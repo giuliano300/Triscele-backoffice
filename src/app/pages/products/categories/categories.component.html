@@ -1,0 +1,82 @@
+<nav aria-label="breadcrumb" class="position-relative">
+    <ol class="breadcrumb">
+        <li aria-current="page" class="breadcrumb-item active">Categorie</li>
+    </ol>
+
+    <button color="primary" class="btn-download btn btn-primary" (click)="OpenPopUp()"><i class="ri-add-line"></i> Aggiungi categoria</button>
+</nav>
+<mat-card
+    class="trinta-card to-do-list-card mb-25 bg-white border-none d-block"
+>
+    <mat-card-content>
+        <div class="to-do-list-table">
+            <div class="table-responsive">
+                <table mat-table [dataSource]="dataSource">
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Nome
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{element.name}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="source">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Fonte
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{element.source}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="edit">
+                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
+                            Modifica
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0">
+                            <div class="action">
+                                <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
+                                    <i class="{{element.action.edit}}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
+                            Elimina
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0">
+                            <div class="action">
+                                <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DeleteItem(element)">
+                                    <i class="{{element.action.delete}}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+                            Nessun cliente inserito
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+            <mat-paginator [pageSizeOptions]="[20, 50, 100]"></mat-paginator>
+        </div>
+    </mat-card-content>
+</mat-card>

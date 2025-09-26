@@ -1,0 +1,149 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li aria-current="page" class="breadcrumb-item active">{{title}}</li>
+  </ol>
+</nav>
+
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3">
+
+        <!-- Nome -->
+         <!-- Nome -->
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Nome prodotto</label>
+          <mat-form-field class="w-100">
+            <i-feather name="tag"></i-feather>
+            <mat-label>Nome prodotto</mat-label>
+            <input matInput formControlName="name" type="text">
+          </mat-form-field>
+        </div>
+
+       <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Categoria prodotto</label>
+          <mat-form-field class="w-100">
+            <i-feather name="star"></i-feather>
+            <mat-label>Categoria</mat-label>
+            <mat-select formControlName="categoryId">
+              <mat-option *ngFor="let cat of categories" [value]="cat._id">
+                {{ cat.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+
+        <!-- Codice interno -->
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Codice Interno</label>
+          <mat-form-field class="w-100">
+            <i-feather name="code"></i-feather>
+            <mat-label>Codice Interno</mat-label>
+            <input matInput formControlName="internalCode" type="text">
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Fornitore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="star"></i-feather>
+            <mat-label>Fornitore</mat-label>
+            <mat-select formControlName="supplierId">
+              <mat-option *ngFor="let supp of suppliers" [value]="supp._id">
+                {{ supp.businessName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+
+        <!-- Codice interno -->
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Codice fornitore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="code"></i-feather>
+            <mat-label>Codice fornitore</mat-label>
+            <input matInput formControlName="supplierCode" type="text">
+          </mat-form-field>
+        </div>
+
+        <!-- Soglia -->
+        <div class="col-sm-4">
+          <label class="label d-block fw-medium mb-10">Soglia</label>
+          <mat-form-field class="w-100">
+            <i-feather name="bell"></i-feather>
+            <mat-label>Soglia</mat-label>
+            <input matInput formControlName="theshold" type="number">
+          </mat-form-field>
+        </div>
+
+
+        <!-- Prezzo -->
+        <div class="col-sm-4">
+          <label class="label d-block fw-medium mb-10">Prezzo</label>
+          <mat-form-field class="w-100">
+            <i-feather name="dollar-sign"></i-feather>
+            <mat-label>Prezzo</mat-label>
+            <input matInput formControlName="price" type="number">
+          </mat-form-field>
+        </div>
+
+        <!-- Costo -->
+        <div class="col-sm-4">
+          <label class="label d-block fw-medium mb-10">Costo</label>
+          <mat-form-field class="w-100">
+            <i-feather name="trending-down"></i-feather>
+            <mat-label>Costo</mat-label>
+            <input matInput formControlName="cost" type="number">
+          </mat-form-field>
+        </div>
+
+        <!-- Stock type -->
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Tipo di stock</label>
+          <mat-form-field class="w-100">
+            <i-feather name="layers"></i-feather>
+            <mat-label>stock</mat-label>
+            <mat-select formControlName="stock_type">
+              <mat-option *ngFor="let unit of stockTypes" [value]="unit.value">
+                {{unit.label}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Stato -->
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Stato</label>
+          <mat-form-field class="w-100">
+            <i-feather name="activity"></i-feather>
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="enabled">
+              <mat-option [value]="true">Attivo</mat-option>
+              <mat-option [value]="false">Disattivo</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Descrizione -->
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Descrizione</label>
+          <mat-form-field class="w-100">
+            <i-feather name="file-text"></i-feather>
+            <mat-label>Descrizione</mat-label>
+            <textarea matInput formControlName="description" style="min-height: 200px;"></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- Pulsanti -->
+        <div class="col-sm-6 mt-10 text-start">
+          <button mat-flat-button class="back" type="button" (click)="returnBack()">Back</button>
+        </div>
+        <div class="col-sm-6 mt-10 text-end">
+          <button mat-flat-button color="primary" type="submit" [disabled]="productForm.invalid">
+            Save
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>

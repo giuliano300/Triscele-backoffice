@@ -1,0 +1,40 @@
+.files-uploaded{
+    color:var(--primaryColor);
+}
+
+.preview-list{
+    float: left;
+    width: 100%;
+
+    h4{
+        font-size: 15px;
+        font-weight: 500;
+        margin: 10px 0 0;
+    }
+
+    .preview-item{
+        float: left;
+        width: 100%;
+        background-color: #fafafa;
+        margin: 2px 0;
+        padding: 5px 10px
+    }
+}
+
+.dropzone-disabled{
+    opacity: 0.5;
+}
+
+h3{
+    width: 100%;
+    font-size: 17px!important;
+    background-color: #f5f7fa;
+    color: var(--primaryColor);
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    font-weight: 300;
+}
+
+.mat-mdc-form-field-error {
+    margin-top: -12px;
+}
