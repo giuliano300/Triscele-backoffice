@@ -11,7 +11,7 @@ import { provideToastr } from 'ngx-toastr';
 export const API_URL = 'http://localhost:3000/';
 export const TOKEN_KEY = 'a-string-secret-at-least-256-bits-long';
 export const exceedsLimit = 3;
-export const maxLenghtUploadFile = 2;
+export const maxLenghtUploadFile = 10;
 
 bootstrapApplication(AppComponent, {
   providers: [

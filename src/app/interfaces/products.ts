@@ -11,7 +11,7 @@ export interface Product {
   supplierCode: string;
   supplierId: string;
   description?: string;
-  files?: string[];
+  files?: any[];
   amazonCode?: string;
   ebayCode?: string;
   wcCode?: string;

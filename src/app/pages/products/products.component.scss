@@ -81,6 +81,7 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
+                    min-width: 120px;
 
                     .task-name {
                         padding-left: 28px;
@@ -316,3 +317,17 @@
 @media only screen and (min-width: 1600px) {}
 
 
+.filter {
+    width: 100%;
+    height: auto;
+    display: block;
+    min-width: auto;
+    margin-top: 0px;
+    border-radius: 6px;
+    padding: 18px 25px;
+    color: var(--whiteColor)!important;
+    background-color: var(--primaryColor);
+    font-size: 14px;
+    font-weight: 400;
+    font-family: var(--headingFontFamily);
+}

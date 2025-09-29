@@ -1,0 +1,60 @@
+.files-uploaded{
+    color:var(--primaryColor);
+}
+
+.preview-list{
+    float: left;
+    width: 100%;
+
+    h4{
+        font-size: 15px;
+        font-weight: 500;
+        margin: 10px 0 0;
+    }
+
+    .preview-item{
+        float: left;
+        width: 100%;
+        background-color: #fafafa;
+        margin: 2px 0;
+        padding: 5px 10px
+    }
+}
+
+.dropzone-disabled{
+    opacity: 0.5;
+}
+
+.ri-delete-bin-line{
+    font-size: 20px;
+    color: var(--dangerColor);
+    margin-top: -10px;
+}
+
+.thumbnail {
+  height: 80px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: transform 0.2s;
+}
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.big-image {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 5px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}

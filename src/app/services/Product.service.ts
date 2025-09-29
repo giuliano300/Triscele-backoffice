@@ -3,6 +3,7 @@ import { API_URL } from '../../main';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../interfaces/products';
+import { ProductViewModel } from '../classess/productViewModel';
 
 @Injectable({
   providedIn: 'root'
@@ -13,16 +14,16 @@ export class ProductService {
     
     constructor(private http: HttpClient) {}
 
-    getProducts(): Observable<Product[]>{
+    getProducts(query: string = ''): Observable<ProductViewModel[]>{
       const token = localStorage.getItem('authToken'); 
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });      
-      return this.http.get<Product[]>(this.apiUrl, { headers });
+      return this.http.get<ProductViewModel[]>(this.apiUrl + query, { headers });
     }
 
-    getProduct(id: string): Observable<Product>{
-      return this.http.get<Product>(this.apiUrl + "/" + id);
+    getProduct(id: string): Observable<ProductViewModel>{
+      return this.http.get<ProductViewModel>(this.apiUrl + "/" + id);
     }
 
     delete(id: string):Observable<boolean>{

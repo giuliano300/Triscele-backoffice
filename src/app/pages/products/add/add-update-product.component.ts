@@ -14,6 +14,13 @@ import { ProductService } from '../../../services/Product.service';
 import { FeathericonsModule } from "../../../icons/feathericons/feathericons.module";
 import { CategoryService } from '../../../services/Category.service';
 import { SupplierService } from '../../../services/Supplier.service';
+import { NgxFileDropEntry, NgxFileDropModule } from 'ngx-file-drop';
+import { exceedsLimit, maxLenghtUploadFile } from '../../../../main';
+import { AlertDialogComponent } from '../../../alert-dialog/alert-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { ImageDialogComponent } from '../../../image-dialog/image-dialog.component';
+import { ProductViewModel } from '../../../classess/productViewModel';
 
 @Component({
   selector: 'app-add-product',
@@ -26,7 +33,9 @@ import { SupplierService } from '../../../services/Supplier.service';
     MatSelectModule,
     MatButtonModule,
     MatCheckboxModule,
-    FeathericonsModule
+    FeathericonsModule,
+    NgxFileDropModule,
+    MatIconModule
 ],
   templateUrl: './add-update-product.component.html',
   styleUrl: './add-update-product.component.scss'
@@ -41,6 +50,16 @@ export class AddProductComponent {
 
   categories: any[] = [];
   suppliers: any[] = [];
+
+  uploadedFiles: { name: string, base64: string }[] = [];
+
+  rejectedFiles: { name: string; reason: string }[] = [];
+
+  dropZoneIsDisabled = false;
+  
+  exceedsLimit: number = 3;
+
+  dismissTimeout: any;
 
   stockTypes = [
     { value: 'pezzi', label: 'Pezzi' },
@@ -59,6 +78,7 @@ export class AddProductComponent {
     { value: 'sq. in.', label: 'in²' },
   ];
 
+  openedImage: string | null = null;
 
   constructor(
     private router: Router,
@@ -66,7 +86,8 @@ export class AddProductComponent {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private categoryService: CategoryService,
-    private supplierService: SupplierService
+    private supplierService: SupplierService,
+    private dialog: MatDialog
   ) {
     this.productForm = this.fb.group({
       name: ['', Validators.required],
@@ -111,7 +132,7 @@ export class AddProductComponent {
         this.title = "Aggiorna prodotto";
 
         this.productService.getProduct(this.id)
-          .subscribe((data: Product) => {
+          .subscribe((data: ProductViewModel) => {
             this.productForm.patchValue({
               name: data.name,
               internalCode: data.internalCode,
@@ -128,8 +149,14 @@ export class AddProductComponent {
               amazonCode: data.amazonCode,
               ebayCode: data.ebayCode,
               wcCode: data.wcCode,
-              manomanoCode: data.manomanoCode
+              manomanoCode: data.manomanoCode,
+              
             });
+
+            const uploadFilesJson = data.files!;
+            this.uploadedFiles = uploadFilesJson ? uploadFilesJson : [];
+            if(this.uploadedFiles.length >= maxLenghtUploadFile)
+              this.dropZoneIsDisabled = true;
           });
       }
     });
@@ -144,6 +171,8 @@ export class AddProductComponent {
       const formData: Product = {
         ...this.productForm.value
       };
+
+      formData.files = this.uploadedFiles;
 
       if (this.id) {
         formData._id = this.id;
@@ -167,4 +196,113 @@ export class AddProductComponent {
       console.warn('Form non valido');
     }
   }
+
+
+  onFileDrop(files: NgxFileDropEntry[]) {
+
+    if(this.uploadedFiles.length >= maxLenghtUploadFile){
+      this.dropZoneIsDisabled = true;
+      this.openAlertDialog();
+      return;
+    }
+
+    let stopProcessing = false;
+
+    for (const droppedFile of files) {
+      if (stopProcessing) return;
+
+      if (droppedFile.fileEntry.isFile) {
+        const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
+
+        fileEntry.file(file => {
+          if (stopProcessing) return;
+
+          if (file.size > exceedsLimit * 1024 * 1024) {
+            this.rejectedFiles.push({
+              name: file.name,
+              reason: 'File eccede il limite di ' + exceedsLimit + ' MB'
+            });
+          } else {
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (stopProcessing) return;
+
+              if (this.uploadedFiles.length >= maxLenghtUploadFile) {
+                this.dropZoneIsDisabled = true;
+                this.openAlertDialog();
+                stopProcessing = true;
+                return;
+              }
+
+              const base64 = (reader.result as string).split(',')[1];
+              this.uploadedFiles.push({
+                name: file.name,
+                base64: base64
+              });
+
+              // Dopo il push, controlliamo ancora
+              if (this.uploadedFiles.length >= maxLenghtUploadFile) {
+                this.dropZoneIsDisabled = true;
+                this.openAlertDialog();
+                stopProcessing = true;
+              }
+            };
+
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+    }    
+    
+    setTimeout(() => {
+        this.rejectedFiles = [];
+      }, 5000);
+  }
+
+  removeFile(index: number): void {
+    this.uploadedFiles.splice(index, 1);
+    if(this.uploadedFiles.length < maxLenghtUploadFile)
+      this.dropZoneIsDisabled = false;
+  }
+
+  
+  openAlertDialog(): void {
+    this.dialog.open(AlertDialogComponent, {
+      data: {
+        title: 'Completato',
+        message: 'Hai raggiunto il massimo di ' + maxLenghtUploadFile + ' files che puoi caricare.'
+      }
+    });
+  }
+
+  dismissRejectedFiles() {
+    clearTimeout(this.dismissTimeout);
+    this.rejectedFiles = [];
+  }
+
+  downloadFile(file: { name: string, base64: string }) {
+    const byteCharacters = atob(file.base64);
+    const byteNumbers = new Array(byteCharacters.length).fill(null).map((_, i) => byteCharacters.charCodeAt(i));
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+    // Funzione per aprire una foto
+  openImage(file: { name: string; base64: string }) {
+    this.openedImage = 'data:image/png;base64,' + file.base64;
+  }
+
+  // Funzione per chiudere la foto
+  closeImage() {
+    this.openedImage = null;
+  }
+
+
 }

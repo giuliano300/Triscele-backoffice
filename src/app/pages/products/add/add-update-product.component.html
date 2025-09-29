@@ -134,13 +134,55 @@
           </mat-form-field>
         </div>
 
+        <div class="col-sm-12">
+          <div class="preview-list mb-10" *ngIf="uploadedFiles.length > 0">
+              <label class="label d-block fw-medium mb-10">Foto caricate</label>
+              <div *ngFor="let file of uploadedFiles; let i = index" class="preview-item mb-3">
+                <div *ngIf="openedImage" class="overlay" (click)="openedImage=null">
+                  <img [src]="openedImage" class="big-image">
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="files-uploaded">
+                      <img [src]="'data:image/png;base64,' + file.base64" [alt]="file.name" class="thumbnail"
+                       (click)="openedImage='data:image/png;base64,'+file.base64">
+                    </span>
+                    <button mat-icon-button (click)="removeFile(i)" aria-label="Elimina file">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+              </div>
+          </div>
+      </div>
+      <div class="col-sm-12">
+        <div *ngIf="rejectedFiles.length > 0" class="alert alert-danger position-relative radius-0 alert-excedeed" [@fadeOut]>
+          <button class="btn-close position-absolute m-2 close-excedeed" (click)="dismissRejectedFiles()">x</button>
+          <h5>Questi file sono riufiutati:</h5>
+          <div *ngFor="let file of rejectedFiles; let i = index" class="preview-item mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                  - {{ file.name }} – {{ file.reason }}
+              </div>
+          </div>
+        </div>
+      </div>
+
+       <div class="col-sm-12">
+            <label class="label d-block fw-medium mb-10">Foto del prodotto</label>
+            <ngx-file-drop (onFileDrop)="onFileDrop($event)">
+                <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+                    <div class="drop-zone" (click)="openFileSelector()">
+                       Aggiungi foto (Max 3 MB)
+                    </div>
+                </ng-template>
+            </ngx-file-drop>   
+            
+        </div>
         <!-- Pulsanti -->
         <div class="col-sm-6 mt-10 text-start">
           <button mat-flat-button class="back" type="button" (click)="returnBack()">Back</button>
         </div>
         <div class="col-sm-6 mt-10 text-end">
           <button mat-flat-button color="primary" type="submit" [disabled]="productForm.invalid">
-            Save
+            Salva
           </button>
         </div>
       </div>

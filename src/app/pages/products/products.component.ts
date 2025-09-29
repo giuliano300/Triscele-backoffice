@@ -8,9 +8,19 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
-import { Product } from '../../interfaces/products';
 import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 import { ProductService } from '../../services/Product.service';
+import { ProductViewModel } from '../../classess/productViewModel';
+import { FeathericonsModule } from "../../icons/feathericons/feathericons.module";
+import { MatLabel, MatFormField } from "@angular/material/form-field";
+import { MatSelect } from "@angular/material/select";
+import { MatOptionModule } from "@angular/material/core";
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { Categories } from '../../interfaces/categories';
+import { Supplier } from '../../interfaces/suppliers';
+import { SupplierService } from '../../services/Supplier.service';
+import { CategoryService } from '../../services/Category.service';
 
 @Component({
   selector: 'app-products',
@@ -20,45 +30,90 @@ import { ProductService } from '../../services/Product.service';
     MatMenuModule,
     MatPaginatorModule,
     MatTableModule,
-    MatCheckboxModule
-  ],
+    MatCheckboxModule,
+    FeathericonsModule,
+    MatLabel,
+    MatSelect,
+    MatOptionModule,
+    MatFormField,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule
+],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
 export class ProductsComponent {
 
-  Products: Product[] = [];
+  Products: ProductViewModel[] = [];
 
   displayedColumns: string[] = [
     'name',
+    'category',
+    'supplier',
+    'supplierCode',
     'internalCode',
     'price',
     'cost',
     'enabled',
-    'supplierCode',
     'edit',
     'delete'
   ];
 
-  dataSource = new MatTableDataSource<Product>(this.Products);
+  form: FormGroup;
+
+  dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
+  categories: Categories[] = [];
+  suppliers: Supplier[] = [];
+
   constructor(
     private router: Router,
+    private fb: FormBuilder,
     private productService: ProductService,
+    private supplierService: SupplierService,
+    private categoryService: CategoryService,
     private dialog: MatDialog
-  ) {}
+  ) 
+  { 
+    this.form = this.fb.group({
+      categoryId: [],
+      supplierId: []
+    });
+  }
+
 
   ngOnInit(): void {
     this.getProducts();
+     this.supplierService.getSuppliers()
+      .subscribe((data: Supplier[]) => {
+        this.suppliers = data;
+      });
+     this.categoryService.getCategories()
+      .subscribe((data: Categories[]) => {
+        this.categories = data;
+      });
   }
 
-  getProducts() {
-    this.productService.getProducts()
-      .subscribe((data: Product[]) => {
+  onSubmit(){
+    const { categoryId, supplierId } = this.form.value;
+    this.getProducts(categoryId, supplierId);
+  }
+  getProducts(categoryId?: string, supplierId?: string) {
+    let query = '';
+    if (categoryId || supplierId) {
+      const params = new URLSearchParams();
+      if (categoryId) params.append('categoryId', categoryId);
+      if (supplierId) params.append('supplierId', supplierId);
+      query = `?${params.toString()}`;
+    }
+    this.productService.getProducts(query)
+      .subscribe((data: ProductViewModel[]) => {
         if (!data || data.length === 0) {
-          console.log('Nessun prodotto disponibile');
+            this.dataSource.data = [];
+            this.dataSource.paginator = this.paginator;        
         } else {
           this.Products = data.map(p => ({
             ...p,
@@ -67,20 +122,20 @@ export class ProductsComponent {
               delete: 'ri-delete-bin-line'
             }
           }));
-          this.dataSource = new MatTableDataSource<Product>(this.Products);
+          this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
           this.dataSource.paginator = this.paginator;
         }
       });
   }
 
-  DeleteItem(item: Product) {
+  DeleteItem(item: ProductViewModel) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '500px'
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.productService.delete(item._id!)
+        this.productService.delete(item!.id!)
           .subscribe((data: boolean) => {
             if (data) {
               this.getProducts();
@@ -92,8 +147,8 @@ export class ProductsComponent {
     });
   }
 
-  UpdateItem(item: Product) {
-    this.router.navigate(["/product/add/" + item._id]);
+  UpdateItem(item: ProductViewModel) {
+    this.router.navigate(["/product/add/" + item.id]);
   }
 
   getEnabledStatus(enabled: boolean): string {

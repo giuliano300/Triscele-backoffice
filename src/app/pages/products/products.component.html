@@ -4,6 +4,43 @@
   </ol>
 </nav>
 
+<mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+        <form [formGroup]="form">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <mat-form-field>
+                            <i-feather name="star"></i-feather>
+                            <mat-label>Filtra per categorie</mat-label>
+                            <mat-select formControlName="categoryId">
+                                <mat-option *ngFor="let option of categories" [value]="option._id">
+                                {{ option.name }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>                        
+                    </div>
+                    <div class="col-lg-3">
+                        <mat-form-field>
+                            <i-feather name="star"></i-feather>
+                            <mat-label>Filtra per fornitore</mat-label>
+                            <mat-select formControlName="supplierId">
+                                <mat-option *ngFor="let option of suppliers" [value]="option._id">
+                                {{ option.name }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>                        
+                    </div>
+                    <div class="col-lg-2">
+                         <button mat-button class="filter" type="submit" [disabled]="form.invalid" (click)="onSubmit()">
+                            Filtra
+                        </button>               
+                    </div>
+                </div>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>
 <mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
   <mat-card-content>
     <div class="to-do-list-table">
@@ -15,6 +52,30 @@
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Nome </th>
             <td mat-cell *matCellDef="let element" class="pl-0">
               <h6 class="mt-0 mb-0">{{element.name}}</h6>
+            </td>
+          </ng-container>
+
+          <!-- Categoria -->
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Categoria </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{element.category.name}}</h6>
+            </td>
+          </ng-container>
+
+          <!-- Fornitore -->
+          <ng-container matColumnDef="supplier">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Fornitore </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{element.supplier.name}}</h6>
+            </td>
+          </ng-container>
+          
+          <!-- Codice Fornitore -->
+          <ng-container matColumnDef="supplierCode">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Codice Fornitore </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{element.supplierCode}}</h6>
             </td>
           </ng-container>
 
@@ -42,13 +103,6 @@
             </td>
           </ng-container>
 
-          <!-- Fornitore -->
-          <ng-container matColumnDef="supplierCode">
-            <th mat-header-cell *matHeaderCellDef class="pl-0"> Fornitore </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
-              <h6 class="mt-0 mb-0">{{element.supplierCode}}</h6>
-            </td>
-          </ng-container>
 
           <!-- Stato -->
           <ng-container matColumnDef="enabled">
