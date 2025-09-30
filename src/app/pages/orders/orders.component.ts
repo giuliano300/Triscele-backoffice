@@ -63,18 +63,18 @@ export class OrdersComponent {
     'delete'
   ];
 
-OrderStatusLabels: Record<number, string> = {
-  1: 'Completato',
-  2: 'In lavorazione',
-  3: 'Rimborsato',
-  4: 'In sospeso',
-  5: 'Cancellato',
-  6: 'Fallito',
-  10: 'Spedito',
-  14: 'Consegnato',
-  15: 'Completato duplicato',
-  16: 'In consegna'
-};
+  OrderStatusLabels: Record<number, string> = {
+    1: 'Completato',
+    2: 'In lavorazione',
+    3: 'Rimborsato',
+    4: 'In sospeso',
+    5: 'Cancellato',
+    6: 'Fallito',
+    10: 'Spedito',
+    14: 'Consegnato',
+    15: 'Completato duplicato',
+    16: 'In consegna'
+  };
 
 
   constructor(

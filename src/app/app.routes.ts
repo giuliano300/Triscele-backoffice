@@ -14,6 +14,7 @@ import { CategoriesComponent } from './pages/products/categories/categories.comp
 import { ProductsComponent } from './pages/products/products.component';
 import { AddProductComponent } from './pages/products/add/add-update-product.component';
 import { OrdersComponent } from './pages/orders/orders.component';
+import { AddOrderComponent } from './pages/orders/add-order/add-order.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -43,6 +44,8 @@ export const routes: Routes = [
             { path: 'product/add/:id', component: AddProductComponent },
             { path: 'product/add', component: AddProductComponent },
             { path: 'orders', component: OrdersComponent },
+            { path: 'order/add/:id', component: AddOrderComponent },
+            { path: 'order/add', component: AddOrderComponent },
         ]
     },
     { path: '**', component: NotFoundComponent},
