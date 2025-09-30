@@ -22,4 +22,5 @@ export interface Order {
   shippingEmail: string;
   note?: string;
   orderProducts: OrderProducts[];
+  totalPrice: number;
 }
