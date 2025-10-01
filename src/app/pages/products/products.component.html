@@ -87,14 +87,6 @@
             </td>
           </ng-container>
 
-          <!-- costo -->
-          <ng-container matColumnDef="cost">
-            <th mat-header-cell *matHeaderCellDef class="pl-0"> Costo </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
-              <h6 class="mt-0 mb-0">{{element.cost}} €</h6>
-            </td>
-          </ng-container>
-
           <!-- Prezzo -->
           <ng-container matColumnDef="price">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Prezzo </th>
@@ -103,6 +95,21 @@
             </td>
           </ng-container>
 
+          <!-- costo -->
+          <ng-container matColumnDef="cost">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Costo </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{element.cost}} €</h6>
+            </td>
+          </ng-container>
+
+          <!-- costo -->
+          <ng-container matColumnDef="stock">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Giacenza </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{element.stock}} </h6>
+            </td>
+          </ng-container>
 
           <!-- Stato -->
           <ng-container matColumnDef="enabled">
@@ -113,10 +120,10 @@
           </ng-container>
 
           <ng-container matColumnDef="edit">
-              <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
+              <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Modifica
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
                           <i class="{{element.action.edit}}"></i>
@@ -126,10 +133,10 @@
           </ng-container>
 
           <ng-container matColumnDef="delete">
-              <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
+              <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Elimina
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DeleteItem(element)">
                           <i class="{{element.action.delete}}"></i>

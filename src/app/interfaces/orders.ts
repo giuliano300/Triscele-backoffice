@@ -1,10 +1,12 @@
 import { OrderStatus, PaymentMethod } from '../enum/enum';
 import { OrderProducts } from '../interfaces/orderProducts';
+import { Customers } from './customers';
+import { Operators } from './operators';
 
 export interface Order {
   _id?: string; // opzionale, viene creato da MongoDB
-  customerId: string;
-  operatorId: string;
+  customerId: Customers;
+  operatorId: Operators;
   status: OrderStatus;
   insertDate: string;
   paymentMethod: PaymentMethod;

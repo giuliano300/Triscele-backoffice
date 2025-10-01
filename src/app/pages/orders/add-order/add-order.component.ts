@@ -1,6 +1,6 @@
 import { Component, LOCALE_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,14 +9,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
-import { Product } from '../../../interfaces/products';
 import { ProductService } from '../../../services/Product.service';
 import { FeathericonsModule } from "../../../icons/feathericons/feathericons.module";
-import { CategoryService } from '../../../services/Category.service';
-import { SupplierService } from '../../../services/Supplier.service';
-import { NgxFileDropEntry, NgxFileDropModule } from 'ngx-file-drop';
-import { exceedsLimit, maxLenghtUploadFile } from '../../../../main';
-import { AlertDialogComponent } from '../../../alert-dialog/alert-dialog.component';
+import { NgxFileDropModule } from 'ngx-file-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ProductViewModel } from '../../../classess/productViewModel';
@@ -28,8 +23,13 @@ import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } f
 import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { UtilsService } from '../../../services/utils.service';
-import { data } from 'jquery';
 import { OrderProducts } from '../../../interfaces/orderProducts';
+import { map, Observable, startWith } from 'rxjs';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { Customers } from '../../../interfaces/customers';
+import { Order } from '../../../interfaces/orders';
+import { OrderService } from '../../../services/Order.service';
 
 registerLocaleData(localeIt);
 
@@ -60,7 +60,10 @@ export const MY_DATE_FORMATS = {
     NgxFileDropModule,
     MatIconModule,
     MatDatepickerModule,
-    MatNativeDateModule 
+    MatNativeDateModule,
+    MatChipsModule,
+    MatAutocompleteModule,
+    FormsModule
 ],
   templateUrl: './add-order.component.html',
   styleUrl: './add-order.component.scss',
@@ -79,7 +82,7 @@ export const MY_DATE_FORMATS = {
 })
 export class AddOrderComponent {
 
-  title: string = "Aggiungi prodotto";
+  title: string = "Aggiungi ordine";
 
   productForm: FormGroup;
 
@@ -120,25 +123,27 @@ orderStatusOptions = [
     private customerService: CustomerService,
     private operatorService: OperatorService,
     private adapter: DateAdapter<any>,
-    private utilsService: UtilsService
+    private utilsService: UtilsService,
+    private orderService: OrderService
   ) {
     this.adapter.setLocale('it-IT');
     this.productForm = this.fb.group({
       customerId: ['', Validators.required],
       operatorId: ['', Validators.required],
-      agentId: ['', Validators.required],
+      agent: ['', Validators.required],
       paymentMethod: ['', Validators.required],
-      city: ['', Validators.required],
-      orderStatus: ['', Validators.required],
+      status: ['', Validators.required],
       insertDate: ['', Validators.required],
       expectedDelivery: ['', Validators.required],
       shippingAddress: ['', Validators.required],
-      zipCode: [null, Validators.required],
+      shippingZipcode: [null, Validators.required],
       shippingName: ['', Validators.required],
       shippingLastName: ['', Validators.required],
       shippingBusinessName: ['', Validators.required],
       shippingTelephone: ['', Validators.required],
       shippingEmail: ['', Validators.required],
+      shippingProvince: ['', Validators.required],
+      shippingCity: ['', Validators.required],
       note: [''],
       productIds: [''],
       products: this.fb.array([])
@@ -152,7 +157,81 @@ orderStatusOptions = [
     return this.productForm.get('products') as FormArray;
   }
 
+  private syncDiscount(group: FormGroup) {
+    group.get('discount')?.valueChanges.subscribe(value => {
+      const price = group.get('price')?.value || 0;
+      const quantity = group.get('quantity')?.value || 0;
+      const subtotal = price * quantity;
+
+      if (subtotal > 0) {
+        const perc = (value / subtotal) * 100;
+        const rounded = Math.round(perc * 100) / 100; // due decimali
+        group.get('discountPercentage')?.setValue(rounded, { emitEvent: false });
+      }
+    });
+
+    group.get('discountPercentage')?.valueChanges.subscribe(value => {
+      const price = group.get('price')?.value || 0;
+      const quantity = group.get('quantity')?.value || 0;
+      const subtotal = price * quantity;
+
+      if (subtotal > 0) {
+        const euro = (value / 100) * subtotal;
+        const rounded = Math.round(euro * 100) / 100; // due decimali
+        group.get('discount')?.setValue(rounded, { emitEvent: false });
+      }
+    });
+
+    group.valueChanges.subscribe(val => {
+      const price = val.price || 0;
+      const quantity = val.quantity || 0;
+      const subtotal = price * quantity;
+
+      let totale = subtotal;
+      totale -= val.discount || 0;
+
+      const rounded = Math.round(totale * 100) / 100; // due decimali
+      group.get('total')?.setValue(rounded, { emitEvent: false });
+    });
+  }
+
+  get grandTotal(): number {
+    return this.productsForm.controls.reduce((acc, ctrl) => {
+      const price = ctrl.get('price')?.value || 0;
+      const qty = ctrl.get('quantity')?.value || 0;
+      const discount = ctrl.get('discount')?.value || 0;
+      return acc + (price * qty - discount);
+    }, 0);
+  }
+
+  selectedProducts: any[] = [];
+  productCtrl = new FormControl('');
+  filteredProducts!: Observable<any[]>;
+
+  private _filter(value: string): any[] {
+    const filterValue = value.toLowerCase();
+    return this.products
+      .filter(p => !this.selectedProducts.includes(p)) // escludi già scelti
+      .filter(p => p.name!.toLowerCase().includes(filterValue));
+  }
+
+  selectProduct(product: any) {
+    this.selectedProducts.push(product);
+    this.productCtrl.setValue('');
+  }
+
+  removeProduct(product: any) {
+    const index = this.selectedProducts.indexOf(product);
+    if (index >= 0) {
+      this.selectedProducts.splice(index, 1);
+    }
+  }
+
   ngOnInit(): void {
+    this.filteredProducts = this.productCtrl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || ''))
+    );
     const token = localStorage.getItem('authToken');
     if (!token) {
       this.router.navigate(['/']);
@@ -176,72 +255,123 @@ orderStatusOptions = [
       this.id = params.get('id');
 
       if (this.id) {
-        this.title = "Aggiorna prodotto";
+        this.title = "Aggiorna ordine";
 
-        this.productService.getProduct(this.id)
-          .subscribe((data: ProductViewModel) => {
+        this.orderService.getOrder(this.id)
+          .subscribe((data: Order) => {
             this.productForm.patchValue({
-              name: data.name,
-              internalCode: data.internalCode,
-              categoryId: data.categoryId,
-              theshold: data.theshold,
-              price: data.price,
-              cost: data.cost,
-              enabled: data.enabled,
-              stock_type: data.stock_type,
-              supplierCode: data.supplierCode,
-              supplierId: data.supplierId,
-              description: data.description,
-              files: data.files || [],
-              amazonCode: data.amazonCode,
-              ebayCode: data.ebayCode,
-              wcCode: data.wcCode,
-              manomanoCode: data.manomanoCode,
-              
+              customerId: data.customerId._id.toString(),
+              operatorId: data.operatorId._id!.toString(),
+              agent: data.agent,
+              paymentMethod: data.paymentMethod,
+              status: data.status,
+              insertDate: data.insertDate,
+              expectedDelivery: data.expectedDelivery,
+              shippingAddress: data.shippingAddress,
+              shippingZipcode: data.shippingZipcode,
+              shippingName: data.shippingName,
+              shippingLastName: data.shippingLastName,
+              shippingBusinessName: data.shippingBusinessName,
+              shippingTelephone: data.shippingTelephone,
+              shippingEmail: data.shippingEmail,
+              shippingProvince: data.shippingProvince,
+              shippingCity: data.shippingCity,
+              note: data.note
             });
+            data.orderProducts.forEach(product => {
+              const group = this.fb.group({
+                _id: [product._id],
+                name: [product.name],
+                quantity: [product.quantity || 1],
+                price: [product.price],
+                discount: [product.discount || 0],
+                discountPercentage: [0],
+                total: [product.total]
+              });
+
+              group.get('discountPercentage')!.setValue(
+               product.price ? parseFloat((((product.discount || 0) / product.price) * 100).toFixed(2)) : 0
+              );
+              this.productsForm.push(group);
+            });          
           });
       }
     });
   }
+  addProductToList(product: any){
+    const exists = this.productsForm.controls.some(
+      (ctrl) => (ctrl as FormGroup).get('_id')?.value === product.id
+    );
 
-  addProductToList(){
-    const product = this.productForm.value.productIds;
-    const group = this.fb.group({
+    if (!exists) {
+      const group = this.fb.group({
         _id: [product.id],
         name: [product.name],
         quantity: [1],
         price: [product.price],
         discount: [0],
-        total: [product.price]
+        total: [product.price],
+        discountPercentage: [0]
       });
       this.productsForm.push(group);
-    //console.log(this.orderProducts);
+
+      this.syncDiscount(group);
+
+    }    
+    
+    this.productCtrl.setValue('');
+    
   }
 
   returnBack() {
     this.router.navigate(["/orders"]);
   }
 
+  removeThis(index: number) {
+   this.productsForm.removeAt(index);
+ }
+
+ setShippingValues(c: Customers){
+  this.productForm.patchValue({
+    shippingAddress:c.address,
+    shippingZipcode: c.zipCode,
+    shippingName: c.name,
+    shippingLastName: c.lastName,
+    shippingBusinessName: c.businessName,
+    shippingTelephone: c.mobile,
+    shippingEmail: c.email,
+    shippingProvince: c.province,
+    shippingCity: c.city
+  });
+ }
+
   onSubmit() {
+    //console.log(this.productForm.value)
     if (this.productForm.valid) {
-      const formData: Product = {
+      const formData: Order = {
         ...this.productForm.value
       };
+      formData.origin = "1";
+      formData.orderProducts = this.productsForm.value;
+
+      formData.totalPrice = formData.orderProducts
+        .map(p => (p.price * p.quantity) - (p.discount || 0))
+        .reduce((acc, curr) => acc + curr, 0);
 
       if (this.id) {
         formData._id = this.id;
-        this.productService.updateProduct(formData)
+        this.orderService.updateOrder(formData)
           .subscribe((data: boolean) => {
             if (data)
-              this.router.navigate(["/products"]);
+              this.router.navigate(["/orders"]);
             else
               console.log("Errore durante aggiornamento");
           });
       } else {
-        this.productService.setProduct(formData)
-          .subscribe((data: Product) => {
+        this.orderService.setOrder(formData)
+          .subscribe((data: Order) => {
             if (data)
-              this.router.navigate(["/products"]);
+              this.router.navigate(["/orders"]);
             else
               console.log("Errore durante inserimento");
           });
@@ -249,29 +379,6 @@ orderStatusOptions = [
     } else {
       console.warn('Form non valido');
     }
-  }
-  
-  openAlertDialog(): void {
-    this.dialog.open(AlertDialogComponent, {
-      data: {
-        title: 'Completato',
-        message: 'Hai raggiunto il massimo di ' + maxLenghtUploadFile + ' files che puoi caricare.'
-      }
-    });
-  }
-
-  downloadFile(file: { name: string, base64: string }) {
-    const byteCharacters = atob(file.base64);
-    const byteNumbers = new Array(byteCharacters.length).fill(null).map((_, i) => byteCharacters.charCodeAt(i));
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'application/octet-stream' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = file.name;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
 }

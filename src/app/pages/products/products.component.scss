@@ -81,7 +81,7 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
-                    min-width: 120px;
+                    min-width: 70px;
 
                     .task-name {
                         padding-left: 28px;
@@ -148,7 +148,7 @@
                     }
 
                     .mat-mdc-cell {
-                        padding: 15px 0!important;
+                        /*padding: 15px 0!important;*/
                         h6{
                             font-weight: 500!important;
                             font-size: 14px!important;

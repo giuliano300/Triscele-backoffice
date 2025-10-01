@@ -6,6 +6,7 @@ export interface Product {
   theshold: number;
   price: number;
   cost: number;
+  stock: number;
   enabled: boolean;
   stock_type: string;
   supplierCode: string;

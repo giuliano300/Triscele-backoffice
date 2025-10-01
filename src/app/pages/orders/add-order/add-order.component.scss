@@ -1,0 +1,68 @@
+.subtotal{
+    font-weight: 500;
+    font-size: 16px;
+    margin-right: 20px;
+    float: right;
+    border-radius: 10px;
+    padding: 15px 15px 15px 60px;
+    border: 1px solid #f5f7fa;
+    background-color: #f5f7fa;
+    position: relative;
+    color: var(--blackColor);
+}
+
+.sub{
+    margin-right: 20px;
+}
+
+.delete{
+    color: var(--dangerColor);
+    margin-left: 20px;
+    font-size: 18px;
+    cursor: pointer;
+
+    &:hover{
+        color: var(--darkColor);
+    }
+}
+
+.grandTotalText, .grandTotal{
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.grandTotal{
+    padding-right: 35px;
+}
+
+.material-symbols-outlined{
+   position: absolute;
+   left: 15px;
+   font-size: 22px;
+   top: 17px;
+}
+
+.in-mat{
+    left: -42px;
+    font-size: 25px;
+    color: var(--blackColor);
+}
+
+.custom-select2 {
+  width: 100%;
+}
+
+mat-chip {
+  background-color: #e0e0e0;
+  margin: 2px;
+}
+
+mat-chip button {
+  margin-left: 5px;
+  font-size: 14px;
+}
+
+input[matinput] {
+  border: none;
+  outline: none;
+}

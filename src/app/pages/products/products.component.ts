@@ -55,6 +55,7 @@ export class ProductsComponent {
     'internalCode',
     'price',
     'cost',
+    'stock',
     'enabled',
     'edit',
     'delete'

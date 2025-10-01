@@ -16,8 +16,8 @@
             <i-feather name="users"></i-feather>
             <mat-label>Seleziona un cliente</mat-label>
             <mat-select formControlName="customerId">
-              <mat-option *ngFor="let cat of customers" [value]="cat._id">
-                {{ cat.businessName }}
+              <mat-option *ngFor="let c of customers" [value]="c._id" (onSelectionChange)="setShippingValues(c)">
+                {{ c.businessName }}
               </mat-option>
             </mat-select>
           </mat-form-field>        
@@ -41,7 +41,7 @@
           <mat-form-field class="w-100">
             <i-feather name="users"></i-feather>
             <mat-label>Seleziona un agente</mat-label>
-            <mat-select formControlName="agentId">
+            <mat-select formControlName="agent">
               <mat-option *ngFor="let a of agents" [value]="a.id">
                 {{ a.value| titlecase }}
               </mat-option>
@@ -76,7 +76,7 @@
           <mat-form-field class="w-100">
             <i-feather name="bar-chart-2"></i-feather>
             <mat-label>Seleziona uno stato</mat-label>
-            <mat-select formControlName="orderStatus">
+            <mat-select formControlName="status">
               <mat-option *ngFor="let o of orderStatusOptions" [value]="o.value">
                 {{ o.label }}
               </mat-option>
@@ -108,50 +108,7 @@
   <mat-card class="trinta-card mb-10 bg-white border-none d-block">
     <mat-card-content>
       <div class="row g-3">
-
-        <div class="col-sm-5">
-          <label class="label d-block fw-medium mb-10">Indirizzo</label>
-          <mat-form-field class="w-100">
-            <i-feather name="map"></i-feather>
-            <mat-label>indirizzo di spedizione</mat-label>
-            <input matInput formControlName="shippingAddress" type="text">
-          </mat-form-field>
-        </div>
-
-        <!-- Codice interno -->
-        <div class="col-sm-2">
-          <label class="label d-block fw-medium mb-10">CAP</label>
-          <mat-form-field class="w-100">
-            <i-feather name="map-pin"></i-feather>
-            <mat-label>Cap</mat-label>
-            <input matInput formControlName="zipCode" type="number">
-          </mat-form-field>
-        </div>
-
-        <!-- Soglia -->
-        <div class="col-sm-2">
-          <label class="label d-block fw-medium mb-10">Provincia</label>
-          <mat-form-field class="w-100">
-            <i-feather name="map-pin"></i-feather>
-            <mat-label>Provincia</mat-label>
-            <mat-select formControlName="paymentMethod">
-              <mat-option *ngFor="let p of province" [value]="p">
-                {{ p | uppercase }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        
-        <div class="col-sm-3">
-          <label class="label d-block fw-medium mb-10">Comune</label>
-          <mat-form-field class="w-100">
-            <i-feather name="map"></i-feather>
-            <mat-label>Comune</mat-label>
-            <input matInput formControlName="city" type="text">
-          </mat-form-field>
-        </div>
-      
-        <div class="col-sm-4">
+                <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Nome</label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
@@ -195,7 +152,49 @@
             <input matInput formControlName="shippingEmail" type="text">
           </mat-form-field>
         </div>
-      
+
+        <div class="col-sm-5">
+          <label class="label d-block fw-medium mb-10">Indirizzo</label>
+          <mat-form-field class="w-100">
+            <i-feather name="map"></i-feather>
+            <mat-label>indirizzo di spedizione</mat-label>
+            <input matInput formControlName="shippingAddress" type="text">
+          </mat-form-field>
+        </div>
+
+        <!-- Codice interno -->
+        <div class="col-sm-2">
+          <label class="label d-block fw-medium mb-10">CAP</label>
+          <mat-form-field class="w-100">
+            <i-feather name="map-pin"></i-feather>
+            <mat-label>Cap</mat-label>
+            <input matInput formControlName="shippingZipcode" type="number">
+          </mat-form-field>
+        </div>
+
+        <!-- Soglia -->
+        <div class="col-sm-2">
+          <label class="label d-block fw-medium mb-10">Provincia</label>
+          <mat-form-field class="w-100">
+            <i-feather name="map-pin"></i-feather>
+            <mat-label>Provincia</mat-label>
+            <mat-select formControlName="shippingProvince">
+              <mat-option *ngFor="let p of province" [value]="p">
+                {{ p | uppercase }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <div class="col-sm-3">
+          <label class="label d-block fw-medium mb-10">Comune</label>
+          <mat-form-field class="w-100">
+            <i-feather name="map"></i-feather>
+            <mat-label>Comune</mat-label>
+            <input matInput formControlName="shippingCity" type="text">
+          </mat-form-field>
+        </div>
+          
         <div class="col-sm-12">
           <label class="label d-block fw-medium mb-10">Note</label>
           <mat-form-field class="w-100">
@@ -219,43 +218,106 @@
       <div class="row g-3">
        <div class="col-sm-12">
           <label class="label d-block fw-medium mb-10">Seleziona uno o più prodotti</label>
-          <mat-form-field class="w-100">
-            <i-feather name="users"></i-feather>
-            <mat-label>Seleziona uno o più prodotti</mat-label>
-            <mat-select formControlName="productIds" (selectionChange)="addProductToList()">
-              <mat-option *ngFor="let p of products" [value]="p">
+          <!-- Input di ricerca con autocomplete -->
+          <mat-form-field class="w-100 mt-2">
+            <i-feather name="tag"></i-feather>
+            <input
+              matInput
+              placeholder="Cerca prodotti"
+              [formControl]="productCtrl"
+              [matAutocomplete]="auto"
+            >
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="addProductToList($event.option.value)">
+              <mat-option *ngFor="let p of filteredProducts | async" [value]="p">
                 {{ p.name }}
               </mat-option>
-            </mat-select>
-          </mat-form-field>        
-       </div>
-      </div>
-      
-      <div formArrayName="products">
-        <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
-          <div class="col-sm-4">
-           <label class="label d-block fw-medium mb-10">Nome del prodotto</label>
-           <mat-form-field class="w-100">
-              <mat-label>Nome del prodotto</mat-label>
-              <input matInput formControlName="name">
-            </mat-form-field>
-          </div>
-          <div class="col-sm-4">
-           <label class="label d-block fw-medium mb-10">Quantità</label>
-            <mat-form-field class="w-100">
-              <mat-label>Quantità</mat-label>
-              <input matInput formControlName="quantity" type="number">
-            </mat-form-field>
-          </div>
-          <div class="col-sm-4">
-           <label class="label d-block fw-medium mb-10">Prezzo</label>
-            <mat-form-field class="w-100">
-              <mat-label>Prezzo</mat-label>
-              <input matInput formControlName="price" type="number">
-            </mat-form-field>
-          </div>
+            </mat-autocomplete>
+          </mat-form-field>
         </div>
       </div>
+      
+    <div formArrayName="products">
+      <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
+        
+        <div class="col-sm-3">
+          <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Nome del prodotto</label>
+          <mat-form-field class="w-100">
+            <i-feather name="tag"></i-feather>
+            <mat-label>Nome del prodotto</mat-label>
+            <input matInput formControlName="name">
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-1">
+          <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Quantità</label>
+          <mat-form-field class="w-100">
+            <i-feather name="layers"></i-feather>
+            <input matInput formControlName="quantity" type="number">
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2">
+          <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Prezzo</label>
+          <mat-form-field class="w-100">
+            <span class="material-symbols-outlined in-mat">
+              euro
+            </span>
+            <mat-label>Prezzo</mat-label>
+            <input matInput formControlName="price" type="number">
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2">
+          <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Sconto</label>
+          <mat-form-field class="w-100">
+            <span class="material-symbols-outlined in-mat">
+              euro
+            </span>
+            <mat-label>Sconto</mat-label>
+            <input matInput formControlName="discount" type="number">
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2">
+          <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Sconto %</label>
+          <mat-form-field class="w-100">
+            <i-feather name="percent"></i-feather>
+            <mat-label>Sconto %</mat-label>
+            <input matInput formControlName="discountPercentage" type="number">
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-2">
+          <label *ngIf="i === 0" class="label d-block fw-medium mb-10 text-end sub">Subtotale</label>
+          <span class="subtotal">
+            <span class="material-symbols-outlined">
+              euro
+            </span>
+            {{
+              (group.get('price')?.value || 0) *
+              (group.get('quantity')?.value || 0)
+              -
+              (group.get('discount')?.value || 0)
+              | number:'1.2-2'
+            }} €
+            <span class="delete" (click)="removeThis(i)">
+              <i class="ri-delete-bin-line"></i>
+            </span>
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Totale generale -->
+      <div class="row g-3 border-top pt-2 mt-2">
+        <div class="col-sm-10 text-end mt-20 grandTotalText">
+          Totale generale
+        </div>
+        <div class="col-sm-2 text-end mt-20 grandTotal">
+          {{ grandTotal | number:'1.2-2' }} €
+        </div>
+      </div>
+    </div>
     </mat-card-content>
   </mat-card>
 
@@ -268,7 +330,7 @@
           <button mat-flat-button class="back" type="button" (click)="returnBack()">Back</button>
         </div>
         <div class="col-sm-6 mt-10 text-end">
-          <button mat-flat-button color="primary" type="submit" [disabled]="productForm.invalid">
+          <button mat-flat-button color="primary" type="submit" [disabled]="productForm.invalid || productsForm.controls.length == 0">
             Salva
           </button>
         </div>

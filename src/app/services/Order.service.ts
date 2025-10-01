@@ -34,7 +34,7 @@ export class OrderService {
       return this.http.delete<boolean>(this.apiUrl + "/" + id, { headers });
     }
   
-    setOrder(c: Operators):Observable<Order>{
+    setOrder(c: Order):Observable<Order>{
       return this.http.post<Order>(this.apiUrl, c);
     }
 
