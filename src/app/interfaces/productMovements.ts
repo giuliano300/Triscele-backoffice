@@ -3,4 +3,5 @@ export interface ProductMovements {
     movementType: number;
     stock: number;
     productId: string;
+    createdAt: string;
 }

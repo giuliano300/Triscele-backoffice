@@ -24,6 +24,8 @@ import { CategoryService } from '../../services/Category.service';
 import { AddMovementComponent } from '../../add-movement-dialog/add-movement-dialog.component';
 import { ProductMovementsService } from '../../services/Product-movements.service';
 import { ProductMovements } from '../../interfaces/productMovements';
+import { MovementsComponent } from '../../movements-dialog/movements-dialog.component';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 
 @Component({
   selector: 'app-products',
@@ -41,7 +43,8 @@ import { ProductMovements } from '../../interfaces/productMovements';
     MatFormField,
     CommonModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    MatSortModule
 ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
@@ -61,6 +64,7 @@ export class ProductsComponent {
     'stock',
     'enabled',
     'edit',
+    'movements',
     'delete'
   ];
 
@@ -69,6 +73,7 @@ export class ProductsComponent {
   dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   categories: Categories[] = [];
   suppliers: Supplier[] = [];
@@ -107,6 +112,14 @@ export class ProductsComponent {
     this.getProducts(categoryId, supplierId);
   }
 
+  remove(){
+    this.getProducts();
+    this.form.patchValue({
+      categoryId: [],
+      supplierId: []
+    });
+  }
+
   getProducts(categoryId?: string, supplierId?: string) {
     let query = '';
     if (categoryId || supplierId) {
@@ -125,11 +138,13 @@ export class ProductsComponent {
             ...p,
             action: {
               edit: 'ri-edit-line',
+              movements: 'ri-search-line',
               delete: 'ri-delete-bin-line'
             }
           }));
           this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
           this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
         }
       });
   }
@@ -151,6 +166,27 @@ export class ProductsComponent {
         console.log("Close");
       }
     });
+  }
+
+  ShowMovements(item: ProductViewModel){
+    const dialogRef = this.dialog.open(MovementsComponent, {
+      data: item,
+      width: '700px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      console.log(result);
+      if (result) {
+        this.productMovementsService.setProductMovements(result)
+          .subscribe((data: ProductMovements) => {
+            if (data) {
+              this.getProducts();
+            }
+          });
+      } else {
+        console.log("Close");
+      }
+    });  
   }
 
   UpdateItem(item: ProductViewModel) {

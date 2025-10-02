@@ -6,7 +6,7 @@
         <div class="col-sm-12">
           <label class="label d-block fw-medium mb-10">Tipologia</label>
           <mat-form-field class="w-100">
-            <i-feather name="layers"></i-feather>
+            <i-feather name="command"></i-feather>
             <mat-label>Tipologia</mat-label>
             <mat-select formControlName="movementType">
               <mat-option *ngFor="let m of movementType" [value]="m.id">
@@ -18,7 +18,7 @@
         <div class="col-sm-12">
           <label class="label d-block fw-medium mb-10">{{stock_type}}</label>
           <mat-form-field class="w-100">
-            <i-feather name="activity"></i-feather>
+            <i-feather name="layers"></i-feather>
             <mat-label>{{stock_type}}</mat-label>
             <input matInput formControlName="stock" type="number">
           </mat-form-field>
