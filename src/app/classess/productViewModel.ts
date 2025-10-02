@@ -10,6 +10,7 @@ export class ProductViewModel {
     theshold: number| undefined;
     enabled: boolean| undefined;
     stock_type: string| undefined;
+    stock: number| undefined;
     supplierCode: string| undefined;
     description?: string| undefined;
 

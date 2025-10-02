@@ -98,6 +98,7 @@ export class AddProductComponent {
       cost: ['', Validators.required],
       enabled: [true, Validators.required],
       stock_type: [0, Validators.required],
+      stock: [0, Validators.required],
       supplierCode: ['', Validators.required],
       supplierId: ['', Validators.required],
       description: [''],
@@ -150,7 +151,7 @@ export class AddProductComponent {
               ebayCode: data.ebayCode,
               wcCode: data.wcCode,
               manomanoCode: data.manomanoCode,
-              
+              stock: data.stock
             });
 
             const uploadFilesJson = data.files!;

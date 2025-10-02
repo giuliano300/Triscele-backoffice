@@ -35,3 +35,8 @@ export const AGENTS: AgentOption[] = [
   { id: 9,  value: "Giuseppe Ciulla", label: "Giuseppe Ciulla" },
   { id: 10,  value: "Giorgia Bellafiore", label: "Giorgia Bellafiore" }
 ];
+
+export const MovementType: any[] = [
+  { id:1, name: "Carico" },
+  { id:2, name: "Scarico" }
+]

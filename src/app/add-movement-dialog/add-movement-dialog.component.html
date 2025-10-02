@@ -1,0 +1,34 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup] = "form">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Tipologia</label>
+          <mat-form-field class="w-100">
+            <i-feather name="layers"></i-feather>
+            <mat-label>Tipologia</mat-label>
+            <mat-select formControlName="movementType">
+              <mat-option *ngFor="let m of movementType" [value]="m.id">
+                {{ m.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">{{stock_type}}</label>
+          <mat-form-field class="w-100">
+            <i-feather name="activity"></i-feather>
+            <mat-label>{{stock_type}}</mat-label>
+            <input matInput formControlName="stock" type="number">
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <input type="hidden" formControlName="productId">
+</form>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()" class="btn back">Chiudi</button>
+  <button mat-flat-button (click)="onSave()" class="btn" [disabled]="form.invalid">Salva</button>
+</mat-dialog-actions>

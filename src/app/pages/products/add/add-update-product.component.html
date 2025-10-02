@@ -56,7 +56,7 @@
           </mat-form-field>        
         </div>
 
-        <!-- Codice interno -->
+        <!-- Codice fornitore -->
         <div class="col-sm-6">
           <label class="label d-block fw-medium mb-10">Codice fornitore</label>
           <mat-form-field class="w-100">
@@ -100,7 +100,7 @@
         </div>
 
         <!-- Stock type -->
-        <div class="col-sm-6">
+        <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Tipo di stock</label>
           <mat-form-field class="w-100">
             <i-feather name="layers"></i-feather>
@@ -113,8 +113,18 @@
           </mat-form-field>
         </div>
 
+        <!-- Stock -->
+        <div class="col-sm-4">
+          <label class="label d-block fw-medium mb-10">Giacenza</label>
+          <mat-form-field class="w-100">
+            <i-feather name="layers"></i-feather>
+            <mat-label>giacenza</mat-label>
+            <input matInput formControlName="stock" type="number">
+          </mat-form-field>
+        </div>
+
         <!-- Stato -->
-        <div class="col-sm-6">
+        <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Stato</label>
           <mat-form-field class="w-100">
             <i-feather name="activity"></i-feather>

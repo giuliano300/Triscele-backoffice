@@ -21,6 +21,9 @@ import { Categories } from '../../interfaces/categories';
 import { Supplier } from '../../interfaces/suppliers';
 import { SupplierService } from '../../services/Supplier.service';
 import { CategoryService } from '../../services/Category.service';
+import { AddMovementComponent } from '../../add-movement-dialog/add-movement-dialog.component';
+import { ProductMovementsService } from '../../services/Product-movements.service';
+import { ProductMovements } from '../../interfaces/productMovements';
 
 @Component({
   selector: 'app-products',
@@ -76,7 +79,8 @@ export class ProductsComponent {
     private productService: ProductService,
     private supplierService: SupplierService,
     private categoryService: CategoryService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private productMovementsService: ProductMovementsService
   ) 
   { 
     this.form = this.fb.group({
@@ -102,6 +106,7 @@ export class ProductsComponent {
     const { categoryId, supplierId } = this.form.value;
     this.getProducts(categoryId, supplierId);
   }
+
   getProducts(categoryId?: string, supplierId?: string) {
     let query = '';
     if (categoryId || supplierId) {
@@ -154,5 +159,26 @@ export class ProductsComponent {
 
   getEnabledStatus(enabled: boolean): string {
     return enabled ? "Attivo" : "Disattivo";
+  }
+
+  addMovements(item: ProductViewModel){
+    const dialogRef = this.dialog.open(AddMovementComponent, {
+      data: item,
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      console.log(result);
+      if (result) {
+        this.productMovementsService.setProductMovements(result)
+          .subscribe((data: ProductMovements) => {
+            if (data) {
+              this.getProducts();
+            }
+          });
+      } else {
+        console.log("Close");
+      }
+    });
   }
 }
