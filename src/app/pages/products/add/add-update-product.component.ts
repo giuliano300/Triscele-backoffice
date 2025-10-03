@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -19,8 +19,13 @@ import { exceedsLimit, maxLenghtUploadFile } from '../../../../main';
 import { AlertDialogComponent } from '../../../alert-dialog/alert-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { ImageDialogComponent } from '../../../image-dialog/image-dialog.component';
 import { ProductViewModel } from '../../../classess/productViewModel';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatMenuModule } from '@angular/material/menu';
+import { SubProducts } from '../../../interfaces/subProducts';
+import { AddUpdateSubProductsDialogComponent } from '../../../add-update-sub-product-dialog/add-update-sub-product-dialog.component';
+import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-add-product',
@@ -35,7 +40,11 @@ import { ProductViewModel } from '../../../classess/productViewModel';
     MatCheckboxModule,
     FeathericonsModule,
     NgxFileDropModule,
-    MatIconModule
+    MatIconModule,
+    MatMenuModule, 
+    MatPaginatorModule, 
+    MatTableModule, 
+    MatCheckboxModule
 ],
   templateUrl: './add-update-product.component.html',
   styleUrl: './add-update-product.component.scss'
@@ -54,6 +63,14 @@ export class AddProductComponent {
   uploadedFiles: { name: string, base64: string }[] = [];
 
   rejectedFiles: { name: string; reason: string }[] = [];
+
+  subProducts: SubProducts[] = [];
+
+  dataSource = new MatTableDataSource<SubProducts>(this.subProducts);
+
+  displayedColumns: string[] = ['name', 'suuplierName', 'supplierCode', 'internalCode', 'price', 'quantity', 'edit', 'delete'];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   dropZoneIsDisabled = false;
   
@@ -158,8 +175,82 @@ export class AddProductComponent {
             this.uploadedFiles = uploadFilesJson ? uploadFilesJson : [];
             if(this.uploadedFiles.length >= maxLenghtUploadFile)
               this.dropZoneIsDisabled = true;
+
+            this.getSubProducts(data.subProducts);
           });
       }
+    });
+  }
+
+  getSubProducts(subp: SubProducts[]){
+      this.subProducts = subp.map(p => ({
+        ...p,
+        action: {
+          edit: 'ri-edit-line',
+          movements: 'ri-search-line',
+          delete: 'ri-delete-bin-line'
+        }
+      }));
+
+      this.dataSource = new MatTableDataSource<SubProducts>(this.subProducts);
+  }
+
+  UpdateItem(item: SubProducts){
+    const dialogRef = this.dialog.open(AddUpdateSubProductsDialogComponent, {
+        data: item,
+        width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) 
+        this.addOrUpdateSubProduct(result);
+      else 
+        console.log("Close");
+    });
+  }
+
+  addOrUpdateSubProduct(result: any) 
+  {
+    const index = this.subProducts.findIndex(p => p.productId === result.productId);
+
+    if (index !== -1) 
+      this.subProducts[index] = result;
+    else 
+      this.subProducts.push(result);
+
+    this.getSubProducts(this.subProducts);
+  }
+
+  DeleteItem(item: SubProducts){
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        const index = this.subProducts.findIndex(p => p.productId === item.productId);
+        if (index !== -1) {
+          this.subProducts.splice(index, 1); 
+          this.getSubProducts(this.subProducts);
+        }      
+      } 
+      else 
+      {
+        console.log("Close");
+      }
+    });
+  }
+
+  addProduct(){
+    const dialogRef = this.dialog.open(AddUpdateSubProductsDialogComponent, {
+        width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) 
+        this.addOrUpdateSubProduct(result);
+      else 
+        console.log("Close");
     });
   }
 
@@ -174,6 +265,7 @@ export class AddProductComponent {
       };
 
       formData.files = this.uploadedFiles;
+      formData.subProducts = this.subProducts;
 
       if (this.id) {
         formData._id = this.id;

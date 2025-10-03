@@ -1,3 +1,5 @@
+import { SubProducts } from "./subProducts";
+
 export interface Product {
   _id?: string; 
   name: string;
@@ -13,6 +15,7 @@ export interface Product {
   supplierId: string;
   description?: string;
   files?: any[];
+  subProducts?: SubProducts[];
   amazonCode?: string;
   ebayCode?: string;
   wcCode?: string;
