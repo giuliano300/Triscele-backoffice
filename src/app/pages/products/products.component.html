@@ -31,6 +31,13 @@
                             </mat-select>
                         </mat-form-field>                        
                     </div>
+                    <div class="col-lg-3">
+                        <mat-form-field>
+                            <i-feather name="tag"></i-feather>
+                            <mat-label>Cerca prodotto</mat-label>
+                            <input matInput formControlName="name">
+                        </mat-form-field>                        
+                    </div>
                     <div class="col-lg-1">
                          <button mat-button class="filter" type="submit" [disabled]="form.invalid" (click)="onSubmit()">
                             Filtra
@@ -139,7 +146,7 @@
 
           <ng-container matColumnDef="movements">
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
-                  Movimenti
+                  Movimentazioni
               </th>
               <td mat-cell *matCellDef="let element" class="text-center pr-0">
                   <div class="action">

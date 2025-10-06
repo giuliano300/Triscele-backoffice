@@ -26,6 +26,7 @@ import { ProductMovementsService } from '../../services/Product-movements.servic
 import { ProductMovements } from '../../interfaces/productMovements';
 import { MovementsComponent } from '../../movements-dialog/movements-dialog.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatInput } from "@angular/material/input";
 
 @Component({
   selector: 'app-products',
@@ -44,7 +45,8 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatSortModule
+    MatSortModule,
+    MatInput
 ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
@@ -90,7 +92,8 @@ export class ProductsComponent {
   { 
     this.form = this.fb.group({
       categoryId: [],
-      supplierId: []
+      supplierId: [],
+      name: []
     });
   }
 
@@ -108,24 +111,26 @@ export class ProductsComponent {
   }
 
   onSubmit(){
-    const { categoryId, supplierId } = this.form.value;
-    this.getProducts(categoryId, supplierId);
+    const { categoryId, supplierId, name } = this.form.value;
+    this.getProducts(categoryId, supplierId, name);
   }
 
   remove(){
     this.getProducts();
     this.form.patchValue({
       categoryId: [],
-      supplierId: []
+      supplierId: [],
+      name: []
     });
   }
 
-  getProducts(categoryId?: string, supplierId?: string) {
+  getProducts(categoryId?: string, supplierId?: string, name?: string) {
     let query = '';
-    if (categoryId || supplierId) {
+    if (categoryId || supplierId || name) {
       const params = new URLSearchParams();
       if (categoryId) params.append('categoryId', categoryId);
       if (supplierId) params.append('supplierId', supplierId);
+      if (name) params.append('name', name);
       query = `?${params.toString()}`;
     }
     this.productService.getProducts(query)

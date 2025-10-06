@@ -259,14 +259,18 @@ orderStatusOptions = [
 
         this.orderService.getOrder(this.id)
           .subscribe((data: Order) => {
+            const [year, month, day] = data.insertDate.substring(0, 10).split('-').map(Number);
+
+            const [yearEx, monthEx, dayEx] = data.expectedDelivery.substring(0, 10).split('-').map(Number);
+
             this.productForm.patchValue({
               customerId: data.customerId._id.toString(),
               operatorId: data.operatorId._id!.toString(),
               agent: data.agent,
               paymentMethod: data.paymentMethod,
               status: data.status,
-              insertDate: data.insertDate,
-              expectedDelivery: data.expectedDelivery,
+              insertDate: new Date(year, month - 1, day),
+              expectedDelivery: new Date(yearEx, monthEx - 1, dayEx),
               shippingAddress: data.shippingAddress,
               shippingZipcode: data.shippingZipcode,
               shippingName: data.shippingName,
@@ -298,7 +302,7 @@ orderStatusOptions = [
       }
     });
   }
-  addProductToList(product: any){
+  addProductToList(product: ProductViewModel){
     const exists = this.productsForm.controls.some(
       (ctrl) => (ctrl as FormGroup).get('_id')?.value === product.id
     );
@@ -314,6 +318,21 @@ orderStatusOptions = [
         discountPercentage: [0]
       });
       this.productsForm.push(group);
+      if(product.subProducts){
+        for(var i = 0; i < product.subProducts.length; i++)
+        {
+            const group = this.fb.group({
+              _id: [product.subProducts[i].productId],
+              name: [product.subProducts[i].name],
+              quantity: [product.subProducts[i].quantity],
+              price: [product.subProducts[i].price],
+              discount: [0],
+              total: [product.subProducts[i].price * product.subProducts[i].quantity],
+              discountPercentage: [0]
+            });
+            this.productsForm.push(group);
+        }
+      }
 
       this.syncDiscount(group);
 
@@ -346,10 +365,21 @@ orderStatusOptions = [
  }
 
   onSubmit() {
-    //console.log(this.productForm.value)
+    const d: Date = this.productForm.value.insertDate;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    const dEx: Date = this.productForm.value.expectedDelivery;
+    const yyyyEx = dEx.getFullYear();
+    const mmEx = String(dEx.getMonth() + 1).padStart(2, '0');
+    const ddEx = String(dEx.getDate()).padStart(2, '0');
+
     if (this.productForm.valid) {
       const formData: Order = {
-        ...this.productForm.value
+        ...this.productForm.value,
+        insertDate: `${yyyy}-${mm}-${dd}`,
+        expectedDelivery: `${yyyyEx}-${mmEx}-${ddEx}` 
       };
       formData.origin = "1";
       formData.orderProducts = this.productsForm.value;
