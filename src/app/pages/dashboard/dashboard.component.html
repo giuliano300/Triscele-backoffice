@@ -1,136 +1,105 @@
 <div class="row">
-    <div class="col-sm-6 col-xxxl-4">
+    <div class="col-sm-6 col-xxxl-6">
 
-        <mat-card class="trinta-card annual-profit-card mb-25 bg-white border-none d-block">
+        <mat-card class="trinta-card number-card mb-25 bg-white border-none d-block">
             <mat-card-content>
-                <span class="sub-title text-gray d-block">
-                    Annual Profit
-                </span>
-                <h3>
-                    $258k
-                </h3>
-                <span class="trending d-inline-block fw-medium position-relative">
-                    1.70% <i class="ri-arrow-up-s-line"></i>
-                </span>
-            </mat-card-content>
-        </mat-card>
-        <!-- Total Growth -->
-        <mat-card class="trinta-card total-growth-card mb-25 bg-white border-none d-block">
-            <mat-card-content>
-                <span class="sub-title text-gray d-block">
-                    Total Growth
-                </span>
-                <h3>
-                    $37.4k
-                </h3>
-                <span class="trending down d-inline-block fw-medium position-relative">
-                    2.50% <i class="ri-arrow-down-s-line"></i>
-                </span>
+                <i class="ri-store-line big-icons"></i>
+                <div class="ctn-numbers">            
+                    <h5 class="mt-0 mb-5 pl-0">
+                        Totale ordini
+                    </h5>
+                    <h3>
+                        {{orders}}
+                    </h3>
+                </div>
             </mat-card-content>
         </mat-card>
     </div>
-    <div class="col-sm-6 col-xxxl-4">
-
-        <!-- Daily Average Income -->
-        <mat-card class="trinta-card daily-average-income-card mb-25 bg-white border-none d-block">
+    <div class="col-sm-6 col-xxxl-6">
+        <mat-card class="trinta-card number-card mb-25 bg-white border-none d-block">
             <mat-card-content>
-                <span class="sub-title text-gray d-block">
-                    Daily Average Income
-                </span>
-                <h3>
-                    $8.3k
-                </h3>
-                <span class="trending d-inline-block fw-medium position-relative">
-                    2.70% <i class="ri-arrow-up-s-line"></i>
-                </span>
+                <i class="ri-group-line big-icons"></i>    
+                <div class="ctn-numbers">            
+                    <h5 class="mt-0 mb-5 pl-0">
+                        Totale clienti
+                    </h5>
+                    <h3>
+                        {{customers}}
+                    </h3>
+                </div>
             </mat-card-content>
         </mat-card>
-        <!-- Total Revenue -->
-        <mat-card class="trinta-card total-revenue-card mb-25 bg-white border-none d-block">
-            <mat-card-content>
-                <span class="sub-title text-gray d-block">
-                    Total Revenue
-                </span>
-                <h3>
-                    $130.4M
-                </h3>
-                <span class="trending d-inline-block fw-medium position-relative">
-                    11.8% <i class="ri-arrow-up-s-line"></i>
-                </span>
-            </mat-card-content>
-        </mat-card>        
-    </div>
-    <div class="col-sm-12 col-lg-6 col-xxxl-4">
-        <div class="row">
-            <div class="col-lg-12 col-sm-6">
-
-                <!-- Lead Conversations -->
-                <mat-card class="trinta-card lead-conversations-card mb-25 bg-white border-none d-block">
-                    <mat-card-content>
-                        <span class="sub-title text-gray d-block">
-                            Lead Conversations
-                        </span>
-                        <h3>
-                            3,254
-                        </h3>
-                        <span class="trending down d-inline-block fw-medium position-relative">
-                            10.7% <i class="ri-arrow-down-s-line"></i>
-                        </span>
-                    </mat-card-content>
-                </mat-card>
-            </div>
-            <div class="col-lg-12 col-sm-6">
-
-                <!-- Total Orders -->
-                <mat-card class="trinta-card total-orders-card mb-25 bg-white border-none d-block">
-                    <mat-card-content>
-                        <span class="sub-title text-gray d-block">
-                            Total Orders
-                        </span>
-                        <h3>
-                            25.47k
-                        </h3>
-                        <span class="trending down d-inline-block fw-medium position-relative">
-                            5.20% <i class="ri-arrow-down-s-line"></i>
-                        </span>
-                    </mat-card-content>
-                </mat-card>
-            </div>
-        </div>
     </div>
 </div>
 <div class="row">
-    <div class="col-xxxl-12">
+    <div class="col-xxxl-8">
         <mat-card class="trinta-card balance-overview-card mb-25 bg-white border-none d-block">
             <mat-card-header>
                 <mat-card-title>
-                    <h5 class="mt-0 mb-0">
-                        Balance Overview
+                    <h5 class="mt-0 mb-15 pl-0">
+                        Ordini del {{y}}
                     </h5>
                 </mat-card-title>
-                <mat-card-subtitle>
-                    <button type="button" mat-button class="card-header-menu-btn" [matMenuTriggerFor]="cardHeaderMenu">
-                        This Year
-                    </button>
-                    <mat-menu #cardHeaderMenu="matMenu" class="card-header-menu" xPosition="before">
-                        <button mat-menu-item>
-                            This Day
-                        </button>
-                        <button mat-menu-item>
-                            This Week
-                        </button>
-                        <button mat-menu-item>
-                            This Month
-                        </button>
-                        <button mat-menu-item>
-                            This Year
-                        </button>
-                    </mat-menu>
-                </mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
                 <div class="chart">
                     <div id="crm_balance_overview_chart"></div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    <div class="col-xxxl-4">
+        <mat-card  class="trinta-card to-do-list-card mb-25 bg-white border-none d-block blocs">
+            <mat-card-content>
+                <h5 class="mt-0 mb-25 pl-0">
+                    Prodotti in esaurimento
+                </h5>
+                <div class="to-do-list-table">
+                    <div class="table-responsive">
+                        <table mat-table [dataSource]="dataSource" matSort>
+
+                        <!-- Nome -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Nome </th>
+                            <td mat-cell *matCellDef="let element" class="pl-0">
+                            <h6 class="mt-0 mb-0">{{element.name}}</h6>
+                            </td>
+                        </ng-container>
+
+                        <!-- Categoria -->
+                        <ng-container matColumnDef="category">
+                            <th mat-header-cell *matHeaderCellDef class="pl-0"> Categoria </th>
+                            <td mat-cell *matCellDef="let element" class="pl-0">
+                            <h6 class="mt-0 mb-0">{{element.category.name}}</h6>
+                            </td>
+                        </ng-container>
+
+                        <!-- soglia -->
+                        <ng-container matColumnDef="theshold">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Soglia </th>
+                            <td mat-cell *matCellDef="let element" class="pl-1">
+                            <h6 class="mt-0 mb-0">{{element.theshold}} </h6>
+                            </td>
+                        </ng-container>
+
+                        <!-- costo -->
+                        <ng-container matColumnDef="stock">
+                            <th mat-header-cell *matHeaderCellDef class="pl-0" mat-sort-header> Giacenza </th>
+                            <td mat-cell *matCellDef="let element" class="pl-1">
+                            <h6 class="mt-0 mb-0">{{element.stock}}</h6>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+                            Nessun prodotto inserito
+                            </td>
+                        </tr>
+                        </table>
+                    </div>
                 </div>
             </mat-card-content>
         </mat-card>

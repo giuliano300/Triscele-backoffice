@@ -8,6 +8,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
+import { StatsService } from '../../services/stats.service';
+import { ProductService } from '../../services/Product.service';
+import { ProductViewModel } from '../../classess/productViewModel';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,145 +20,180 @@ import { isPlatformBrowser } from '@angular/common';
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
-  private isBrowser: boolean | undefined;
 
-  constructor(
+    private isBrowser: boolean | undefined;
+    products: ProductViewModel[] = [];
+
+    dataSource = new MatTableDataSource<ProductViewModel>(this.products);
+
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
+
+    displayedColumns: string[] = [
+        'name',
+        'category',
+        'theshold',
+        'stock'
+    ];
+ 
+   constructor(
       private router: Router,
       private dialog: MatDialog,
+      private statsService: StatsService,
+      private productService: ProductService,
       @Inject(PLATFORM_ID) private platformId: any) {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
 
+    orders: number = 0;
+    customers: number = 0;
+    ordersByMonth: any[] = [];
+    y: number = new Date().getFullYear();
+
    ngOnInit(): void {
-    this.loadChart();
+    this.loadStats();
+    this.findLowStock();
    }
 
-       async loadChart(): Promise<void> {
-        if (this.isBrowser) {
-            try {
-                // Dynamically import ApexCharts
-                const ApexCharts = (await import('apexcharts')).default;
+   findLowStock(){
+    this.productService.findLowStock().subscribe((data) => {
+        if (!data || data.length === 0) {
+            this.dataSource.data = [];
+            this.dataSource.paginator = this.paginator;        
+        } 
+        else 
+        {
+          this.products = data;
+          this.dataSource = new MatTableDataSource<ProductViewModel>(this.products);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+        }    
+    });
+   }
 
-                // Define chart options
-                const options = {
-                    series: [
-                        {
-                            name: "Expense",
-                            data: [130, 90, 120, 160, 200, 170, 130, 100, 70, 100, 120, 75]
-                        },
-                        {
-                            name: "Revenue",
-                            data: [20, 80, 50, 40, 120, 200, 180, 130, 230, 170, 90, 120]
-                        }
-                    ],
-                    chart: {
-                        height: 419,
-                        type: "area",
-                        toolbar: {
-                            show: false
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    fill: {
-                        type: "gradient",
-                        gradient: {
-                            opacityFrom: 0.45,
-                            opacityTo: 0.05
-                        }
-                    },
-                    grid: {
-                        show: true,
-                        strokeDashArray: 0,
-                        borderColor: "#edeff5",
-                        xaxis: {
-                            lines: {
-                                show: true
-                            }
-                        },
-                        yaxis: {
-                            lines: {
-                                show: true
-                            }
-                        }
-                    },
-                    stroke: {
-                        width: 4,
-                        curve: "smooth"
-                    },
-                    colors: [
-                        "#EDEFF5", "#3761EE"
-                    ],
-                    xaxis: {
-                        axisBorder: {
-                            show: false,
-                            color: '#edeff5'
-                        },
-                        axisTicks: {
-                            show: false,
-                            color: '#edeff5'
-                        },
-                        labels: {
-                            show: true,
-                            style: {
-                                colors: "#262626",
-                                fontSize: "13px"
-                            }
-                        },
-                        categories: [
-                            "Jan",
-                            "Feb",
-                            "Mar",
-                            "Apr",
-                            "May",
-                            "Jun",
-                            "Jul",
-                            "Aug",
-                            "Sep",
-                            "Oct",
-                            "Nov",
-                            "Dec"
-                        ]
-                    },
-                    yaxis: {
-                        labels: {
-                            show: true,
-                            style: {
-                                colors: "#a9a9c8",
-                                fontSize: "13px"
-                            }
-                        },
-                        axisBorder: {
-                            show: false,
-                            color: '#edeff5'
-                        }
-                    },
-                    legend: {
-                        show: true,
-                        position: 'top',
-                        fontSize: '13px',
-                        horizontalAlign: 'center',
-                        labels: {
-                            colors: '#77838f',
-                        },
-                        itemMargin: {
-                            horizontal: 15,
-                            vertical: 0
-                        },
-                        markers: {
-                            offsetY: -1
-                        }
-                    }
-                };
+   loadStats() {
+    this.statsService.getStats(this.y).subscribe((data) => {
+      this.orders = data.totalOrders;
+      this.customers = data.totalCustomers;
+      this.ordersByMonth = data.ordersByMonth;
+      this.loadChart();
+    });
+   }
+   
+  async loadChart(): Promise<void> {
+    if (!this.isBrowser) return;
 
-                // Initialize and render the chart
-                const chart = new ApexCharts(document.querySelector('#crm_balance_overview_chart'), options);
-                chart.render();
-            } catch (error) {
-                console.error('Error loading ApexCharts:', error);
-            }
+    try {
+      // Import dinamico ApexCharts
+      const ApexCharts = (await import('apexcharts')).default;
+
+      const monthsData = this.ordersByMonth || [];
+
+      const ordersArray = Array(12).fill(0);
+      monthsData.forEach((m: any) => {
+        if (m.month >= 1 && m.month <= 12) {
+            ordersArray[m.month - 1] = m.orders;
         }
+      });
+      const options: ApexCharts.ApexOptions = {
+        series: [
+          {
+            name: 'Ordini',
+            data: ordersArray,
+          },
+        ],
+        chart: {
+          height: 360,
+          type: 'area',
+          toolbar: { show: false },
+          fontFamily: 'inherit',
+        },
+        dataLabels: { enabled: false },
+        fill: {
+          type: 'gradient',
+          gradient: {
+            opacityFrom: 0.45,
+            opacityTo: 0.05,
+          },
+        },
+        grid: {
+          borderColor: '#edeff5',
+          strokeDashArray: 3,
+          xaxis: { lines: { show: true } },
+          yaxis: { lines: { show: true } },
+        },
+        stroke: {
+          width: 3,
+          curve: 'smooth',
+        },
+        colors: ['#3761EE'],
+        xaxis: {
+          categories: [
+            'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
+            'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic',
+          ],
+          axisTicks: { show: false },
+          axisBorder: { show: false },
+          labels: {
+            style: {
+              colors: '#262626',
+              fontSize: '13px',
+            },
+          },
+        },
+        yaxis: {
+          labels: {
+            style: {
+              colors: '#a9a9c8',
+              fontSize: '13px',
+            },
+          },
+        },
+        legend: {
+          show: true,
+          position: 'top',
+          horizontalAlign: 'center',
+          fontSize: '13px',
+          labels: { colors: '#77838f' },
+          itemMargin: { horizontal: 15 },
+          markers: { offsetY: -1 },
+        },
+      };
+
+      // 🔁 Rimuovi grafico precedente (utile nei refresh)
+      const chartContainer = document.querySelector('#crm_balance_overview_chart');
+      if (chartContainer && chartContainer.innerHTML.trim() !== '') {
+        chartContainer.innerHTML = '';
+      }
+
+      // 🎨 Crea e renderizza grafico
+      const chart = new ApexCharts(chartContainer, options);
+      await chart.render();
+    } catch (error) {
+      console.error('Errore nel caricamento del grafico ApexCharts:', error);
     }
+  
+}
+   renderChart() {
+    const ctx = document.getElementById('ordersChart') as HTMLCanvasElement;
+    if (!ctx) return;
+
+    const months = this.ordersByMonth.map((m) => `Mese ${m.month}`);
+    const orders = this.ordersByMonth.map((m) => m.orders);
+
+    new (window as any).Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: months,
+        datasets: [
+          {
+            label: 'Numero ordini',
+            data: orders,
+          },
+        ],
+      },
+    });
+  }
+
 
   }

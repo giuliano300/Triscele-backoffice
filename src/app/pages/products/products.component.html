@@ -115,6 +115,14 @@
             </td>
           </ng-container>
 
+          <!-- soglia -->
+          <ng-container matColumnDef="theshold">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Soglia </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{element.theshold}} </h6>
+            </td>
+          </ng-container>
+
           <!-- costo -->
           <ng-container matColumnDef="stock">
             <th mat-header-cell *matHeaderCellDef class="pl-0" mat-sort-header> Giacenza </th>

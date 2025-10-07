@@ -354,3 +354,8 @@
     font-weight: 400;
     font-family: var(--headingFontFamily);
 }
+
+::ng-deep .mat-form-field-label {
+  font-size: 14px !important;
+  color: #888; /* opzionale */
+}

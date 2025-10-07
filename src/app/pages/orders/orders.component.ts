@@ -23,6 +23,8 @@ import { MatDatepickerModule, MatDatepickerToggle } from "@angular/material/date
 import { MatInputModule } from '@angular/material/input';
 import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { Operators } from '../../interfaces/operators';
+import { OperatorService } from '../../services/Operator.service';
 
 registerLocaleData(localeIt);
 
@@ -90,7 +92,12 @@ export class OrdersComponent {
 
   customers: Customers[] = [];
 
+  operators: Operators[] = [];
+
+  IsOperatorView: boolean = false;
+
   displayedColumns: string[] = [
+    'operatorId',
     'shippingBusinessName',
     'orderProducts',
     'insertDate',
@@ -120,6 +127,7 @@ export class OrdersComponent {
       private fb: FormBuilder,
       private orderService: OrderService,
       private customerService: CustomerService,
+      private operatorService: OperatorService,
       private adapter: DateAdapter<any>,
       private dialog: MatDialog
     ) 
@@ -127,6 +135,7 @@ export class OrdersComponent {
       this.adapter.setLocale('it-IT');
       this.form = this.fb.group({
         customerId: [],
+        operatorId: [],
         status: [],
         dateRange: this.fb.group({
             start: [null],
@@ -136,18 +145,34 @@ export class OrdersComponent {
     }
 
   ngOnInit(): void {
+    const isOperator = localStorage.getItem('isOperator') === 'true';
+    if(isOperator)
+      this.IsOperatorView = true;
+
     this.getOrders();
-      this.customerService.getCustomers()
+    this.customerService.getCustomers()
       .subscribe((data: Customers[]) => {
         this.customers = data;
-      });
+    });
+
+    this.operatorService.getOperators()
+      .subscribe((data: Operators[]) => {
+        this.operators = data;
+    });
   }
 
-  getOrders(customerId?: string, status?: number, start?: string, end?: string) {
+  getOrders(customerId?: string, operatorId?: string, status?: number, start?: string, end?: string) {
     let query = '';
-    if (customerId || status|| start || end) {
+    if(this.IsOperatorView)
+    {
+      const o = JSON.parse(localStorage.getItem("operator") || "{}");
+      operatorId = o.sub;    
+    }
+
+    if (customerId || operatorId || status|| start || end) {
       const params = new URLSearchParams();
       if (customerId) params.append('customerId', customerId);
+      if (operatorId) params.append('operatorId', operatorId);
       if (status) params.append('status', status.toString());
       if (start) params.append('start', start);
       if (end) params.append('end', end);
@@ -174,25 +199,33 @@ export class OrdersComponent {
   }
 
   onSubmit(){
-    console.log(this.form.value);
-    const { customerId, status, dateRange } = this.form.value;
-    const { start, end } = dateRange || {};   
-    const startFixed = new Date(start);
-    startFixed.setHours(12, 0, 0, 0);
+    //console.log(this.form.value);
+    const { customerId, operatorId, status, dateRange } = this.form.value;
+    const { start, end } = dateRange || {};
 
-    const endFixed = new Date(end);
-    endFixed.setHours(12, 0, 0, 0);    
+    let s = '';
+    let e = '';
 
-    const s = startFixed.toISOString();
-    const e = endFixed.toISOString();
+    if (start) {
+      const startFixed = new Date(start);
+      startFixed.setHours(12, 0, 0, 0);
+      s = startFixed.toISOString();
+    }
+
+    if (end) {
+      const endFixed = new Date(end);
+      endFixed.setHours(12, 0, 0, 0);
+      e = endFixed.toISOString();
+    }
     
-    this.getOrders(customerId, status, s, e);
+    this.getOrders(customerId, operatorId, status, s, e);
   }
 
   remove(){
     this.getOrders();
     this.form.patchValue({
       customerId: [],
+      operatorId: [],
       status: [],
       dateRange: {
         start: null,

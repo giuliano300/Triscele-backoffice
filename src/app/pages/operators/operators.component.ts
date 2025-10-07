@@ -10,10 +10,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
+import { AuthService } from '../../services/auth.service';
+import { Permission } from '../../interfaces/permissions';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-operators',
-  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule],
+  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, CommonModule],
   templateUrl: './operators.component.html',
   styleUrl: './operators.component.scss'
 })
@@ -26,16 +29,27 @@ export class OperatorsComponent {
   dataSource = new MatTableDataSource<Operators>(this.Operators);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  isAdmin:boolean = true;
   
   constructor(
       private router: Router,
       private operatorService: OperatorService,
-      private dialog: MatDialog
+      private dialog: MatDialog,
+      private authService: AuthService
   ) {}
 
-   ngOnInit(): void {
+  ngOnInit(): void {
     this.getOperators();
-   }
+    const o = localStorage.getItem("operator");
+    if(o)
+      this.isAdmin = false;
+    else
+    {
+      const i = this.displayedColumns.length - 1;
+      this.displayedColumns.splice(i, 0, 'login');
+    }
+  }
 
   getOperators(){
     this.operatorService.getOperators()
@@ -49,6 +63,7 @@ export class OperatorsComponent {
             ...c, 
             action: {
                 edit: 'ri-edit-line',
+                login: 'ri-corner-down-right-fill',
                 delete: 'ri-delete-bin-line'
             }
         }));;
@@ -59,43 +74,107 @@ export class OperatorsComponent {
   }
 
 
-      DeleteItem(item:Operators){
+  DeleteItem(item:Operators){
 
-      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-        width: '500px'
-      });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '500px'
+    });
 
-      dialogRef.afterClosed().subscribe((result: any) => {
-        if (result) {
-          this.operatorService.delete(item._id!)
-            .subscribe((data: boolean) => {
-              if(data){
-                this.getOperators();
-              }
-            });
-        } 
-        else 
-        {
-          console.log("Close");
-        }
-      });
-    }
-
-    UpdateItem(item: Operators){
-      this.router.navigate(["/operator/add/" + item._id]);
-    }
-
-    getElementStatus(status: string): string{
-      switch(parseInt(status)){
-        case 1:
-          return "Attivo";
-        case 2:
-          return "Disattivo";
-        case 3:
-          return "Cancellato";
-        default:
-          return "";
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.operatorService.delete(item._id!)
+          .subscribe((data: boolean) => {
+            if(data){
+              this.getOperators();
+            }
+          });
+      } 
+      else 
+      {
+        console.log("Close");
       }
+    });
+  }
+
+  UpdateItem(item: Operators){
+    this.router.navigate(["/operator/add/" + item._id]);
+  }
+
+  LoginAs(item: Operators){
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data:{title:"Login operatore", description: 'Sei sicuro di voler accedere come ' + item.businessName + '?', confirm: "Conferma"},
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.operatorService.loginOperator(item).subscribe((data: any) => {
+          if(data != null)
+          {
+            const o = this.authService.decodeToken(data)!
+            const login = this.operatorService.setOperatorAfterLogin(o, data);
+            
+            this.authService.setIsAdminState(false, true, o!.name!);
+
+            if(login)
+            {
+              const l = JSON.parse(localStorage.getItem("permissions") || "[]");
+                  if(!l)
+                  {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('isLogin');
+                    localStorage.removeItem('isAdmin');
+                    localStorage.removeItem('isOperator');
+                    this.authService.clearRoles();
+                    this.router.navigate(['/']);
+                  }
+              
+                  const p: Permission = l[0];
+                  switch(p.permissionName.toUpperCase()){
+                    case 'CUSTOMERSMODULE':
+                      this.router.navigate(['/customers']);
+                      break;
+                    case 'PRODUCTSMODULE':
+                      this.router.navigate(['/products']);
+                      break;
+                    case 'ORDERSMODULE':
+                      this.router.navigate(['/orders']);
+                      break;
+                    case 'OPERATORSSMODULE':
+                      this.router.navigate(['/operators']);
+                      break;
+                    case 'SUPPLIERSMODULE':
+                      this.router.navigate(['/suppliers']);
+                      break;
+                    default:
+                      this.router.navigate(['/dashboard']);
+                      break;
+                  }
+            }
+          }
+        })
+      } 
+      else 
+      {
+        console.log("Close");
+      }
+    });
+
+  }
+
+  getElementStatus(status: string): string{
+    switch(parseInt(status)){
+      case 1:
+        return "Attivo";
+      case 2:
+        return "Disattivo";
+      case 3:
+        return "Cancellato";
+      default:
+        return "";
     }
+  }
 
 }

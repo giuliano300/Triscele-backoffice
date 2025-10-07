@@ -23,19 +23,19 @@
         <div class="sidebar-inner">
             <div class="sidebar-menu">
                 <mat-accordion>
-                    <span class="sub-title text-body">
+                    <span class="sub-title text-body" *ngIf="isVisibleDashboard">
                         MAIN
                     </span>
-                    <a routerLink="/" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                    <a routerLink="/" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleDashboard">
                         <i-feather name="activity"></i-feather>
                         <span class="title">
                             Dashboard
                         </span>
                     </a>
-                    <span class="sub-title text-body sbs">
+                    <span class="sub-title text-body sbs" *ngIf="isVisibleUsers">
                         UTENTI
                     </span>
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true">
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleCustomers">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <i-feather name="users"></i-feather>
@@ -58,7 +58,7 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true">
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleOperators">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <i-feather name="command"></i-feather>
@@ -81,7 +81,7 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true">
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleSuppliers">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <i-feather name="briefcase"></i-feather>
@@ -104,10 +104,10 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <span class="sub-title text-body sbs">
+                    <span class="sub-title text-body sbs" *ngIf="isVisibleProductions">
                         PRODUTTIVITA'
                     </span>
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true">
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleProducts">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <i-feather name="bar-chart-2"></i-feather>
@@ -135,7 +135,7 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true">
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleOrders">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <i-feather name="share-2"></i-feather>

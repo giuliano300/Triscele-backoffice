@@ -63,6 +63,7 @@ export class ProductsComponent {
     'internalCode',
     'price',
     'cost',
+    'theshold',
     'stock',
     'enabled',
     'edit',

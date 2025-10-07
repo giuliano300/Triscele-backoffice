@@ -22,6 +22,10 @@ export class ProductService {
       return this.http.get<ProductViewModel[]>(this.apiUrl + query, { headers });
     }
 
+    findLowStock(): Observable<ProductViewModel[]>{
+      return this.http.get<ProductViewModel[]>(this.apiUrl + "/findLowStock");
+    }
+
     getProduct(id: string): Observable<ProductViewModel>{
       return this.http.get<ProductViewModel>(this.apiUrl + "/" + id);
     }

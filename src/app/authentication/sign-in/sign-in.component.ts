@@ -54,28 +54,39 @@ export class SignInComponent {
             
             this.userService.login(login).subscribe((data: any) => {
                 if(data == null)
+                {
                     this.isError = true;
+                }
                 else
                 {
                     this.user! = this.authService.decodeToken(data)!;
                     localStorage.setItem('isLogin', "true");
+                    localStorage.setItem('isAdmin', "true");
+                    localStorage.setItem('isOperator', "false");
                     localStorage.setItem('loginName', this.user!.name!);
                     this.authService.setIsLogin(true);
+                    this.authService.setIsAdmin(true);
+                    this.authService.setIsOperator(false);
                     this.authService.setLoginName(this.user!.name!);
+                    localStorage.setItem('authTokenAdmin', data.access_token);
                     localStorage.setItem('authToken', data.access_token);
                     localStorage.setItem('user', JSON.stringify(this.user!));
-                    this.router.navigate(['/dashboard']);
+                    localStorage.removeItem('operator');
+                    localStorage.removeItem('permissions');
+                    document.location.href = '/dashboard';
                 }
             });
                         
-        } else {
+        } 
+        else 
+        {
             console.log('Il modulo non è valido. Si prega di controllare i campi.');
         }
     }
 
     ngOnInit(): void {
         const token = localStorage.getItem('authToken');
-        if (token) 
+        if (token)
             this.router.navigate(['/dashboard']);
    }
    
