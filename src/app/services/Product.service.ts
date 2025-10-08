@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { API_URL } from '../../main';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Product } from '../interfaces/products';
 import { ProductViewModel } from '../classess/productViewModel';
@@ -26,6 +26,15 @@ export class ProductService {
       return this.http.get<ProductViewModel[]>(this.apiUrl + "/findLowStock");
     }
 
+    findProductsForSelect(): Observable<any[]>{
+      return this.http.get<any[]>(this.apiUrl + "/findProductsForSelect");
+    }
+
+    getProductsByName(name: string): Observable<ProductViewModel[]> {
+      const params = new HttpParams().set('name', name);
+      return this.http.get<ProductViewModel[]>(`${this.apiUrl}/findProductsByName`, { params });
+    }
+  
     getProduct(id: string): Observable<ProductViewModel>{
       return this.http.get<ProductViewModel>(this.apiUrl + "/" + id);
     }

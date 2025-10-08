@@ -14,12 +14,12 @@ export class OrderService {
     
     constructor(private http: HttpClient) {}
 
-    getOrders(query: string = ''): Observable<Order[]>{
+    getOrders(query: string = ''): Observable<any>{
       const token = localStorage.getItem('authToken'); 
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });      
-      return this.http.get<Order[]>(this.apiUrl + query, { headers });
+      return this.http.get<any>(this.apiUrl + query, { headers });
     }
 
     getOrder(id: string): Observable<Order>{

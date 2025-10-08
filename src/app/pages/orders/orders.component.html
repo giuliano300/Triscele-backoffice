@@ -182,7 +182,12 @@
           </tr>
         </table>
       </div>
-      <mat-paginator [pageSizeOptions]="[20, 50, 100]"></mat-paginator>
+      <mat-paginator  
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[20, 50, 100]"
+        showFirstLastButtons>ù
+      </mat-paginator>
     </div>
   </mat-card-content>
 </mat-card>

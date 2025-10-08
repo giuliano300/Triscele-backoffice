@@ -511,3 +511,16 @@ h5{
 .pointer{
     cursor: pointer;
 }
+
+
+.position-relative{
+    position: relative;
+}
+
+.truncate {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: 30px;
+}

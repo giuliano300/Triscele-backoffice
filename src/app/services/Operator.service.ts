@@ -44,12 +44,8 @@ export class OperatorService {
       return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
     }
 
-    loginOperator(c: Operators): Observable<Operators>{
-      const login: Login = {
-        email : c.email,
-        password: c.pwd
-      };
-      return this.http.post<Operators>(this.apiUrlLogin, login);
+    loginOperator(c: Login): Observable<Operators>{
+      return this.http.post<Operators>(this.apiUrlLogin, c);
     }
 
     setOperatorAfterLogin(c: any, data: any): boolean{

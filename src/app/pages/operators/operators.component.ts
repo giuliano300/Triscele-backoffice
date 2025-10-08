@@ -13,6 +13,7 @@ import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.comp
 import { AuthService } from '../../services/auth.service';
 import { Permission } from '../../interfaces/permissions';
 import { CommonModule } from '@angular/common';
+import { Login } from '../../interfaces/Login';
 
 @Component({
   selector: 'app-operators',
@@ -109,7 +110,12 @@ export class OperatorsComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.operatorService.loginOperator(item).subscribe((data: any) => {
+        let login: Login = {
+          email: item.email,
+          password: item.pwd
+        };
+        
+        this.operatorService.loginOperator(login).subscribe((data: any) => {
           if(data != null)
           {
             const o = this.authService.decodeToken(data)!

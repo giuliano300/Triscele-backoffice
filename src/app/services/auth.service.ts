@@ -15,7 +15,7 @@ export class AuthService {
   private operatorSubject = new BehaviorSubject<any | null>(null);
   operator$ = this.operatorSubject.asObservable();
 
-  private operatorState = new BehaviorSubject<{ isAdmin: boolean; isOperator: boolean; name: string } | null>(null);
+  private operatorState = new BehaviorSubject<{ isAdmin: boolean; isOperator: boolean; name: string, loginOperator?: boolean } | null>(null);
   operatorState$ = this.operatorState.asObservable();
 
   constructor(private http: HttpClient) { }
@@ -61,8 +61,8 @@ export class AuthService {
     }
   }
 
-  setIsAdminState(isAdmin: boolean, isOperator: boolean, name: string) {
-    this.operatorState.next({ isAdmin, isOperator, name });
+  setIsAdminState(isAdmin: boolean, isOperator: boolean, name: string, loginOperator?: boolean) {
+    this.operatorState.next({ isAdmin, isOperator, name, loginOperator });
   }
     
   // Pulisce i ruoli

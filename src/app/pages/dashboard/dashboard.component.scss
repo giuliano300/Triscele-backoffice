@@ -81,6 +81,7 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
+                    max-width: 180px;
                     min-width: 70px;
 
                     .task-name {
@@ -374,7 +375,7 @@
 .big-icons{
     float: left;
     font-size: 70px;
-    margin-right: 25px;
+    margin-right: 15px;
     margin-top: -5px;
     color: var(--primaryColor);
 }
@@ -382,4 +383,10 @@
 h5{
     font-size: 14px!important;
     color: var(--blackColor);
+}
+
+.card-alert{
+    .big-icons, h3{
+        color: var(--dangerColor)!important;
+    }
 }

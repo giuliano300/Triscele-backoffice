@@ -96,6 +96,10 @@ export class OrdersComponent {
 
   IsOperatorView: boolean = false;
 
+  totalItems = 0;
+  pageSize = 20;
+  pageIndex = 0;
+
   displayedColumns: string[] = [
     'operatorId',
     'shippingBusinessName',
@@ -149,7 +153,6 @@ export class OrdersComponent {
     if(isOperator)
       this.IsOperatorView = true;
 
-    this.getOrders();
     this.customerService.getCustomers()
       .subscribe((data: Customers[]) => {
         this.customers = data;
@@ -161,7 +164,45 @@ export class OrdersComponent {
     });
   }
 
-  getOrders(customerId?: string, operatorId?: string, status?: number, start?: string, end?: string) {
+
+  ngAfterViewInit() {
+    // Chiamata iniziale
+    this.getOrders();
+
+    // Evento cambio pagina
+    this.paginator.page.subscribe(() => {
+      const dateRange = this.form.value.dateRange;
+
+      const { start, end } = dateRange || {};
+
+      let s = '';
+      let e = '';
+
+      if (start) {
+        const startFixed = new Date(start);
+        startFixed.setHours(12, 0, 0, 0);
+        s = startFixed.toISOString();
+      }
+
+      if (end) {
+        const endFixed = new Date(end);
+        endFixed.setHours(12, 0, 0, 0);
+        e = endFixed.toISOString();
+      }
+    
+      this.getOrders(
+        this.form.value.customerId,
+        this.form.value.operatorId,
+        this.form.value.status,
+        s,
+        e,
+        this.paginator.pageIndex,
+        this.paginator.pageSize
+      );
+    });
+  }
+
+  getOrders(customerId?: string, operatorId?: string, status?: number, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
     if(this.IsOperatorView)
     {
@@ -169,8 +210,10 @@ export class OrdersComponent {
       operatorId = o.sub;    
     }
 
-    if (customerId || operatorId || status|| start || end) {
+    if (customerId || operatorId || status|| start || end || pageIndex || pageSize) {
       const params = new URLSearchParams();
+      params.append('page', (pageIndex + 1).toString()); 
+      params.append('limit', pageSize.toString());
       if (customerId) params.append('customerId', customerId);
       if (operatorId) params.append('operatorId', operatorId);
       if (status) params.append('status', status.toString());
@@ -179,27 +222,26 @@ export class OrdersComponent {
       query = `?${params.toString()}`;
     }
     this.orderService.getOrders(query)
-      .subscribe((data: Order[]) => {
-        if (!data || data.length === 0) {
-            this.dataSource.data = [];
-            this.dataSource.paginator = this.paginator;        
-        } else {
-          this.orders = data.map(p => ({
+      .subscribe((response: any) => {
+          const data = response.data || [];
+          this.totalItems = response.total;
+          this.pageSize = response.limit;
+          this.pageIndex = response.page - 1;
+
+          this.orders = data.map((p: any) => ({
             ...p,
             action: {
               edit: 'ri-edit-line',
               delete: 'ri-delete-bin-line'
             }
           }));
+
           this.dataSource = new MatTableDataSource<Order>(this.orders);
-          this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-       }
       });
   }
 
   onSubmit(){
-    //console.log(this.form.value);
     const { customerId, operatorId, status, dateRange } = this.form.value;
     const { start, end } = dateRange || {};
 

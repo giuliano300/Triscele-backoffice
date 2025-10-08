@@ -52,8 +52,10 @@ export class HeaderComponent {
     }
 
     ngOnInit(){
-        this.authService.operator$.subscribe(op => {
-            if(op)
+        this.authService.operatorState$.subscribe(state => {
+            if(state?.loginOperator)
+                this.back = false;
+            else if(state?.isOperator)
                 this.back = true;
         })
     }

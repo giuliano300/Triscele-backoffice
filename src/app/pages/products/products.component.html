@@ -9,7 +9,7 @@
         <form [formGroup]="form">
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-2">
+                    <div class="col-lg-3">
                         <mat-form-field>
                             <i-feather name="star"></i-feather>
                             <mat-label>Filtra per categorie</mat-label>
@@ -70,8 +70,11 @@
           <!-- Categoria -->
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Categoria </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
-              <h6 class="mt-0 mb-0">{{element.category.name}}</h6>
+            <td mat-cell *matCellDef="let element" class="pl-0 position-relative">
+              <h6 #el
+                class="truncate"
+                (mouseenter)="element.showTooltip = el.scrollWidth > el.clientWidth"
+                [matTooltip]="element.showTooltip ? element.category.name : ''" matTooltipPosition = "above">{{element.category.name}}</h6>
             </td>
           </ng-container>
 
@@ -123,7 +126,7 @@
             </td>
           </ng-container>
 
-          <!-- costo -->
+          <!-- Giacenza -->
           <ng-container matColumnDef="stock">
             <th mat-header-cell *matHeaderCellDef class="pl-0" mat-sort-header> Giacenza </th>
             <td mat-cell *matCellDef="let element" class="pl-1">
@@ -188,7 +191,12 @@
           </tr>
         </table>
       </div>
-      <mat-paginator [pageSizeOptions]="[20, 50, 100]"></mat-paginator>
+      <mat-paginator  
+        [length]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[20, 50, 100]"
+        showFirstLastButtons>ù
+      </mat-paginator>
     </div>
   </mat-card-content>
 </mat-card>

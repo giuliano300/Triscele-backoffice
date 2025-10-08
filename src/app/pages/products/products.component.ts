@@ -27,6 +27,7 @@ import { ProductMovements } from '../../interfaces/productMovements';
 import { MovementsComponent } from '../../movements-dialog/movements-dialog.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatInput } from "@angular/material/input";
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-products',
@@ -46,7 +47,8 @@ import { MatInput } from "@angular/material/input";
     ReactiveFormsModule,
     FormsModule,
     MatSortModule,
-    MatInput
+    MatInput,
+    MatTooltipModule
 ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
@@ -81,6 +83,10 @@ export class ProductsComponent {
   categories: Categories[] = [];
   suppliers: Supplier[] = [];
 
+  totalItems = 0;
+  pageSize = 20;
+  pageIndex = 0;
+
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -100,7 +106,7 @@ export class ProductsComponent {
 
 
   ngOnInit(): void {
-    this.getProducts();
+    //this.getProducts();
      this.supplierService.getSuppliers()
       .subscribe((data: Supplier[]) => {
         this.suppliers = data;
@@ -109,6 +115,22 @@ export class ProductsComponent {
       .subscribe((data: Categories[]) => {
         this.categories = data;
       });
+  }
+
+  ngAfterViewInit() {
+    // Chiamata iniziale
+    this.getProducts();
+
+    // Evento cambio pagina
+    this.paginator.page.subscribe(() => {
+      this.getProducts(
+        this.form.value.categoryId,
+        this.form.value.supplierId,
+        this.form.value.name,
+        this.paginator.pageIndex,
+        this.paginator.pageSize
+      );
+    });
   }
 
   onSubmit(){
@@ -125,22 +147,24 @@ export class ProductsComponent {
     });
   }
 
-  getProducts(categoryId?: string, supplierId?: string, name?: string) {
+  getProducts(categoryId?: string, supplierId?: string, name?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
-    if (categoryId || supplierId || name) {
-      const params = new URLSearchParams();
-      if (categoryId) params.append('categoryId', categoryId);
-      if (supplierId) params.append('supplierId', supplierId);
-      if (name) params.append('name', name);
-      query = `?${params.toString()}`;
-    }
+    const params = new URLSearchParams();
+    params.append('page', (pageIndex + 1).toString()); 
+    params.append('limit', pageSize.toString());
+    if (categoryId) params.append('categoryId', categoryId);
+    if (supplierId) params.append('supplierId', supplierId);
+    if (name) params.append('name', name);
+    query = `?${params.toString()}`;
+
     this.productService.getProducts(query)
-      .subscribe((data: ProductViewModel[]) => {
-        if (!data || data.length === 0) {
-            this.dataSource.data = [];
-            this.dataSource.paginator = this.paginator;        
-        } else {
-          this.Products = data.map(p => ({
+      .subscribe((response: any) => {
+          const data = response.data || [];
+          this.totalItems = response.total;
+          this.pageSize = response.limit;
+          this.pageIndex = response.page - 1;
+
+          this.Products = data.map((p: any) => ({
             ...p,
             action: {
               edit: 'ri-edit-line',
@@ -148,10 +172,9 @@ export class ProductsComponent {
               delete: 'ri-delete-bin-line'
             }
           }));
+
           this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
-          this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-        }
       });
   }
 

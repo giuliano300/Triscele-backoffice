@@ -13,6 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/User.service';
 import { JwtPayloads } from '../../interfaces/JwtPayloads';
+import { OperatorService } from '../../services/Operator.service';
+import { Permission } from '../../interfaces/permissions';
 
 @Component({
     selector: 'app-sign-in',
@@ -31,7 +33,8 @@ export class SignInComponent {
         private router: Router,
         private utilsService: UtilsService,
         private authService: AuthService,
-        private userService: UsersService
+        private userService: UsersService,
+        private operatorService: OperatorService
     ) {
         this.authForm = this.fb.group({
             email: ['', [Validators.required, Validators.email]],
@@ -55,7 +58,54 @@ export class SignInComponent {
             this.userService.login(login).subscribe((data: any) => {
                 if(data == null)
                 {
-                    this.isError = true;
+                    this.operatorService.loginOperator(login).subscribe((data: any) => {
+                        if(data == null)
+                         this.isError = true;
+                        else
+                        {
+                            const o = this.authService.decodeToken(data)!
+                            const login = this.operatorService.setOperatorAfterLogin(o, data);
+                            
+                            this.authService.setIsAdminState(false, true, o!.name!, true);
+
+                            if(login)
+                            {
+                                const l = JSON.parse(localStorage.getItem("permissions") || "[]");
+                                if(!l)
+                                {
+                                    localStorage.removeItem('authToken');
+                                    localStorage.removeItem('user');
+                                    localStorage.removeItem('isLogin');
+                                    localStorage.removeItem('isAdmin');
+                                    localStorage.removeItem('isOperator');
+                                    this.authService.clearRoles();
+                                    this.router.navigate(['/']);
+                                }
+                            
+                                const p: Permission = l[0];
+                                switch(p.permissionName.toUpperCase()){
+                                    case 'CUSTOMERSMODULE':
+                                    this.router.navigate(['/customers']);
+                                    break;
+                                    case 'PRODUCTSMODULE':
+                                    this.router.navigate(['/products']);
+                                    break;
+                                    case 'ORDERSMODULE':
+                                    this.router.navigate(['/orders']);
+                                    break;
+                                    case 'OPERATORSSMODULE':
+                                    this.router.navigate(['/operators']);
+                                    break;
+                                    case 'SUPPLIERSMODULE':
+                                    this.router.navigate(['/suppliers']);
+                                    break;
+                                    default:
+                                    this.router.navigate(['/dashboard']);
+                                    break;
+                                }
+                            }
+                        }
+                    })
                 }
                 else
                 {

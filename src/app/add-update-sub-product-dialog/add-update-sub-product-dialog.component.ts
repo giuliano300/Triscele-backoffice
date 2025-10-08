@@ -1,17 +1,18 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatCardContent, MatCard } from "@angular/material/card";
-import { MatFormField, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
+import { MatFormField, MatFormFieldControl, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 import { FeathericonsModule } from "../icons/feathericons/feathericons.module";
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatOption } from "@angular/material/core";
-import { MatSelect } from '@angular/material/select';
 import { ProductViewModel } from '../classess/productViewModel';
 import { ProductService } from '../services/Product.service';
 import { SubProducts } from '../interfaces/subProducts';
+import { debounceTime, Observable, of, switchMap } from 'rxjs';
+import { MatAutocomplete, MatAutocompleteModule } from "@angular/material/autocomplete";
 
 @Component({
   selector: 'app-update-sub-product-dialog',
@@ -31,7 +32,8 @@ import { SubProducts } from '../interfaces/subProducts';
     CommonModule,
     ReactiveFormsModule,
     MatOption,
-    MatSelect
+    MatAutocomplete,
+    MatAutocompleteModule
 ]
 })
 export class AddUpdateSubProductsDialogComponent {
@@ -46,7 +48,13 @@ export class AddUpdateSubProductsDialogComponent {
 
   products: ProductViewModel[] = [];
 
-  selectedProduct?: ProductViewModel;
+  selectedProduct?: any;
+
+  isAdd: boolean = true;
+
+  productCtrl = new FormControl('');
+  filteredProducts!: Observable<any[]>;
+  
 
   constructor(public dialogRef: MatDialogRef<AddUpdateSubProductsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data:  SubProducts,
@@ -54,42 +62,48 @@ export class AddUpdateSubProductsDialogComponent {
     private productService: ProductService
   ) {
     this.form = this.fb.group({
+      type: [''],
       name: ['', Validators.required],
       quantity: [null, Validators.required],
       price: [null, Validators.required],
       productId: [null, Validators.required]
     });
   }
-
-  getProducts() {
-    this.productService.getProducts()
-      .subscribe((data: ProductViewModel[]) => {
-        if (!data || data.length === 0) 
-            this.onClose();  
-        else
-        {
-          this.products = data;
-          if(this.data)
-            this.selectedProduct = this.products.find(a => a.id == this.data.productId)!;
-        }
-      });
-  }
-  
-  selectProduct(id: any){
-    if(!id)
+  selectProduct(product: any){
+    if(!product)
       return;
 
-    this.selectedProduct = this.products.find(a => a.id == id);
+    this.selectedProduct = product;
+
+    this.displayProduct(product.name);
     this.form.patchValue({
-      name: this.selectedProduct!.name,
+      name: product!.name,
       quantity: 1,
-      price: this.selectedProduct?.price
+      price: product?.price,
+      productId: product!.id
     });
   }
 
+  displayProduct(product: any): string {
+    return product ? product.name : '';
+  }
+
+
   ngOnInit(): void {
-    this.getProducts();
+    
+    this.filteredProducts = this.productCtrl.valueChanges.pipe(
+      debounceTime(300), 
+      switchMap(value => {
+        if (value && value.length >= 2) 
+          return this.productService.getProductsByName(value); 
+        else 
+          return of([]); 
+      })
+    )
+
     if(this.data){
+      this.isAdd = false;
+      this.selectedProduct = this.data;
       this.form.patchValue({
         name: this.data.name,
         quantity: this.data.quantity,
@@ -113,7 +127,7 @@ export class AddUpdateSubProductsDialogComponent {
 
       result.internalCode = this.selectedProduct?.internalCode!;
       result.supplierCode = this.selectedProduct?.supplierCode!;
-      result.supplierName = this.selectedProduct?.supplier?.businessName!;
+      result.supplierName = this.selectedProduct?.supplierName!;
       
       this.dialogRef.close(result);
     }

@@ -12,10 +12,14 @@ import { StatsService } from '../../services/stats.service';
 import { ProductService } from '../../services/Product.service';
 import { ProductViewModel } from '../../classess/productViewModel';
 import { MatSort } from '@angular/material/sort';
+import { AddMovementComponent } from '../../add-movement-dialog/add-movement-dialog.component';
+import { ProductMovements } from '../../interfaces/productMovements';
+import { ProductMovementsService } from '../../services/Product-movements.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule],
+  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, MatTooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -41,12 +45,14 @@ export class DashboardComponent {
       private dialog: MatDialog,
       private statsService: StatsService,
       private productService: ProductService,
+      private productMovementsService: ProductMovementsService,
       @Inject(PLATFORM_ID) private platformId: any) {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
 
     orders: number = 0;
     customers: number = 0;
+    productsEnd: number = 0;
     ordersByMonth: any[] = [];
     y: number = new Date().getFullYear();
 
@@ -59,7 +65,7 @@ export class DashboardComponent {
     this.productService.findLowStock().subscribe((data) => {
         if (!data || data.length === 0) {
             this.dataSource.data = [];
-            this.dataSource.paginator = this.paginator;        
+           this.productsEnd = 0;      
         } 
         else 
         {
@@ -67,6 +73,7 @@ export class DashboardComponent {
           this.dataSource = new MatTableDataSource<ProductViewModel>(this.products);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
+          this.productsEnd = data.length;
         }    
     });
    }
@@ -173,8 +180,9 @@ export class DashboardComponent {
       console.error('Errore nel caricamento del grafico ApexCharts:', error);
     }
   
-}
-   renderChart() {
+  }
+  
+  renderChart() {
     const ctx = document.getElementById('ordersChart') as HTMLCanvasElement;
     if (!ctx) return;
 
@@ -195,5 +203,29 @@ export class DashboardComponent {
     });
   }
 
+  addMovements(item: ProductViewModel){
+    const dialogRef = this.dialog.open(AddMovementComponent, {
+      data: item,
+      width: '500px'
+    });
 
+    dialogRef.afterClosed().subscribe((result: any) => {
+      console.log(result);
+      if (result) {
+        this.productMovementsService.setProductMovements(result)
+          .subscribe((data: ProductMovements) => {
+            if (data) {
+              this.findLowStock();
+            }
+          });
+      } else {
+        console.log("Close");
+      }
+    });
   }
+
+  isTruncated(element: HTMLElement): boolean {
+    return element.scrollWidth > element.clientWidth;
+  }
+
+ }

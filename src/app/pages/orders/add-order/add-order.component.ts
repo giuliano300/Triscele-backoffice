@@ -24,7 +24,7 @@ import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { UtilsService } from '../../../services/utils.service';
 import { OrderProducts } from '../../../interfaces/orderProducts';
-import { map, Observable, startWith } from 'rxjs';
+import { debounceTime, Observable, of, switchMap } from 'rxjs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Customers } from '../../../interfaces/customers';
@@ -228,10 +228,17 @@ orderStatusOptions = [
   }
 
   ngOnInit(): void {
+    
     this.filteredProducts = this.productCtrl.valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value || ''))
+      debounceTime(300), 
+      switchMap(value => {
+        if (value && value.length >= 2) 
+          return this.productService.getProductsByName(value); 
+        else 
+          return of([]); 
+      })
     );
+
     const token = localStorage.getItem('authToken');
     if (!token) {
       this.router.navigate(['/']);
@@ -247,9 +254,10 @@ orderStatusOptions = [
       this.operators = data;
     });
 
-    this.productService.getProducts().subscribe((data: ProductViewModel[]) => {
-      this.products = data;
-    })
+    // carica prodotti
+    //this.productService.findProductsForSelect().subscribe((data: any) => {
+      //this.products = data;
+    //})
 
     this.route.paramMap.subscribe(params => {
       this.id = params.get('id');

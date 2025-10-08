@@ -3,16 +3,22 @@
   <mat-card class="trinta-card mb-10 bg-white border-none d-block">
     <mat-card-content>
       <div class="row g-3"> 
-        <div class="col-sm-12">
+        <div class="col-sm-12" *ngIf="isAdd">
           <label class="label d-block fw-medium mb-10">Prodotto</label>
           <mat-form-field class="w-100">
             <i-feather name="tag"></i-feather>
             <mat-label>Prodotto</mat-label>
-            <mat-select formControlName="productId" (selectionChange)="selectProduct($event.source.value)">
-              <mat-option *ngFor="let m of products" [value]="m.id" >
-                {{ m.name }}
+            <input
+              matInput
+              placeholder="Cerca prodotto"
+              [formControl]="productCtrl"
+              [matAutocomplete]="auto"
+            >
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectProduct($event.option.value)" [displayWith]="displayProduct">
+              <mat-option *ngFor="let p of filteredProducts | async" [value]="p">
+                {{ p.name }}
               </mat-option>
-            </mat-select>
+            </mat-autocomplete>
           </mat-form-field>        
         </div>
         <div class="col-sm-12">
