@@ -94,14 +94,6 @@
             </td>
           </ng-container>
 
-          <!-- Codice interno -->
-          <ng-container matColumnDef="internalCode">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Codice Interno </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
-              <h6 class="mt-0 mb-0">{{element.internalCode}}</h6>
-            </td>
-          </ng-container>
-
           <!-- Prezzo -->
           <ng-container matColumnDef="price">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Prezzo </th>
@@ -131,14 +123,6 @@
             <th mat-header-cell *matHeaderCellDef class="pl-0" mat-sort-header> Giacenza </th>
             <td mat-cell *matCellDef="let element" class="pl-1">
               <h6 class="mt-0 mb-0"><a (click)="addMovements(element)" class="pointer">{{element.stock}}</a></h6>
-            </td>
-          </ng-container>
-
-          <!-- Stato -->
-          <ng-container matColumnDef="enabled">
-            <th mat-header-cell *matHeaderCellDef class="pl-0"> Stato </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
-              <h6 class="mt-0 mb-0">{{element.enabled ? 'Attivo' : 'Disattivo'}}</h6>
             </td>
           </ng-container>
 

@@ -11,6 +11,19 @@
     color: var(--blackColor);
 }
 
+.subtotal-subs{
+    font-weight: 500;
+    font-size: 16px;
+    margin-right: 20px;
+    float: right;
+    border-radius: 10px;
+    padding: 15px 15px 15px 0px;
+    border: 1px solid #f5f7fa;
+    background-color: #f5f7fa;
+    position: relative;
+    color: var(--blackColor);
+}
+
 .sub{
     margin-right: 20px;
 }
@@ -34,6 +47,19 @@
 .grandTotal{
     padding-right: 35px;
 }
+
+.sub-element{
+  font-weight: 500;
+  font-size: 25px;
+}
+
+.center{
+  display: flex;
+  justify-content: center;  
+  align-items: center;    
+  text-align: center;
+  max-height: 56px;
+ }
 
 .material-symbols-outlined{
    position: absolute;

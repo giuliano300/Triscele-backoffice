@@ -164,6 +164,19 @@
           </mat-form-field>
         </div>
 
+        <div class="col-md-12">
+            <h3>Note cliente</h3>
+        </div>
+        
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Note cliente</label>
+          <mat-form-field class="w-100">
+            <i-feather name="file-text"></i-feather>
+            <mat-label>Note cliente</mat-label>
+            <textarea matInput formControlName="customerNote" style="min-height: 200px;"></textarea>
+          </mat-form-field>
+        </div>
+
         <!-- Pulsanti -->
         <div class="col-sm-6 mt-10 text-start">
             <button mat-flat-button class="back" type="submit" (click)="returnBack()">

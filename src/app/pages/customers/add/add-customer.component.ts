@@ -100,6 +100,7 @@ export class AddCustomerComponent {
       province: ['', Validators.required],
       city: [''],
       id: [''],
+      customerNote: []
     });
 
     this.province = utilsService.getProvinceItaliane();
@@ -136,7 +137,8 @@ export class AddCustomerComponent {
               zipCode: data.zipCode,
               province: data.province,
               city: data.city,
-              id: this.id
+              id: this.id,
+              customerNote: data.customerNote
             });
           });
       }

@@ -5,4 +5,6 @@ export interface OrderProducts {
   price: number;
   discount: number;
   total: number;
+  isSubs:boolean;
+  note?:string;
 }

@@ -8,9 +8,12 @@
                     <h5 class="mt-0 mb-5 pl-0">
                         Totale ordini
                     </h5>
-                    <h3>
+                    <h3 *ngIf="loaded">
                         {{orders}}
                     </h3>
+                    <h4 *ngIf="!loaded">
+                        <i class="ri-refresh-line rotate"></i>
+                    </h4>
                 </div>
             </mat-card-content>
         </mat-card>
@@ -23,9 +26,12 @@
                     <h5 class="mt-0 mb-5 pl-0">
                         Totale clienti
                     </h5>
-                    <h3>
+                    <h3 *ngIf="loaded">
                         {{customers}}
                     </h3>
+                    <h4 *ngIf="!loaded">
+                        <i class="ri-refresh-line rotate"></i>
+                    </h4>
                 </div>
             </mat-card-content>
         </mat-card>
@@ -48,7 +54,7 @@
 </div>
 <div class="row">
     <div class="col-xxxl-8">
-        <mat-card class="trinta-card balance-overview-card mb-25 bg-white border-none d-block">
+        <mat-card class="trinta-card balance-overview-card mb-25 bg-white border-none d-block" style="min-height: 500px;">
             <mat-card-header>
                 <mat-card-title>
                     <h5 class="mt-0 mb-15 pl-0">
@@ -57,8 +63,11 @@
                 </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-                <div class="chart">
+                <div class="chart" *ngIf="loaded">
                     <div id="crm_balance_overview_chart"></div>
+                </div>
+                <div class="load-chart" *ngIf="!loaded">
+                     <i class="ri-refresh-line rotate"></i>
                 </div>
             </mat-card-content>
         </mat-card>
@@ -117,7 +126,7 @@
 
                         <tr class="mat-row" *matNoDataRow>
                             <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
-                            Nessun prodotto inserito
+                            Nessun prodotto in esaurimento
                             </td>
                         </tr>
                         </table>

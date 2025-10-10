@@ -62,12 +62,10 @@ export class ProductsComponent {
     'category',
     'supplier',
     'supplierCode',
-    'internalCode',
     'price',
     'cost',
     'theshold',
     'stock',
-    'enabled',
     'edit',
     'movements',
     'delete'

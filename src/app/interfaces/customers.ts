@@ -14,4 +14,5 @@ export interface Customers {
   zipCode: string;
   province: string;
   city: string;
+  customerNote?: string;
 }

@@ -365,6 +365,11 @@
         font-size: 36px!important;
         color: var(--primaryColor);               
     }
+    h4{
+        margin:15px 0 5px!important;
+        font-size: 26px!important;
+        color: var(--primaryColor);               
+    }
     h5{
         margin:0px 0 5px!important;
         font-size: 14px!important;
@@ -388,5 +393,27 @@ h5{
 .card-alert{
     .big-icons, h3{
         color: var(--dangerColor)!important;
+    }
+}
+
+.ri-refresh-line.rotate {
+  display: inline-block;       
+  transform-origin: 50% 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.load-chart{
+    width: 100%;
+    text-align: center;
+    i{
+        margin: 110px auto;
+        font-size: 36px!important;
+        color: var(--primaryColor);    
+        font-weight: 400;           
     }
 }

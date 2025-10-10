@@ -30,6 +30,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Customers } from '../../../interfaces/customers';
 import { Order } from '../../../interfaces/orders';
 import { OrderService } from '../../../services/Order.service';
+import { SectorService } from '../../../services/Sector.service';
 
 registerLocaleData(localeIt);
 
@@ -90,19 +91,21 @@ export class AddOrderComponent {
 
   customers: any[] = [];
   operators: any[] = [];
+  sectors: any[] = [];
 
-orderStatusOptions = [
-  { value: OrderStatus.COMPLETATO, label: 'Completato' },
-  { value: OrderStatus.IN_LAVORAZIONE, label: 'In lavorazione' },
-  { value: OrderStatus.RIMBORSATO, label: 'Rimborsato' },
-  { value: OrderStatus.IN_SOSPESO, label: 'In sospeso' },
-  { value: OrderStatus.CANCELLATO, label: 'Cancellato' },
-  { value: OrderStatus.FALLITO, label: 'Fallito' },
-  { value: OrderStatus.SPEDITO, label: 'Spedito' },
-  { value: OrderStatus.CONSEGNATO, label: 'Consegnato' },
-  { value: OrderStatus.COMPLETATO_DUPLICATO, label: 'Completato duplicato' },
-  { value: OrderStatus.IN_CONSEGNA, label: 'In consegna' }
-];
+  orderStatusOptions = [
+    { value: OrderStatus.COMPLETATO, label: 'Completato' },
+    { value: OrderStatus.IN_LAVORAZIONE, label: 'In lavorazione' },
+    { value: OrderStatus.RIMBORSATO, label: 'Rimborsato' },
+    { value: OrderStatus.IN_SOSPESO, label: 'In sospeso' },
+    { value: OrderStatus.CANCELLATO, label: 'Cancellato' },
+    { value: OrderStatus.FALLITO, label: 'Fallito' },
+    { value: OrderStatus.SPEDITO, label: 'Spedito' },
+    { value: OrderStatus.CONSEGNATO, label: 'Consegnato' },
+    { value: OrderStatus.COMPLETATO_DUPLICATO, label: 'Completato duplicato' },
+    { value: OrderStatus.IN_CONSEGNA, label: 'In consegna' },
+    { value: OrderStatus.PREVENTIVO, label: 'Preventivo' }
+  ];
 
   paymentMethods = Object.values(PaymentMethod);
  
@@ -124,15 +127,17 @@ orderStatusOptions = [
     private operatorService: OperatorService,
     private adapter: DateAdapter<any>,
     private utilsService: UtilsService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private sectorService: SectorService
   ) {
     this.adapter.setLocale('it-IT');
     this.productForm = this.fb.group({
       customerId: ['', Validators.required],
       operatorId: ['', Validators.required],
+      sectorId: [''],
       agent: ['', Validators.required],
       paymentMethod: ['', Validators.required],
-      status: ['', Validators.required],
+      status: [OrderStatus.PREVENTIVO, Validators.required],
       insertDate: ['', Validators.required],
       expectedDelivery: ['', Validators.required],
       shippingAddress: ['', Validators.required],
@@ -144,6 +149,7 @@ orderStatusOptions = [
       shippingEmail: ['', Validators.required],
       shippingProvince: ['', Validators.required],
       shippingCity: ['', Validators.required],
+      customerNote: [],
       note: [''],
       productIds: [''],
       products: this.fb.array([])
@@ -197,10 +203,14 @@ orderStatusOptions = [
 
   get grandTotal(): number {
     return this.productsForm.controls.reduce((acc, ctrl) => {
-      const price = ctrl.get('price')?.value || 0;
-      const qty = ctrl.get('quantity')?.value || 0;
-      const discount = ctrl.get('discount')?.value || 0;
-      return acc + (price * qty - discount);
+      const isSubs = ctrl.get('isSubs')?.value;
+      if (!isSubs) {
+        const price = ctrl.get('price')?.value || 0;
+        const qty = ctrl.get('quantity')?.value || 0;
+        const discount = ctrl.get('discount')?.value || 0;
+        return acc + (price * qty - discount);
+      }
+      return acc; // se isSubs è true, non aggiungere al totale
     }, 0);
   }
 
@@ -245,8 +255,13 @@ orderStatusOptions = [
     }
 
     // carica clienti
-    this.customerService.getCustomers().subscribe((data: any[]) => {
+    this.customerService.getCustomers('').subscribe((data: any[]) => {
       this.customers = data;
+    });
+
+    // carica settori
+    this.sectorService.getSectors().subscribe((data: any[]) => {
+      this.sectors = data;
     });
 
     // carica operatori
@@ -274,6 +289,7 @@ orderStatusOptions = [
             this.productForm.patchValue({
               customerId: data.customerId._id.toString(),
               operatorId: data.operatorId._id!.toString(),
+              sectorId: data.sectorId?._id!.toString(),
               agent: data.agent,
               paymentMethod: data.paymentMethod,
               status: data.status,
@@ -288,7 +304,8 @@ orderStatusOptions = [
               shippingEmail: data.shippingEmail,
               shippingProvince: data.shippingProvince,
               shippingCity: data.shippingCity,
-              note: data.note
+              note: data.note,
+              customerNote: data.customerNote
             });
             data.orderProducts.forEach(product => {
               const group = this.fb.group({
@@ -298,7 +315,9 @@ orderStatusOptions = [
                 price: [product.price],
                 discount: [product.discount || 0],
                 discountPercentage: [0],
-                total: [product.total]
+                total: [product.total],
+                isSubs: [product.isSubs],
+                note: [product.note]
               });
 
               group.get('discountPercentage')!.setValue(
@@ -323,7 +342,8 @@ orderStatusOptions = [
         price: [product.price],
         discount: [0],
         total: [product.price],
-        discountPercentage: [0]
+        discountPercentage: [0],
+        isSubs: false
       });
       this.productsForm.push(group);
       if(product.subProducts){
@@ -336,7 +356,8 @@ orderStatusOptions = [
               price: [product.subProducts[i].price],
               discount: [0],
               total: [product.subProducts[i].price * product.subProducts[i].quantity],
-              discountPercentage: [0]
+              discountPercentage: [0],
+              isSubs: true 
             });
             this.productsForm.push(group);
         }
@@ -368,8 +389,9 @@ orderStatusOptions = [
     shippingTelephone: c.mobile,
     shippingEmail: c.email,
     shippingProvince: c.province,
-    shippingCity: c.city
-  });
+    shippingCity: c.city,
+    customerNote: c.customerNote
+  })
  }
 
   onSubmit() {
@@ -392,7 +414,7 @@ orderStatusOptions = [
       formData.origin = "1";
       formData.orderProducts = this.productsForm.value;
 
-      formData.totalPrice = formData.orderProducts
+      formData.totalPrice = formData.orderProducts.filter(p => !p.isSubs)
         .map(p => (p.price * p.quantity) - (p.discount || 0))
         .reduce((acc, curr) => acc + curr, 0);
 

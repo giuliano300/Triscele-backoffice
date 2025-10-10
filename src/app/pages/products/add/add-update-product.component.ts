@@ -68,7 +68,7 @@ export class AddProductComponent {
 
   dataSource = new MatTableDataSource<SubProducts>(this.subProducts);
 
-  displayedColumns: string[] = ['name', 'suuplierName', 'supplierCode', 'internalCode', 'price', 'quantity', 'edit', 'delete'];
+  displayedColumns: string[] = ['name', 'suuplierName', 'supplierCode', 'price', 'quantity', 'edit', 'delete'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -108,7 +108,6 @@ export class AddProductComponent {
   ) {
     this.productForm = this.fb.group({
       name: ['', Validators.required],
-      internalCode: ['', Validators.required],
       categoryId: ['', Validators.required],
       theshold: ['', Validators.required],
       price: ['', Validators.required],
@@ -120,10 +119,7 @@ export class AddProductComponent {
       supplierId: ['', Validators.required],
       description: [''],
       files: [[]],
-      amazonCode: [''],
-      ebayCode: [''],
-      wcCode: [''],
-      manomanoCode: [''],
+      purchasePackage: ['']
     });
   }
 
@@ -153,7 +149,6 @@ export class AddProductComponent {
           .subscribe((data: ProductViewModel) => {
             this.productForm.patchValue({
               name: data.name,
-              internalCode: data.internalCode,
               categoryId: data.categoryId,
               theshold: data.theshold,
               price: data.price,
@@ -164,10 +159,7 @@ export class AddProductComponent {
               supplierId: data.supplierId,
               description: data.description,
               files: data.files || [],
-              amazonCode: data.amazonCode,
-              ebayCode: data.ebayCode,
-              wcCode: data.wcCode,
-              manomanoCode: data.manomanoCode,
+              purchasePackage: data.purchasePackage,
               stock: data.stock
             });
 
@@ -266,6 +258,9 @@ export class AddProductComponent {
 
       formData.files = this.uploadedFiles;
       formData.subProducts = this.subProducts;
+      formData.enabled = true;
+
+      //console.log(JSON.stringify(formData));
 
       if (this.id) {
         formData._id = this.id;

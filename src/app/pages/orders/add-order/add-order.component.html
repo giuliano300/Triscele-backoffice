@@ -13,7 +13,7 @@
        <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Cliente</label>
           <mat-form-field class="w-100">
-            <i-feather name="users"></i-feather>
+            <i-feather name="user"></i-feather>
             <mat-label>Seleziona un cliente</mat-label>
             <mat-select formControlName="customerId">
               <mat-option *ngFor="let c of customers" [value]="c._id" (onSelectionChange)="setShippingValues(c)">
@@ -24,9 +24,22 @@
        </div>
 
        <div class="col-sm-4">
+          <label class="label d-block fw-medium mb-10">Settore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="flag"></i-feather>
+            <mat-label>Seleziona un settore</mat-label>
+            <mat-select formControlName="sectorId">
+              <mat-option *ngFor="let c of sectors" [value]="c._id">
+                {{ c.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+       </div>
+
+       <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Operatore</label>
           <mat-form-field class="w-100">
-            <i-feather name="users"></i-feather>
+            <i-feather name="user"></i-feather>
             <mat-label>Seleziona un operatore</mat-label>
             <mat-select formControlName="operatorId">
               <mat-option *ngFor="let o of operators" [value]="o._id">
@@ -39,7 +52,7 @@
        <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Agente</label>
           <mat-form-field class="w-100">
-            <i-feather name="users"></i-feather>
+            <i-feather name="user"></i-feather>
             <mat-label>Seleziona un agente</mat-label>
             <mat-select formControlName="agent">
               <mat-option *ngFor="let a of agents" [value]="a.id">
@@ -87,7 +100,7 @@
        <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Tipo pagamento</label>
           <mat-form-field class="w-100">
-            <i-feather name="command"></i-feather>
+            <i-feather name="credit-card"></i-feather>
             <mat-label>Seleziona un tipo di pagamento</mat-label>
             <mat-select formControlName="paymentMethod">
               <mat-option *ngFor="let method of paymentMethods" [value]="method">
@@ -96,6 +109,15 @@
             </mat-select>
           </mat-form-field>        
        </div>
+
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Note</label>
+          <mat-form-field class="w-100">
+            <i-feather name="file-text"></i-feather>
+            <mat-label>Note</mat-label>
+            <textarea matInput formControlName="note" style="min-height: 200px;"></textarea>
+          </mat-form-field>
+        </div>
 
       </div>
     </mat-card-content>
@@ -196,11 +218,11 @@
         </div>
           
         <div class="col-sm-12">
-          <label class="label d-block fw-medium mb-10">Note</label>
+          <label class="label d-block fw-medium mb-10">Note cliente</label>
           <mat-form-field class="w-100">
             <i-feather name="file-text"></i-feather>
-            <mat-label>Note</mat-label>
-            <textarea matInput formControlName="note" style="min-height: 200px;"></textarea>
+            <mat-label>Note cliente</mat-label>
+            <textarea matInput formControlName="customerNote" style="min-height: 200px;"></textarea>
           </mat-form-field>
         </div>
       
@@ -239,7 +261,8 @@
     <div formArrayName="products">
       <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
         
-        <div class="col-sm-3">
+        <div class="col-sm-1 center" *ngIf="group.get('isSubs')!.value === true"> <span class="sub-element"> - </span></div>
+        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-2' : 'col-sm-3'">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Nome del prodotto</label>
           <mat-form-field class="w-100">
             <i-feather name="tag"></i-feather>
@@ -252,7 +275,7 @@
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Quantità</label>
           <mat-form-field class="w-100">
             <i-feather name="layers"></i-feather>
-            <input matInput formControlName="quantity" type="number">
+            <input matInput formControlName="quantity" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
 
@@ -263,7 +286,7 @@
               euro
             </span>
             <mat-label>Prezzo</mat-label>
-            <input matInput formControlName="price" type="number">
+            <input matInput formControlName="price" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
 
@@ -274,7 +297,7 @@
               euro
             </span>
             <mat-label>Sconto</mat-label>
-            <input matInput formControlName="discount" type="number">
+            <input matInput formControlName="discount" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
 
@@ -283,13 +306,18 @@
           <mat-form-field class="w-100">
             <i-feather name="percent"></i-feather>
             <mat-label>Sconto %</mat-label>
-            <input matInput formControlName="discountPercentage" type="number">
+            <input matInput formControlName="discountPercentage" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
 
         <div class="col-sm-2">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10 text-end sub">Subtotale</label>
-          <span class="subtotal">
+          <span class="subtotal-subs" *ngIf="group.get('isSubs')!.value === true">
+            <span class="delete" (click)="removeThis(i)">
+              <i class="ri-delete-bin-line"></i>
+            </span>
+          </span>
+          <span class="subtotal" *ngIf="group.get('isSubs')!.value === false">
             <span class="material-symbols-outlined">
               euro
             </span>

@@ -7,7 +7,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, NgIf } from '@angular/common';
 import { StatsService } from '../../services/stats.service';
 import { ProductService } from '../../services/Product.service';
 import { ProductViewModel } from '../../classess/productViewModel';
@@ -19,7 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, MatTooltipModule],
+  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, MatTooltipModule, NgIf],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -56,6 +56,8 @@ export class DashboardComponent {
     ordersByMonth: any[] = [];
     y: number = new Date().getFullYear();
 
+    loaded: boolean = false;
+
    ngOnInit(): void {
     this.loadStats();
     this.findLowStock();
@@ -80,9 +82,10 @@ export class DashboardComponent {
 
    loadStats() {
     this.statsService.getStats(this.y).subscribe((data) => {
-      this.orders = data.totalOrders;
-      this.customers = data.totalCustomers;
+      this.orders = data.totalOrders.toLocaleString('it-IT');
+      this.customers = data.totalCustomers.toLocaleString('it-IT');
       this.ordersByMonth = data.ordersByMonth;
+      this.loaded = true;
       this.loadChart();
     });
    }

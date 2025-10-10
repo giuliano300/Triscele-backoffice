@@ -3,7 +3,6 @@ import { SubProducts } from "./subProducts";
 export interface Product {
   _id?: string; 
   name: string;
-  internalCode: string;
   categoryId: string;
   theshold: number;
   price: number;
@@ -16,8 +15,5 @@ export interface Product {
   description?: string;
   files?: any[];
   subProducts?: SubProducts[];
-  amazonCode?: string;
-  ebayCode?: string;
-  wcCode?: string;
-  manomanoCode?: string;
+  purchasePackage?: string;
 }

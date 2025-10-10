@@ -25,6 +25,7 @@ import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Operators } from '../../interfaces/operators';
 import { OperatorService } from '../../services/Operator.service';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 registerLocaleData(localeIt);
 
@@ -62,7 +63,8 @@ export const MY_DATE_FORMATS = {
     MatDatepickerToggle,
     MatDatepickerModule,
     MatInputModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatProgressBarModule 
 ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.scss',
@@ -96,6 +98,8 @@ export class OrdersComponent {
 
   IsOperatorView: boolean = false;
 
+  firstLoading: boolean = false;
+
   totalItems = 0;
   pageSize = 20;
   pageIndex = 0;
@@ -121,6 +125,7 @@ export class OrdersComponent {
     5: 'Cancellato',
     6: 'Fallito',
     10: 'Spedito',
+    11: 'Preventivo',
     14: 'Consegnato',
     15: 'Completato duplicato',
     16: 'In consegna'
@@ -204,6 +209,8 @@ export class OrdersComponent {
 
   getOrders(customerId?: string, operatorId?: string, status?: number, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
+    this.firstLoading = true;
+
     if(this.IsOperatorView)
     {
       const o = JSON.parse(localStorage.getItem("operator") || "{}");
@@ -238,6 +245,7 @@ export class OrdersComponent {
 
           this.dataSource = new MatTableDataSource<Order>(this.orders);
           this.dataSource.sort = this.sort;
+           this.firstLoading = false;
       });
   }
 
