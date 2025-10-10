@@ -14,10 +14,32 @@ import { AuthService } from '../../services/auth.service';
 import { Permission } from '../../interfaces/permissions';
 import { CommonModule } from '@angular/common';
 import { Login } from '../../interfaces/Login';
+import { FeathericonsModule } from '../../icons/feathericons/feathericons.module';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { Sectors } from '../../interfaces/sectors';
+import { SectorService } from '../../services/Sector.service';
 
 @Component({
   selector: 'app-operators',
-  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, CommonModule],
+  imports: [
+    MatCardModule, 
+    MatButtonModule, 
+    MatMenuModule, 
+    MatPaginatorModule, 
+    MatTableModule, 
+    MatCheckboxModule, 
+    FeathericonsModule, 
+    MatFormField, 
+    MatLabel,
+    CommonModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatSelect,
+    MatSelectModule
+  ],
   templateUrl: './operators.component.html',
   styleUrl: './operators.component.scss'
 })
@@ -25,22 +47,32 @@ export class OperatorsComponent {
 
   Operators: Operators[] = [];
 
-  displayedColumns: string[] = ['businessName', 'fiscalCode', 'email', 'mobile', 'status', 'edit', 'delete'];
+  displayedColumns: string[] = ['sectorId', 'businessName', 'fiscalCode', 'email', 'mobile', 'status', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Operators>(this.Operators);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   isAdmin:boolean = true;
+
+  form!: FormGroup;
+
+  sectors: any[] = [];
   
   constructor(
+      private fb: FormBuilder,
       private router: Router,
       private operatorService: OperatorService,
       private dialog: MatDialog,
-      private authService: AuthService
+      private authService: AuthService,
+      private sectorService: SectorService
   ) {}
 
   ngOnInit(): void {
+    this.form = this.fb.group({
+      sectorId: []
+    });
+
     this.getOperators();
     const o = localStorage.getItem("operator");
     if(o)
@@ -50,10 +82,15 @@ export class OperatorsComponent {
       const i = this.displayedColumns.length - 1;
       this.displayedColumns.splice(i, 0, 'login');
     }
+
+    this.sectorService.getSectors()
+        .subscribe((data: Sectors[]) => {
+          this.sectors = data;
+    })
   }
 
-  getOperators(){
-    this.operatorService.getOperators()
+  getOperators(sectorId?: string){
+    this.operatorService.getOperators(sectorId)
     .subscribe((data: Operators[]) => {
       if (!data || data.length === 0) {
         console.log('Nessun dato disponibile');
@@ -74,6 +111,17 @@ export class OperatorsComponent {
     });
   }
 
+  onSubmit(){
+    const sectorId = this.form.value.sectorId;
+    this.getOperators(sectorId);
+  }
+
+  remove(){
+    this.form.patchValue({
+      sectorId: []
+    });
+    this.getOperators('');
+  }
 
   DeleteItem(item:Operators){
 

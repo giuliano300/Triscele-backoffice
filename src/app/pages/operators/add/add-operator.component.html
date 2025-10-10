@@ -14,6 +14,18 @@
                 </ng-template>
                 <div class="row g-3 mt-20" [formGroupName]="'personalData'"> 
                   <div class="col-sm-6">
+                    <label class="label d-block fw-medium mb-10">Settore</label>
+                    <mat-form-field class="w-100">
+                      <i-feather name="credit-card"></i-feather>
+                      <mat-label>Settore</mat-label>
+                      <mat-select formControlName="sectorId">
+                        <mat-option *ngFor="let o of sectors" [value]="o._id">
+                          {{ o.name }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-sm-6">
                     <label class="label d-block fw-medium mb-10"> Ragione sociale </label>
                     <mat-form-field class="w-100">
                       <i-feather name="briefcase"></i-feather>

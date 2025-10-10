@@ -104,6 +104,29 @@
                         </ul>
                     </mat-expansion-panel>
 
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleSectors">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <i-feather name="credit-card"></i-feather>
+                                <span class="title">
+                                    Settore
+                                </span>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <ul class="sidebar-sub-menu">
+                            <li class="sidemenu-item">
+                                <a routerLink="/sectors" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                    Vedi tutti
+                                </a>
+                            </li>
+                            <li class="sidemenu-item">
+                                <a routerLink="/sectors/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                    Aggiungi
+                                </a>
+                            </li>
+                        </ul>
+                    </mat-expansion-panel>
+
                     <span class="sub-title text-body sbs" *ngIf="isVisibleProductions">
                         PRODUTTIVITA'
                     </span>

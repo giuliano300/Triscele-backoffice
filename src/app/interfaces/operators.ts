@@ -16,4 +16,5 @@ export interface Operators {
   province: string;
   city: string;
   pwd: string;
+  sectorId: string;
 }

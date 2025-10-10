@@ -315,35 +315,3 @@
 /* Min width 1600px */
 @media only screen and (min-width: 1600px) {}
 
-.filter {
-    width: 100%;
-    height: auto;
-    display: block;
-    min-width: auto;
-    margin-top: 0px;
-    border-radius: 6px;
-    padding: 18px 25px;
-    color: var(--whiteColor)!important;
-    background-color: var(--primaryColor);
-    font-size: 14px;
-    font-weight: 400;
-    font-family: var(--headingFontFamily);
-    border: none;
-    cursor: pointer;
-}
-
-.remove {
-    width: 100%;
-    height: auto;
-    display: block;
-    min-width: auto;
-    margin-top: 0px;
-    border-radius: 6px;
-    padding: 18px 25px;
-    color: var(--whiteColor)!important;
-    background-color: var(--dangerColor);
-    font-size: 14px;
-    font-weight: 400;
-    font-family: var(--headingFontFamily);
-}
-

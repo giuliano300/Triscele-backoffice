@@ -16,12 +16,15 @@ export class OperatorService {
     
     constructor(private http: HttpClient, private authService: AuthService) {}
 
-    getOperators(): Observable<Operators[]>{
+    getOperators(sectorId?: string): Observable<Operators[]>{
       const token = localStorage.getItem('authToken'); 
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });      
-      return this.http.get<Operators[]>(this.apiUrl, { headers });
+        let query = "";
+        if(sectorId)
+          query = "?sectorId=" + sectorId;
+      return this.http.get<Operators[]>(this.apiUrl + query, { headers });
     }
 
     getOperator(id: string): Observable<Operators>{

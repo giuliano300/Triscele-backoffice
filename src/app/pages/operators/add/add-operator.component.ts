@@ -22,6 +22,9 @@ import { codiceFiscaleValidator } from '../../../validators/fiscalCode.validator
 import { Permission } from '../../../interfaces/permissions';
 import { PermissionService } from '../../../services/Permission.service';
 import { MatCheckbox } from "@angular/material/checkbox";
+import { Sectors } from '../../../interfaces/sectors';
+import { SectorService } from '../../../services/Sector.service';
+import { data } from 'jquery';
 
 registerLocaleData(localeIt);
 
@@ -80,6 +83,8 @@ export class AddOperatorComponent {
 
   permissions: Permission[] = [];
 
+  sectors: Sectors[] = [];
+
   constructor(
       private router: Router,
       private OperatorService: OperatorService,
@@ -87,7 +92,8 @@ export class AddOperatorComponent {
       private route: ActivatedRoute,
       private adapter: DateAdapter<any>,
       private utilsService: UtilsService,
-      private permissionService: PermissionService
+      private permissionService: PermissionService,
+      private sectorService: SectorService
   ) 
   {
     this.adapter.setLocale('it-IT');
@@ -99,7 +105,8 @@ export class AddOperatorComponent {
           lastName: [''],
           birthDate: [''],
           mobile: [''],
-          status: [null, Validators.required]
+          status: [null, Validators.required],
+          sectorId: [null, Validators.required]
         }),
         accessData: this.fb.group({
           email: ['', [Validators.required, Validators.email]],
@@ -145,7 +152,8 @@ export class AddOperatorComponent {
               birthDate: data.birthDate,
               mobile: data.mobile,
               status: Number(data.status),
-              fiscalCode: data.fiscalCode
+              fiscalCode: data.fiscalCode,
+              sectorId: data.sectorId
             },
             accessData: {
               email: data.email,
@@ -168,6 +176,10 @@ export class AddOperatorComponent {
       this.permissionService.getPermissions()
           .subscribe((data:Permission[]) => {
             this.permissions = data;
+          })
+      this.sectorService.getSectors()
+          .subscribe((data: Sectors[]) => {
+            this.sectors = data;
           })
     });
 
@@ -205,7 +217,7 @@ export class AddOperatorComponent {
         province: formData.addressData.province,
         city: formData.addressData.city,
         address: formData.addressData.address,
-
+        sectorId: formData.personalData.sectorId
       };
 
       if(this.id)

@@ -22,6 +22,7 @@ export class SidebarComponent {
     isVisibleProductions: boolean = true;
     isVisibleProducts: boolean = true;
     isVisibleOrders: boolean = true;
+    isVisibleSectors: boolean = true;
     
 
     constructor(
@@ -65,6 +66,7 @@ export class SidebarComponent {
                         {
                             this.isOperator = true;
                             this.isAdmin = false;
+                            this.isVisibleSectors = false;
 
                             if(!this.isOperator)
                                 this.logout();
