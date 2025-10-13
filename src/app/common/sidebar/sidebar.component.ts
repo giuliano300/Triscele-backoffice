@@ -47,72 +47,99 @@ export class SidebarComponent {
     isAdmin = true;
 
     ngOnInit() {
+       this.authService.operatorState$.subscribe(state => {
+            const savedState = this.getLocal('persistentState');
 
-        this.authService.operatorState$.subscribe(state => {
-            if (state) {
-                if(state.isAdmin){
-                    this.isVisibleDashboard = true;
-                    this.isVisibleCustomers = true;
-                    this.isVisibleOperators = true;
-                    this.isVisibleSuppliers = true;
-                    this.isVisibleUsers = true;
-                    this.isVisibleProductions = true;
-                    this.isVisibleProducts = true;
-                    this.isVisibleOrders = true;
-                }
-                if(state.isOperator){
-                    this.authService.operator$.subscribe(op => {
-                        if(op)
-                        {
-                            this.isOperator = true;
-                            this.isAdmin = false;
-                            this.isVisibleSectors = false;
-
-                            if(!this.isOperator)
-                                this.logout();
-
-                            this.isVisibleDashboard = false;
-                            
-                            const l = op.permission;
-
-                            const hasCustomersModule = l.some((p: any) => p.permissionName === "CustomersModule");        
-                            const hasOperatorsModule = l.some((p: any) => p.permissionName === "OperatorsModule");        
-                            const hasSuppliersModule = l.some((p: any) => p.permissionName === "SuppliersModule");        
-                            const hasProductsModule = l.some((p: any) => p.permissionName === "ProductsModule");        
-                            const hasOrdersModule = l.some((p: any) => p.permissionName === "OrdersModule");        
-
-                            if(!hasCustomersModule)
-                                this.isVisibleCustomers = false;
-
-                            if(!hasOperatorsModule)
-                                this.isVisibleOperators = false;
-
-                            if(!hasSuppliersModule)
-                                this.isVisibleSuppliers = false;
-
-                            if(!hasProductsModule)
-                                this.isVisibleProducts = false;
-
-                            if(!hasOrdersModule)
-                                this.isVisibleOrders = false;
-
-                            if(!hasCustomersModule && !hasOperatorsModule && !hasSuppliersModule)
-                                this.isVisibleUsers = false;
-
-                            if(!hasProductsModule && !hasOrdersModule)
-                                this.isVisibleProductions = false;
-                                
-                        }
-
-                    })
-                }
+            // Usa lo stato salvato se non esiste ancora in memoria
+            if (!state && savedState) {
+            state = savedState;
             }
-        });
 
+            if (!state) return;
+
+            if (state.isAdmin) {
+            this.setAdminVisibility();
+            localStorage.removeItem('persistentState');
+            } else {
+            this.saveLocal('persistentState', state);
+            }
+
+            if (!state.isOperator) return;
+
+            this.authService.operator$.subscribe(operator => {
+            const savedPerms = this.getLocal('persistentPermissions');
+
+            // Se non c'è operator ma esistono permessi persistenti, li riutilizza
+            if (!operator && savedPerms) {
+                operator = { permission: savedPerms };
+            }
+
+            if (!operator) {
+                localStorage.removeItem('persistentPermissions');
+                return;
+            }
+
+            this.isOperator = true;
+            this.isAdmin = false;
+            this.isVisibleSectors = false;
+            this.isVisibleDashboard = false;
+
+            const permissions = operator.permission || [];
+            this.saveLocal('persistentPermissions', permissions);
+
+            this.applyPermissions(permissions);
+            });
+        });
+    }
+
+    /** Applica la visibilità dei moduli in base ai permessi */
+    private applyPermissions(perms: any[]) {
+        const has = (perm: string) => perms.some(p => p.permissionName === perm);
+
+        this.isVisibleCustomers = has("CustomersModule");
+        this.isVisibleOperators = has("OperatorsModule");
+        this.isVisibleSuppliers = has("SuppliersModule");
+        this.isVisibleProducts = has("ProductsModule");
+        this.isVisibleOrders = has("OrdersModule");
+
+        this.isVisibleUsers = this.isVisibleCustomers || this.isVisibleOperators || this.isVisibleSuppliers;
+        this.isVisibleProductions = this.isVisibleProducts || this.isVisibleOrders;
+    }
+
+    /** Set visibilità completa per admin */
+    private setAdminVisibility() {
+        this.isAdmin = true;
+        this.isOperator = false;
+
+        this.isVisibleDashboard = true;
+        this.isVisibleCustomers = true;
+        this.isVisibleOperators = true;
+        this.isVisibleSuppliers = true;
+        this.isVisibleUsers = true;
+        this.isVisibleProductions = true;
+        this.isVisibleProducts = true;
+        this.isVisibleOrders = true;
+    }
+
+    /** Utility per leggere/scrivere su localStorage */
+    private getLocal(key: string): any | null {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+    } catch {
+        return null;
+    }
+    }
+
+    private saveLocal(key: string, data: any): void {
+        localStorage.setItem(key, JSON.stringify(data));
     }
 
     logout(){
         localStorage.removeItem('authToken');
+        localStorage.removeItem('persistentState');
+        localStorage.removeItem('persistentPermissions');
+        localStorage.removeItem('permissions');
         localStorage.removeItem('user');
         localStorage.removeItem('operator');
         localStorage.removeItem('isLogin');

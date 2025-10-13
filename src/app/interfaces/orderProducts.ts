@@ -4,7 +4,9 @@ export interface OrderProducts {
   quantity: number;
   price: number;
   discount: number;
+  discountPercentage: number;
   total: number;
   isSubs:boolean;
   note?:string;
+  parentId?:string;
 }

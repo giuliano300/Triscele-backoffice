@@ -7,7 +7,7 @@ import { Sectors } from './sectors';
 export interface Order {
   _id?: string; 
   customerId: Customers;
-  operatorId: Operators;
+  operatorId?: Operators;
   sectorId?: Sectors;
   status: OrderStatus;
   insertDate: string;

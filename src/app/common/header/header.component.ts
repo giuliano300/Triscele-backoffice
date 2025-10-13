@@ -53,6 +53,9 @@ export class HeaderComponent {
 
     ngOnInit(){
         this.authService.operatorState$.subscribe(state => {
+            const s = localStorage.getItem('persistentState') ? JSON.parse(localStorage.getItem('persistentState')?.toString()!) : null;
+            if(s)
+                state = s;
             if(state?.loginOperator)
                 this.back = false;
             else if(state?.isOperator)
@@ -78,6 +81,8 @@ export class HeaderComponent {
         localStorage.setItem('user', JSON.stringify(user!));
 
         localStorage.removeItem('operator');
+        localStorage.removeItem('state');
+        localStorage.removeItem('permissions');
         
         this.authService.setIsAdminState(true, false, user!.name!);
 

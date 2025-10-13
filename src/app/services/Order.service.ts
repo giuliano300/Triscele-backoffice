@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { API_URL } from '../../main';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Operators } from '../interfaces/operators';
 import { Order } from '../interfaces/orders';
 
 @Injectable({

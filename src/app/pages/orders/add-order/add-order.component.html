@@ -29,7 +29,7 @@
             <i-feather name="flag"></i-feather>
             <mat-label>Seleziona un settore</mat-label>
             <mat-select formControlName="sectorId">
-              <mat-option *ngFor="let c of sectors" [value]="c._id">
+              <mat-option *ngFor="let c of sectors" [value]="c._id" (onSelectionChange)="selectOperators(c)">
                 {{ c.name }}
               </mat-option>
             </mat-select>
@@ -42,6 +42,7 @@
             <i-feather name="user"></i-feather>
             <mat-label>Seleziona un operatore</mat-label>
             <mat-select formControlName="operatorId">
+              <mat-option [value]="null">Nessun operatore</mat-option>
               <mat-option *ngFor="let o of operators" [value]="o._id">
                 {{ o.businessName }}
               </mat-option>
@@ -130,7 +131,7 @@
   <mat-card class="trinta-card mb-10 bg-white border-none d-block">
     <mat-card-content>
       <div class="row g-3">
-                <div class="col-sm-4">
+        <div class="col-sm-4">
           <label class="label d-block fw-medium mb-10">Nome</label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
@@ -261,25 +262,27 @@
     <div formArrayName="products">
       <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
         
-        <div class="col-sm-1 center" *ngIf="group.get('isSubs')!.value === true"> <span class="sub-element"> - </span></div>
-        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-2' : 'col-sm-3'">
+        <div class="col-sm-1 center" *ngIf="group.get('isSubs')!.value === true"> <span class="sub-element"> <i class="ri-corner-down-right-line"></i> </span></div>
+        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-5' : 'col-sm-3'">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Nome del prodotto</label>
           <mat-form-field class="w-100">
             <i-feather name="tag"></i-feather>
-            <mat-label>Nome del prodotto</mat-label>
+            <mat-label *ngIf="group.get('isSubs')!.value === false">Nome del prodotto</mat-label>
+            <mat-label *ngIf="group.get('isSubs')!.value === true">Nome del sotto prodotto</mat-label>
             <input matInput formControlName="name">
           </mat-form-field>
         </div>
 
-        <div class="col-sm-1">
+        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-2' : 'col-sm-1'">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Quantità</label>
           <mat-form-field class="w-100">
             <i-feather name="layers"></i-feather>
+            <mat-label *ngIf="group.get('isSubs')!.value === true">Quantità</mat-label>
             <input matInput formControlName="quantity" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
 
-        <div class="col-sm-2">
+        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-2' : 'col-sm-2'">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Prezzo</label>
           <mat-form-field class="w-100">
             <span class="material-symbols-outlined in-mat">
@@ -290,7 +293,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col-sm-2" *ngIf="group.get('isSubs')!.value === false">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Sconto</label>
           <mat-form-field class="w-100">
             <span class="material-symbols-outlined in-mat">
@@ -301,7 +304,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col-sm-2" *ngIf="group.get('isSubs')!.value === false">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Sconto %</label>
           <mat-form-field class="w-100">
             <i-feather name="percent"></i-feather>

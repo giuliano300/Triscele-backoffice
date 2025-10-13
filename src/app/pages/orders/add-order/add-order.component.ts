@@ -31,6 +31,8 @@ import { Customers } from '../../../interfaces/customers';
 import { Order } from '../../../interfaces/orders';
 import { OrderService } from '../../../services/Order.service';
 import { SectorService } from '../../../services/Sector.service';
+import { AlertDialogComponent } from '../../../alert-dialog/alert-dialog.component';
+import { Operators } from '../../../interfaces/operators';
 
 registerLocaleData(localeIt);
 
@@ -133,7 +135,7 @@ export class AddOrderComponent {
     this.adapter.setLocale('it-IT');
     this.productForm = this.fb.group({
       customerId: ['', Validators.required],
-      operatorId: ['', Validators.required],
+      operatorId: [null as string | null],
       sectorId: [''],
       agent: ['', Validators.required],
       paymentMethod: ['', Validators.required],
@@ -164,40 +166,65 @@ export class AddOrderComponent {
   }
 
   private syncDiscount(group: FormGroup) {
-    group.get('discount')?.valueChanges.subscribe(value => {
+    const updateFromDiscount = () => {
       const price = group.get('price')?.value || 0;
       const quantity = group.get('quantity')?.value || 0;
       const subtotal = price * quantity;
+      const discount = group.get('discount')?.value || 0;
 
       if (subtotal > 0) {
-        const perc = (value / subtotal) * 100;
+        const perc = (discount / subtotal) * 100;
         const rounded = Math.round(perc * 100) / 100; // due decimali
         group.get('discountPercentage')?.setValue(rounded, { emitEvent: false });
+      } else {
+        group.get('discountPercentage')?.setValue(0, { emitEvent: false });
       }
-    });
+    };
 
-    group.get('discountPercentage')?.valueChanges.subscribe(value => {
+    const updateFromPercentage = () => {
       const price = group.get('price')?.value || 0;
       const quantity = group.get('quantity')?.value || 0;
       const subtotal = price * quantity;
+      const perc = group.get('discountPercentage')?.value || 0;
 
       if (subtotal > 0) {
-        const euro = (value / 100) * subtotal;
-        const rounded = Math.round(euro * 100) / 100; // due decimali
+        const euro = (perc / 100) * subtotal;
+        const rounded = Math.round(euro * 100) / 100;
         group.get('discount')?.setValue(rounded, { emitEvent: false });
+      } else {
+        group.get('discount')?.setValue(0, { emitEvent: false });
       }
-    });
+    };
 
-    group.valueChanges.subscribe(val => {
-      const price = val.price || 0;
-      const quantity = val.quantity || 0;
+    const updateTotal = () => {
+      const price = group.get('price')?.value || 0;
+      const quantity = group.get('quantity')?.value || 0;
+      const discount = group.get('discount')?.value || 0;
       const subtotal = price * quantity;
 
-      let totale = subtotal;
-      totale -= val.discount || 0;
+      const total = Math.round((subtotal - discount) * 100) / 100;
+      group.get('total')?.setValue(total, { emitEvent: false });
+    };
 
-      const rounded = Math.round(totale * 100) / 100; // due decimali
-      group.get('total')?.setValue(rounded, { emitEvent: false });
+    // 🔁 Sottoscrizioni
+    group.get('discount')?.valueChanges.subscribe(() => {
+      updateFromDiscount();
+      updateTotal();
+    });
+
+    group.get('discountPercentage')?.valueChanges.subscribe(() => {
+      updateFromPercentage();
+      updateTotal();
+    });
+
+    group.get('price')?.valueChanges.subscribe(() => {
+      updateFromDiscount();
+      updateTotal();
+    });
+
+    group.get('quantity')?.valueChanges.subscribe(() => {
+      updateFromDiscount();
+      updateTotal();
     });
   }
 
@@ -237,6 +264,13 @@ export class AddOrderComponent {
     }
   }
 
+    // carica operatori
+  selectOperators(c:any){
+    this.operatorService.getOperators(c._id).subscribe((data: any[]) => {
+      this.operators = data;
+    });
+  }
+
   ngOnInit(): void {
     
     this.filteredProducts = this.productCtrl.valueChanges.pipe(
@@ -264,15 +298,7 @@ export class AddOrderComponent {
       this.sectors = data;
     });
 
-    // carica operatori
-    this.operatorService.getOperators().subscribe((data: any[]) => {
-      this.operators = data;
-    });
 
-    // carica prodotti
-    //this.productService.findProductsForSelect().subscribe((data: any) => {
-      //this.products = data;
-    //})
 
     this.route.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -288,7 +314,7 @@ export class AddOrderComponent {
 
             this.productForm.patchValue({
               customerId: data.customerId._id.toString(),
-              operatorId: data.operatorId._id!.toString(),
+              operatorId: data.operatorId ?  data.operatorId?._id!.toString() : '',
               sectorId: data.sectorId?._id!.toString(),
               agent: data.agent,
               paymentMethod: data.paymentMethod,
@@ -314,25 +340,47 @@ export class AddOrderComponent {
                 quantity: [product.quantity || 1],
                 price: [product.price],
                 discount: [product.discount || 0],
-                discountPercentage: [0],
+                discountPercentage: [product.discountPercentage ||0],
                 total: [product.total],
                 isSubs: [product.isSubs],
-                note: [product.note]
+                note: [product.note],
+                parentId: [product.parentId]
               });
 
-              group.get('discountPercentage')!.setValue(
-               product.price ? parseFloat((((product.discount || 0) / product.price) * 100).toFixed(2)) : 0
-              );
+              this.syncDiscount(group);
               this.productsForm.push(group);
-            });          
+            });      
+            
+          const isOperator = localStorage.getItem('isOperator') === 'true';
+          if(isOperator){
+             const o = JSON.parse(localStorage.getItem("operator") || "{}");
+             const operatorId = o.sub;  
+             this.productForm.patchValue({
+                operatorId: operatorId
+             });
+          }
           });
       }
     });
   }
+
   addProductToList(product: ProductViewModel){
-    const exists = this.productsForm.controls.some(
-      (ctrl) => (ctrl as FormGroup).get('_id')?.value === product.id
-    );
+    const exists = this.productsForm.controls.some(ctrl => {
+      const group = ctrl as FormGroup;
+      const id = group.get('_id')?.value;
+      const parentId = group.get('parentId')?.value;
+
+      return id === product.id && (parentId === null || parentId === undefined);
+    });
+
+    if(exists){
+      const dialogRef = this.dialog.open(AlertDialogComponent, {
+        data: {title:"Prodotto già inserito", message: "Attenzione, hai già inserito questo prodotto nell'ordine."},
+        width: '500px'
+      });
+      this.productCtrl.setValue('');
+      return;
+    }
 
     if (!exists) {
       const group = this.fb.group({
@@ -343,8 +391,11 @@ export class AddOrderComponent {
         discount: [0],
         total: [product.price],
         discountPercentage: [0],
-        isSubs: false
+        isSubs: false,
+        parentId: null,
+        note: ""
       });
+
       this.productsForm.push(group);
       if(product.subProducts){
         for(var i = 0; i < product.subProducts.length; i++)
@@ -357,11 +408,14 @@ export class AddOrderComponent {
               discount: [0],
               total: [product.subProducts[i].price * product.subProducts[i].quantity],
               discountPercentage: [0],
-              isSubs: true 
+              isSubs: true,
+              parentId: product.id
             });
             this.productsForm.push(group);
         }
       }
+
+      //console.log(this.productsForm.value);
 
       this.syncDiscount(group);
 
@@ -376,7 +430,29 @@ export class AddOrderComponent {
   }
 
   removeThis(index: number) {
-   this.productsForm.removeAt(index);
+    const item = this.productsForm.at(index);
+    if (!item) return; // sicurezza
+
+    const parentId = item.value.parentId;
+    const _id = item.value._id;
+
+    // Rimuovi l’elemento principale
+    this.productsForm.removeAt(index);
+    
+
+    // Ora rimuovi tutti quelli con parentId = idToRemove
+    if(parentId == null)
+      for (let i = this.productsForm.length - 1; i >= 0; i--) {
+        const elem = this.productsForm.at(i).value;
+        if (elem.parentId === _id)
+          this.productsForm.removeAt(i);
+      }
+    else
+      for (let i = this.productsForm.length - 1; i >= 0; i--) {
+        const elem = this.productsForm.at(i).value;
+        if (elem._id === parentId)
+          elem.note += "<br>Rimosso prodotto: " + item.value.name;
+      }
  }
 
  setShippingValues(c: Customers){
@@ -411,6 +487,9 @@ export class AddOrderComponent {
         insertDate: `${yyyy}-${mm}-${dd}`,
         expectedDelivery: `${yyyyEx}-${mmEx}-${ddEx}` 
       };
+
+      formData.operatorId = formData.operatorId ?? undefined;
+
       formData.origin = "1";
       formData.orderProducts = this.productsForm.value;
 

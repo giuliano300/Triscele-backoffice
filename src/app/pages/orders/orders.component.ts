@@ -27,6 +27,8 @@ import { Operators } from '../../interfaces/operators';
 import { OperatorService } from '../../services/Operator.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
+declare const pdfMake: any;
+
 registerLocaleData(localeIt);
 
 export const MY_DATE_FORMATS = {
@@ -114,6 +116,7 @@ export class OrdersComponent {
     'note',
     'status',
     'edit',
+    'download',
     'delete'
   ];
 
@@ -158,7 +161,7 @@ export class OrdersComponent {
     if(isOperator)
       this.IsOperatorView = true;
 
-    this.customerService.getCustomers()
+    this.customerService.getCustomers('')
       .subscribe((data: Customers[]) => {
         this.customers = data;
     });
@@ -172,7 +175,7 @@ export class OrdersComponent {
 
   ngAfterViewInit() {
     // Chiamata iniziale
-    this.getOrders();
+    this.getOrders('');
 
     // Evento cambio pagina
     this.paginator.page.subscribe(() => {
@@ -209,20 +212,23 @@ export class OrdersComponent {
 
   getOrders(customerId?: string, operatorId?: string, status?: number, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
+    let sectorId = '';
     this.firstLoading = true;
 
     if(this.IsOperatorView)
     {
       const o = JSON.parse(localStorage.getItem("operator") || "{}");
-      operatorId = o.sub;    
+      operatorId = o.sub;  
+      sectorId = o.sectorId;  
     }
 
-    if (customerId || operatorId || status|| start || end || pageIndex || pageSize) {
+    if (customerId || operatorId || sectorId || status|| start || end || pageIndex || pageSize) {
       const params = new URLSearchParams();
       params.append('page', (pageIndex + 1).toString()); 
       params.append('limit', pageSize.toString());
       if (customerId) params.append('customerId', customerId);
       if (operatorId) params.append('operatorId', operatorId);
+      if (sectorId) params.append('sectorId', sectorId);
       if (status) params.append('status', status.toString());
       if (start) params.append('start', start);
       if (end) params.append('end', end);
@@ -239,6 +245,7 @@ export class OrdersComponent {
             ...p,
             action: {
               edit: 'ri-edit-line',
+              download: 'ri-edit-line',
               delete: 'ri-delete-bin-line'
             }
           }));
@@ -282,6 +289,111 @@ export class OrdersComponent {
         end: null
       }
     });
+  }
+
+  getTableNote(note:string){
+     return note ? note.replace(/<br\s*\/?>/gi, '\n') : '';
+  }
+
+  getMainProducts(orderProducts: any[]) {
+    return orderProducts.filter(p => !p.isSubs);
+  }
+
+  private cleanNote(note: string): string {
+    return note ? note.replace(/<br\s*\/?>/gi, '\n') : '';
+  }
+
+  DownloadDoc(item: Order){
+    const form = item;
+    const products = item.orderProducts;
+
+    const docDefinition = {
+    pageSize: 'A4',
+    pageMargins: [40, 60, 40, 60],
+    content: [
+      // Header con titolo ordine
+      {
+        columns: [
+          { text: 'Triscele Srl', style: 'header' },
+          { text: `Ordine N. ${form._id}`, style: 'subheader', alignment: 'right' }
+        ]
+      },
+      { text: `Data: ${new Date(form.insertDate).toLocaleDateString()}`, style: 'date', margin: [0, 5, 0, 15] },
+
+      // Dati cliente
+      {
+        style: 'section',
+        table: {
+          widths: ['*', '*'],
+          body: [
+            [
+              { text: 'Cliente', bold: true, lineHeight: 1.5 },
+              { text: 'Spedizione', bold: true, lineHeight: 1.5 }
+            ],
+            [
+              {
+                text: `${form.shippingName} ${form.shippingLastName}\nProvincia: ${form.shippingProvince}\nTEL: ${form.shippingTelephone}`,
+                lineHeight: 1.5
+              },
+              {
+                text: `Indirizzo: ${form.shippingAddress}\nCAP: ${form.shippingZipcode}\nComune: ${form.shippingCity}\nProvincia: ${form.shippingProvince}`,
+                lineHeight: 1.5
+              }
+            ]
+          ]
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 0, 0, 25] // spaziatura tra tabelle
+      },
+
+      // Tabella prodotti con note prodotto
+      {
+        style: 'section',
+        table: {
+          headerRows: 1,
+          widths: ['*', 'auto', 'auto', 'auto'],
+          body: [
+            ['Prodotto', 'Quantità', 'Prezzo', 'Totale'].map(h => ({ text: h, bold: true, fillColor: '#eeeeee', margin: [5, 5, 5, 5] })),
+            ...products.filter(p => !p.isSubs).map(p => [
+              {
+                stack: [
+                  { text: p.name, fontSize: 12, bold: true },
+                  ...(p.note ? [{ text: this.cleanNote(p.note), fontSize: 9, italics: true }] : [])
+                ]
+              },
+              p.quantity,
+              `€${p.price.toFixed(2)}`,
+              `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`
+            ])
+          ]
+        },
+        layout: 'lightHorizontalLines',
+        margin: [3, 0, 3, 25] // maggiore spaziatura
+      },
+
+      // Note cliente
+      form.customerNote ? { text: `Note cliente:\n${form.customerNote}`, margin: [0, 0, 0, 15] } : {},
+
+      // Note ordine
+      form.note ? { text: `Note ordine:\n${form.note}`, margin: [0, 0, 0, 25] } : {},
+
+      // Totale generale
+      {
+        columns: [
+          { text: '' },
+          { text: `Totale: €${form.totalPrice.toFixed(2)}`, bold: true, alignment: 'right' }
+        ]
+      }
+    ],
+    styles: {
+      header: { fontSize: 18, bold: true },
+      subheader: { fontSize: 14 },
+      date: { fontSize: 12 },
+      section: { margin: [0, 5, 0, 5] }
+    }
+  };
+
+  pdfMake.createPdf(docDefinition).open();
   }
 
   DeleteItem(item: Order) {

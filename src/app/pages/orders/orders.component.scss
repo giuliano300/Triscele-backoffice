@@ -359,3 +359,11 @@
   font-size: 14px !important;
   color: #888; /* opzionale */
 }
+
+.note-cell {
+  white-space: pre-line;
+  span{
+    font-size: 11px;
+    color: #6f6e81;
+  }
+}
