@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ProductViewModel } from '../../../classess/productViewModel';
 import { CustomerService } from '../../../services/Customer.service';
 import { OperatorService } from '../../../services/Operator.service';
-import { AGENTS, OrderStatus, PaymentMethod } from '../../../enum/enum';
+import { OrderStatus, PaymentMethod } from '../../../enum/enum';
 import {  MatDatepickerModule } from "@angular/material/datepicker";
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import localeIt from '@angular/common/locales/it';
@@ -27,12 +27,12 @@ import { OrderProducts } from '../../../interfaces/orderProducts';
 import { debounceTime, Observable, of, switchMap } from 'rxjs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { Customers } from '../../../interfaces/customers';
 import { Order } from '../../../interfaces/orders';
 import { OrderService } from '../../../services/Order.service';
 import { SectorService } from '../../../services/Sector.service';
 import { AlertDialogComponent } from '../../../alert-dialog/alert-dialog.component';
-import { Operators } from '../../../interfaces/operators';
+import { Agents } from '../../../interfaces/agents';
+import { AgentService } from '../../../services/Agent.service';
 
 registerLocaleData(localeIt);
 
@@ -105,19 +105,23 @@ export class AddOrderComponent {
     { value: OrderStatus.SPEDITO, label: 'Spedito' },
     { value: OrderStatus.CONSEGNATO, label: 'Consegnato' },
     { value: OrderStatus.COMPLETATO_DUPLICATO, label: 'Completato duplicato' },
-    { value: OrderStatus.IN_CONSEGNA, label: 'In consegna' },
-    { value: OrderStatus.PREVENTIVO, label: 'Preventivo' }
+    { value: OrderStatus.IN_CONSEGNA, label: 'In consegna' }
+    //{ value: OrderStatus.PREVENTIVO, label: 'Preventivo' }
   ];
 
   paymentMethods = Object.values(PaymentMethod);
  
-  agents = Object.values(AGENTS);
+  agents: Agents[] = [];
 
   province: string[] = [];
 
   products: ProductViewModel[] = [];
 
   orderProducts: OrderProducts[] = [];
+
+  state: number | undefined;
+
+  isOrder: boolean = true;
 
   constructor(
     private router: Router,
@@ -130,16 +134,17 @@ export class AddOrderComponent {
     private adapter: DateAdapter<any>,
     private utilsService: UtilsService,
     private orderService: OrderService,
-    private sectorService: SectorService
+    private sectorService: SectorService,
+    private agentService: AgentService
   ) {
     this.adapter.setLocale('it-IT');
     this.productForm = this.fb.group({
       customerId: ['', Validators.required],
       operatorId: [null as string | null],
-      sectorId: [''],
-      agent: ['', Validators.required],
+      sectorId: ['', Validators.required],
+      agentId: [''],
       paymentMethod: ['', Validators.required],
-      status: [OrderStatus.PREVENTIVO, Validators.required],
+      status: [OrderStatus.IN_LAVORAZIONE, Validators.required],
       insertDate: ['', Validators.required],
       expectedDelivery: ['', Validators.required],
       shippingAddress: ['', Validators.required],
@@ -264,15 +269,30 @@ export class AddOrderComponent {
     }
   }
 
-    // carica operatori
+  // carica operatori
   selectOperators(c:any){
-    this.operatorService.getOperators(c._id).subscribe((data: any[]) => {
+    this.operatorService.getOperators(c.value).subscribe((data: any[]) => {
       this.operators = data;
     });
   }
 
   ngOnInit(): void {
     
+    //MODIFICA CAMPI SE E' PREVENTIVO
+    this.route.queryParams.subscribe(params => {
+      if(params['state'])
+      {
+        this.state = Number(params['state']);
+        this.title = "Aggiungi preventivo";
+        this.isOrder = false;
+      }
+      else
+      {
+        this.title = "Aggiungi ordine";
+        this.isOrder = true;
+      }
+    });
+
     this.filteredProducts = this.productCtrl.valueChanges.pipe(
       debounceTime(300), 
       switchMap(value => {
@@ -293,6 +313,11 @@ export class AddOrderComponent {
       this.customers = data;
     });
 
+    // carica agenti
+    this.agentService.getAgents().subscribe((data: any[]) => {
+      this.agents = data;
+    });
+
     // carica settori
     this.sectorService.getSectors().subscribe((data: any[]) => {
       this.sectors = data;
@@ -305,6 +330,8 @@ export class AddOrderComponent {
 
       if (this.id) {
         this.title = "Aggiorna ordine";
+        if(this.state)
+          this.title = "Aggiorna preventivo";
 
         this.orderService.getOrder(this.id)
           .subscribe((data: Order) => {
@@ -312,11 +339,15 @@ export class AddOrderComponent {
 
             const [yearEx, monthEx, dayEx] = data.expectedDelivery.substring(0, 10).split('-').map(Number);
 
+             this.operatorService.getOperators(data.sectorId?._id!.toString()).subscribe((data: any[]) => {
+              this.operators = data;
+            });
+
             this.productForm.patchValue({
               customerId: data.customerId._id.toString(),
               operatorId: data.operatorId ?  data.operatorId?._id!.toString() : '',
               sectorId: data.sectorId?._id!.toString(),
-              agent: data.agent,
+              agentId: data.agentId,
               paymentMethod: data.paymentMethod,
               status: data.status,
               insertDate: new Date(year, month - 1, day),
@@ -426,7 +457,11 @@ export class AddOrderComponent {
   }
 
   returnBack() {
-    this.router.navigate(["/orders"]);
+    let navigation = "/orders";
+    if(this.state)
+      navigation = "/quotations";
+
+    this.router.navigate([navigation]);
   }
 
   removeThis(index: number) {
@@ -455,7 +490,8 @@ export class AddOrderComponent {
       }
  }
 
- setShippingValues(c: Customers){
+ setShippingValues(event: any){
+  const c = this.customers.find(c => c._id === event.value);
   this.productForm.patchValue({
     shippingAddress:c.address,
     shippingZipcode: c.zipCode,
@@ -471,6 +507,8 @@ export class AddOrderComponent {
  }
 
   onSubmit() {
+    let navigation = "/orders";
+
     const d: Date = this.productForm.value.insertDate;
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -488,6 +526,7 @@ export class AddOrderComponent {
         expectedDelivery: `${yyyyEx}-${mmEx}-${ddEx}` 
       };
 
+      formData.agentId = formData.agentId ?? '';
       formData.operatorId = formData.operatorId ?? undefined;
 
       formData.origin = "1";
@@ -497,12 +536,20 @@ export class AddOrderComponent {
         .map(p => (p.price * p.quantity) - (p.discount || 0))
         .reduce((acc, curr) => acc + curr, 0);
 
+      //CAMPI SE E' PREVENTIVO
+      if(this.state)
+      {
+        navigation = "/quotations";
+        formData.status = OrderStatus.PREVENTIVO;
+        formData.operatorId = undefined;
+      }
+
       if (this.id) {
         formData._id = this.id;
         this.orderService.updateOrder(formData)
           .subscribe((data: boolean) => {
             if (data)
-              this.router.navigate(["/orders"]);
+              this.router.navigate([navigation]);
             else
               console.log("Errore durante aggiornamento");
           });
@@ -510,7 +557,7 @@ export class AddOrderComponent {
         this.orderService.setOrder(formData)
           .subscribe((data: Order) => {
             if (data)
-              this.router.navigate(["/orders"]);
+              this.router.navigate([navigation]);
             else
               console.log("Errore durante inserimento");
           });

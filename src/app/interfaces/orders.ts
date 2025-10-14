@@ -14,7 +14,7 @@ export interface Order {
   paymentMethod: PaymentMethod;
   expectedDelivery: string;
   origin: string;
-  agent: number;
+  agentId: string;
   shippingAddress: string;
   shippingZipcode: string;
   shippingProvince: string;

@@ -1,31 +1,33 @@
 import { Component, LOCALE_ID, ViewChild } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
-import { FeathericonsModule } from "../../icons/feathericons/feathericons.module";
+import { FeathericonsModule } from "../../../icons/feathericons/feathericons.module";
 import { MatSelect } from "@angular/material/select";
 import { MatNativeDateModule, MatOptionModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, DateAdapter  } from "@angular/material/core";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, registerLocaleData } from '@angular/common';
-import { Customers } from '../../interfaces/customers';
+import { Customers } from '../../../interfaces/customers';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { Order } from '../../interfaces/orders';
-import { OrderService } from '../../services/Order.service';
-import { CustomerService } from '../../services/Customer.service';
+import { Order } from '../../../interfaces/orders';
+import { OrderService } from '../../../services/Order.service';
+import { CustomerService } from '../../../services/Customer.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDatepickerModule, MatDatepickerToggle } from "@angular/material/datepicker";
 import { MatInputModule } from '@angular/material/input';
 import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Operators } from '../../interfaces/operators';
-import { OperatorService } from '../../services/Operator.service';
+import { Operators } from '../../../interfaces/operators';
+import { OperatorService } from '../../../services/Operator.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { OrderStatus } from '../../../enum/enum';
+import { ConvertToOrderDialogComponent } from '../../../convert-to-order-dialog/convert-to-order-dialog.component';
 
 declare const pdfMake: any;
 
@@ -44,7 +46,7 @@ export const MY_DATE_FORMATS = {
 };
 
 @Component({
-  selector: 'app-orders',
+  selector: 'app-quotations',
   imports: [
     MatCardModule,
     MatButtonModule,
@@ -68,8 +70,8 @@ export const MY_DATE_FORMATS = {
     MatNativeDateModule,
     MatProgressBarModule 
 ],
-  templateUrl: './orders.component.html',
-  styleUrl: './orders.component.scss',
+  templateUrl: './quotations.component.html',
+  styleUrl: './quotations.component.scss',
   providers: [
     { provide: LOCALE_ID, useValue: 'it-IT' },
     { provide: MAT_DATE_LOCALE, useValue: 'it-IT' },
@@ -84,7 +86,7 @@ export const MY_DATE_FORMATS = {
     ]
 })
 
-export class OrdersComponent {
+export class QuotationsComponent {
   form: FormGroup;
 
   orders: Order[] = [];
@@ -102,21 +104,18 @@ export class OrdersComponent {
 
   firstLoading: boolean = false;
 
-  admin: boolean = true;
-
   totalItems = 0;
   pageSize = 20;
   pageIndex = 0;
 
   displayedColumns: string[] = [
-    'operatorId',
     'shippingBusinessName',
     'orderProducts',
     'insertDate',
     'totalPrice',
     'paymentMethod',
     'note',
-    'status',
+    'convert',
     'edit',
     'download',
     'delete'
@@ -149,8 +148,6 @@ export class OrdersComponent {
       this.adapter.setLocale('it-IT');
       this.form = this.fb.group({
         customerId: [],
-        operatorId: [],
-        status: [],
         dateRange: this.fb.group({
             start: [null],
             end: [null]
@@ -202,8 +199,6 @@ export class OrdersComponent {
     
       this.getOrders(
         this.form.value.customerId,
-        this.form.value.operatorId,
-        this.form.value.status,
         s,
         e,
         this.paginator.pageIndex,
@@ -212,30 +207,21 @@ export class OrdersComponent {
     });
   }
 
-  getOrders(customerId?: string, operatorId?: string, status?: number, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
+  getOrders(customerId?: string, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
     let sectorId = '';
     this.firstLoading = true;
+    
+    const params = new URLSearchParams();
+    params.append('status', OrderStatus.PREVENTIVO.toString());
 
-    if(this.IsOperatorView)
-    {
-      const o = JSON.parse(localStorage.getItem("operator") || "{}");
-      operatorId = o.sub;  
-      sectorId = o.sectorId;  
-      this.admin = false;
-    }
-
-    if (customerId || operatorId || sectorId || status|| start || end || pageIndex || pageSize || this.admin) {
-      const params = new URLSearchParams();
+    if (customerId || sectorId || start || end || pageIndex || pageSize) {
       params.append('page', (pageIndex + 1).toString()); 
       params.append('limit', pageSize.toString());
       if (customerId) params.append('customerId', customerId);
-      if (operatorId) params.append('operatorId', operatorId);
       if (sectorId) params.append('sectorId', sectorId);
-      if (status) params.append('status', status.toString());
       if (start) params.append('start', start);
       if (end) params.append('end', end);
-      if (this.admin) params.append('admin', this.admin ? 'true' : 'false');
       query = `?${params.toString()}`;
     }
     this.orderService.getOrders(query)
@@ -250,13 +236,14 @@ export class OrdersComponent {
             action: {
               edit: 'ri-edit-line',
               download: 'ri-edit-line',
+              convert:'ri-edit-line',
               delete: 'ri-delete-bin-line'
             }
           }));
 
           this.dataSource = new MatTableDataSource<Order>(this.orders);
           this.dataSource.sort = this.sort;
-          this.firstLoading = false;
+           this.firstLoading = false;
       });
   }
 
@@ -279,7 +266,7 @@ export class OrdersComponent {
       e = endFixed.toISOString();
     }
     
-    this.getOrders(customerId, operatorId, status, s, e);
+    this.getOrders(customerId, s, e);
   }
 
   remove(){
@@ -319,7 +306,7 @@ export class OrdersComponent {
       {
         columns: [
           { text: 'Triscele Srl', style: 'header' },
-          { text: `Ordine N. ${form._id}`, style: 'subheader', alignment: 'right' }
+          { text: `Preventivo N. ${form._id}`, style: 'subheader', alignment: 'right' }
         ]
       },
       { text: `Data: ${new Date(form.insertDate).toLocaleDateString()}`, style: 'date', margin: [0, 5, 0, 15] },
@@ -419,8 +406,36 @@ export class OrdersComponent {
     });
   }
 
+  ConvertItem(item: Order) {
+    const dialogRef = this.dialog.open(ConvertToOrderDialogComponent, {
+      data: item.sectorId?._id,
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result)
+      {
+        const c: any = 
+        {
+          orderId: item._id,
+          status: result.status,
+          sectorId: result.sectorId,
+          operatorId: result.operatorId ?? undefined
+        };
+        this.orderService.convertToOrder(c).subscribe((result: any) => {
+          this.getOrders();
+        })
+      }
+      else
+        console.log("Close");
+    });
+  }
+
   UpdateItem(item: Order) {
-    this.router.navigate(["/order/add/" + item._id]);
+    this.router.navigate(
+      ["/order/add", item._id],
+      { queryParams: { state: 11 } }
+    );
   }
 
 }

@@ -1,0 +1,51 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup] = "form">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Stato lavorazione</label>
+          <mat-form-field class="w-100">
+            <i-feather name="bar-chart-2"></i-feather>
+            <mat-label>Stato lavorazione</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let m of orderStatusOptions" [value]="m.value">
+                {{ m.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Settore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="flag"></i-feather>
+            <mat-label>Seleziona un settore</mat-label>
+            <mat-select formControlName="sectorId" (selectionChange)="selectOperators($event)">
+              <mat-option *ngFor="let c of sectors" [value]="c._id">
+                {{ c.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Operatore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="user"></i-feather>
+            <mat-label>Seleziona un operatore</mat-label>
+            <mat-select formControlName="operatorId">
+              <mat-option [value]="null">Nessun operatore</mat-option>
+              <mat-option *ngFor="let o of operators" [value]="o._id">
+                {{ o.businessName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+       </div>
+
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()" class="btn back">Chiudi</button>
+  <button mat-flat-button (click)="onSave()" class="btn" [disabled]="form.invalid">Salva</button>
+</mat-dialog-actions>

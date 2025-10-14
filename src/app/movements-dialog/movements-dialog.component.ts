@@ -38,7 +38,9 @@ export class MovementsComponent {
   displayedColumns: string[] = [
     'createdAt',
     'movementType',
-    'stock'
+    'stock',
+    'supplierName',
+    'supplierCode'
   ];
 
   constructor(public dialogRef: MatDialogRef<MovementsComponent>,

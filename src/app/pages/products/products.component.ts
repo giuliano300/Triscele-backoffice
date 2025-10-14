@@ -28,6 +28,7 @@ import { MovementsComponent } from '../../movements-dialog/movements-dialog.comp
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatInput } from "@angular/material/input";
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MovementType } from '../../enum/enum';
 
 @Component({
   selector: 'app-products',
@@ -198,22 +199,9 @@ export class ProductsComponent {
   ShowMovements(item: ProductViewModel){
     const dialogRef = this.dialog.open(MovementsComponent, {
       data: item,
-      width: '700px'
+      width: '80vw',
+      maxWidth: '1000px'
     });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result);
-      if (result) {
-        this.productMovementsService.setProductMovements(result)
-          .subscribe((data: ProductMovements) => {
-            if (data) {
-              this.getProducts();
-            }
-          });
-      } else {
-        console.log("Close");
-      }
-    });  
   }
 
   UpdateItem(item: ProductViewModel) {
@@ -231,8 +219,15 @@ export class ProductsComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result);
+      //console.log(result);
       if (result) {
+       if(result.movementType == MovementType[0].id)
+        {
+          result.supplierId = item.supplier?._id,
+          result.supplierName = item.supplier?.businessName,
+          result.supplierCode = item.supplierCode
+        }
+
         this.productMovementsService.setProductMovements(result)
           .subscribe((data: ProductMovements) => {
             if (data) {

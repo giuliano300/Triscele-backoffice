@@ -15,8 +15,8 @@
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
             <mat-label>Seleziona un cliente</mat-label>
-            <mat-select formControlName="customerId">
-              <mat-option *ngFor="let c of customers" [value]="c._id" (onSelectionChange)="setShippingValues(c)">
+            <mat-select formControlName="customerId" (selectionChange)="setShippingValues($event)">
+              <mat-option *ngFor="let c of customers" [value]="c._id" >
                 {{ c.businessName }}
               </mat-option>
             </mat-select>
@@ -28,15 +28,15 @@
           <mat-form-field class="w-100">
             <i-feather name="flag"></i-feather>
             <mat-label>Seleziona un settore</mat-label>
-            <mat-select formControlName="sectorId">
-              <mat-option *ngFor="let c of sectors" [value]="c._id" (onSelectionChange)="selectOperators(c)">
+            <mat-select formControlName="sectorId" (selectionChange)="selectOperators($event)">
+              <mat-option *ngFor="let c of sectors" [value]="c._id">
                 {{ c.name }}
               </mat-option>
             </mat-select>
           </mat-form-field>        
        </div>
 
-       <div class="col-sm-4">
+       <div class="col-sm-4" *ngIf="isOrder">
           <label class="label d-block fw-medium mb-10">Operatore</label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
@@ -55,9 +55,9 @@
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
             <mat-label>Seleziona un agente</mat-label>
-            <mat-select formControlName="agent">
-              <mat-option *ngFor="let a of agents" [value]="a.id">
-                {{ a.value| titlecase }}
+            <mat-select formControlName="agentId">
+              <mat-option *ngFor="let a of agents" [value]="a._id">
+                {{ a.name| titlecase }}
               </mat-option>
             </mat-select>
           </mat-form-field>        
@@ -85,7 +85,7 @@
           </mat-form-field>
        </div>
 
-       <div class="col-sm-4">
+       <div class="col-sm-4" *ngIf="isOrder">
           <label class="label d-block fw-medium mb-10">Stato ordine</label>
           <mat-form-field class="w-100">
             <i-feather name="bar-chart-2"></i-feather>

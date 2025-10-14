@@ -104,28 +104,19 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleSectors">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <i-feather name="credit-card"></i-feather>
-                                <span class="title">
-                                    Settore
-                                </span>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <ul class="sidebar-sub-menu">
-                            <li class="sidemenu-item">
-                                <a routerLink="/sectors" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Vedi tutti
-                                </a>
-                            </li>
-                            <li class="sidemenu-item">
-                                <a routerLink="/sectors/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Aggiungi
-                                </a>
-                            </li>
-                        </ul>
-                    </mat-expansion-panel>
+                    <a routerLink="/sectors" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                        <i-feather name="credit-card"></i-feather>
+                        <span class="title">
+                            Settori
+                        </span>
+                    </a>                
+
+                    <a routerLink="/agents" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                        <i-feather name="users"></i-feather>
+                        <span class="title">
+                            Agenti
+                        </span>
+                    </a>                
 
                     <span class="sub-title text-body sbs" *ngIf="isVisibleProductions">
                         PRODUTTIVITA'
@@ -153,6 +144,31 @@
                             <li class="sidemenu-item">
                                 <a routerLink="/product/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
                                     Aggiungi prodotto
+                                </a>
+                            </li>
+                        </ul>
+                    </mat-expansion-panel>
+
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleAdmin">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <i-feather name="share-2"></i-feather>
+                                <span class="title">
+                                    Preventivi
+                                </span>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <ul class="sidebar-sub-menu">
+                            <li class="sidemenu-item">
+                                <a [routerLink]="['/quotations']" routerLinkActive="active" 
+                                    [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                    Vedi tutti
+                                </a>
+                            </li>
+                            <li class="sidemenu-item">
+                                <a [routerLink]="['/order/add']" [queryParams]="{ state: 11 }" routerLinkActive="active" 
+                                    [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                    Aggiungi
                                 </a>
                             </li>
                         </ul>

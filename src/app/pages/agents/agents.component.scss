@@ -56,8 +56,6 @@
                         letter-spacing: normal;
                         background: transparent;
                         border-bottom: 2px solid #edeff5;
-                        width: 100%;
-                        text-align: center;
                     }
                 }
                 .mat-mdc-row, .mdc-data-table__content {
@@ -83,8 +81,6 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
-                    width: 100%;
-                    text-align: center;
 
                     .task-name {
                         padding-left: 28px;
@@ -151,7 +147,7 @@
                     }
 
                     .mat-mdc-cell {
-                        /*padding: 15px 0!important;*/
+                        padding: 15px 0!important;
                         h6{
                             font-weight: 500!important;
                             font-size: 14px!important;
@@ -318,24 +314,4 @@
 
 /* Min width 1600px */
 @media only screen and (min-width: 1600px) {}
-
-
-.filter {
-    width: 100%;
-    height: auto;
-    display: block;
-    min-width: auto;
-    margin-top: 0px;
-    border-radius: 6px;
-    padding: 18px 25px;
-    color: var(--whiteColor)!important;
-    background-color: var(--primaryColor);
-    font-size: 14px;
-    font-weight: 400;
-    font-family: var(--headingFontFamily);
-}
-
-.mat-mdc-card.trinta-card {
-    padding: 10px 25px 30px;
-}
 

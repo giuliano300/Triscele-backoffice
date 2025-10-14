@@ -38,6 +38,6 @@ export const AGENTS: AgentOption[] = [
 ];
 
 export const MovementType: any[] = [
-  { id:1, name: "Carico" },
-  { id:2, name: "Scarico" }
+  { id: 1, name: "Carico" },
+  { id: 2, name: "Scarico" }
 ]

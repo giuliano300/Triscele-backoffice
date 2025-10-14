@@ -2,27 +2,27 @@ import { Injectable } from '@angular/core';
 import { API_URL } from '../../main';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Order } from '../interfaces/orders';
+import { Agents } from '../interfaces/agents';
 
 @Injectable({
   providedIn: 'root'
 })
-export class OrderService {
+export class AgentService {
 
-    private apiUrl = API_URL + "Orders";
+    private apiUrl = API_URL + "Agents";
     
     constructor(private http: HttpClient) {}
 
-    getOrders(query: string = ''): Observable<any>{
+    getAgents(): Observable<Agents[]>{
       const token = localStorage.getItem('authToken'); 
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });      
-      return this.http.get<any>(this.apiUrl + query, { headers });
+      return this.http.get<Agents[]>(this.apiUrl, { headers });
     }
 
-    getOrder(id: string): Observable<Order>{
-      return this.http.get<Order>(this.apiUrl + "/" + id);
+    getAgent(id: string): Observable<Agents>{
+      return this.http.get<Agents>(this.apiUrl + "/" + id);
     }
 
     delete(id: string):Observable<boolean>{
@@ -33,15 +33,11 @@ export class OrderService {
       return this.http.delete<boolean>(this.apiUrl + "/" + id, { headers });
     }
   
-    setOrder(c: Order):Observable<Order>{
-      return this.http.post<Order>(this.apiUrl, c);
+    setAgent(c: Agents):Observable<Agents>{
+      return this.http.post<Agents>(this.apiUrl, c);
     }
 
-    convertToOrder(c: any):Observable<Order>{
-      return this.http.post<any>(this.apiUrl + "/convertToOrder" , c);
-    }
-
-    updateOrder(c: Order):Observable<boolean>{
+    updateAgent(c: Agents):Observable<boolean>{
       return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
     }
 

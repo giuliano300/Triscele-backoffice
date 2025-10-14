@@ -23,6 +23,7 @@ export class SidebarComponent {
     isVisibleProducts: boolean = true;
     isVisibleOrders: boolean = true;
     isVisibleSectors: boolean = true;
+    isVisibleAdmin: boolean = true;
     
 
     constructor(
@@ -52,42 +53,45 @@ export class SidebarComponent {
 
             // Usa lo stato salvato se non esiste ancora in memoria
             if (!state && savedState) {
-            state = savedState;
+                state = savedState;
             }
 
             if (!state) return;
 
             if (state.isAdmin) {
-            this.setAdminVisibility();
-            localStorage.removeItem('persistentState');
-            } else {
-            this.saveLocal('persistentState', state);
+                this.setAdminVisibility();
+                localStorage.removeItem('persistentState');
+            } 
+            else 
+            {
+                this.saveLocal('persistentState', state);
             }
 
             if (!state.isOperator) return;
 
             this.authService.operator$.subscribe(operator => {
-            const savedPerms = this.getLocal('persistentPermissions');
+                const savedPerms = this.getLocal('persistentPermissions');
 
-            // Se non c'è operator ma esistono permessi persistenti, li riutilizza
-            if (!operator && savedPerms) {
-                operator = { permission: savedPerms };
-            }
+                // Se non c'è operator ma esistono permessi persistenti, li riutilizza
+                if (!operator && savedPerms) {
+                    operator = { permission: savedPerms };
+                }
 
-            if (!operator) {
-                localStorage.removeItem('persistentPermissions');
-                return;
-            }
+                if (!operator) {
+                    localStorage.removeItem('persistentPermissions');
+                    return;
+                }
 
-            this.isOperator = true;
-            this.isAdmin = false;
-            this.isVisibleSectors = false;
-            this.isVisibleDashboard = false;
+                this.isOperator = true;
+                this.isAdmin = false;
+                this.isVisibleSectors = false;
+                this.isVisibleDashboard = false;
+                this.isVisibleAdmin = false;
 
-            const permissions = operator.permission || [];
-            this.saveLocal('persistentPermissions', permissions);
+                const permissions = operator.permission || [];
+                this.saveLocal('persistentPermissions', permissions);
 
-            this.applyPermissions(permissions);
+                this.applyPermissions(permissions);
             });
         });
     }
