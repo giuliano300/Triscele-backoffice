@@ -24,19 +24,6 @@ export interface AgentOption {
   label: string;
 }
 
-export const AGENTS: AgentOption[] = [
-  { id: 1,  value: "Tanino", label: "Tanino" },
-  { id: 2, value: "Salvo Marchese", label: "Salvo Marchese" },
-  { id: 3,  value: "Piero De Blasi", label: "Piero De Blasi" },
-  { id: 4,  value: "privato", label: "privato" },
-  { id: 5,  value: "Rosario Siragusa", label: "Rosario Siragusa" },
-  { id: 6,  value: "Michele Foti", label: "Michele Foti" },
-  { id: 7,  value: "Triscele", label: "Triscele" },
-  { id: 8,  value: "Online", label: "Online" },
-  { id: 9,  value: "Giuseppe Ciulla", label: "Giuseppe Ciulla" },
-  { id: 10,  value: "Giorgia Bellafiore", label: "Giorgia Bellafiore" }
-];
-
 export const MovementType: any[] = [
   { id: 1, name: "Carico" },
   { id: 2, name: "Scarico" }

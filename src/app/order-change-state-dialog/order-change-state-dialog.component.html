@@ -1,0 +1,57 @@
+<h1 mat-dialog-title>
+  <span>Storico cambi di stato dell'ordine</span>
+  <button mat-raised-button class="filter" (click)="exportToExcel()">
+    Esporta in Excel
+  </button>
+</h1>
+<mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
+  <mat-card-content>
+    <div class="to-do-list-table">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource">
+
+          <ng-container matColumnDef="changedAt">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Data </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{ element.changedAt | date:'dd/MM/yyyy hh:mm:ss' }}</h6>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="oldStatus">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Vecchio stato </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{getStatusName(element.oldStatus)}}</h6>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="newStatus">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Nuovo stato </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{getStatusName(element.newStatus)}}</h6>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="operatorName">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Esecutore </th>
+            <td mat-cell *matCellDef="let element" class="pl-0">
+              <h6 class="mt-0 mb-0">{{element.operatorName}}</h6>
+            </td>
+          </ng-container>
+
+           <!-- Riga header -->
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+
+          <!-- Riga dati -->
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+              Nessun cambio effettuato
+            </td>
+          </tr>
+          
+        </table>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

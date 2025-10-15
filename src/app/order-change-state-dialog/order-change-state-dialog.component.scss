@@ -57,7 +57,6 @@
                         background: transparent;
                         border-bottom: 2px solid #edeff5;
                         width: 100%;
-                        text-align: center;
                     }
                 }
                 .mat-mdc-row, .mdc-data-table__content {
@@ -84,7 +83,6 @@
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
                     width: 100%;
-                    text-align: center;
 
                     .task-name {
                         padding-left: 28px;
@@ -318,6 +316,7 @@
 
 /* Min width 1600px */
 @media only screen and (min-width: 1600px) {}
+
 
 .filter {
     border: none;

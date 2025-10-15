@@ -2,6 +2,7 @@ import { OrderStatus, PaymentMethod } from '../enum/enum';
 import { OrderProducts } from '../interfaces/orderProducts';
 import { Customers } from './customers';
 import { Operators } from './operators';
+import { OrderChangeState } from './orderChangeState';
 import { Sectors } from './sectors';
 
 export interface Order {
@@ -27,5 +28,6 @@ export interface Order {
   note?: string;
   customerNote?: string;
   orderProducts: OrderProducts[];
+  orderChangeState?: OrderChangeState[];
   totalPrice: number;
 }

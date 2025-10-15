@@ -41,8 +41,14 @@ export class OrderService {
       return this.http.post<any>(this.apiUrl + "/convertToOrder" , c);
     }
 
-    updateOrder(c: Order):Observable<boolean>{
-      return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
+    updateOrder(c: Order, operatorId?: string):Observable<Order>{
+      let o = "";
+      if(operatorId)
+        o = "?operatorId=" + operatorId;
+
+      const url = this.apiUrl + "/" + c._id + o;
+
+      return this.http.put<Order>(url, c);
     }
 
 }

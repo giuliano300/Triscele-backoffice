@@ -23,7 +23,7 @@
         <div class="sidebar-inner">
             <div class="sidebar-menu">
                 <mat-accordion>
-                    <span class="sub-title text-body" *ngIf="isVisibleDashboard">
+                    <span class="sub-title text-body sbs" *ngIf="isVisibleDashboard">
                         MAIN
                     </span>
                     <a routerLink="/dashboard" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleDashboard">
@@ -104,20 +104,6 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <a routerLink="/sectors" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
-                        <i-feather name="credit-card"></i-feather>
-                        <span class="title">
-                            Settori
-                        </span>
-                    </a>                
-
-                    <a routerLink="/agents" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
-                        <i-feather name="users"></i-feather>
-                        <span class="title">
-                            Agenti
-                        </span>
-                    </a>                
-
                     <span class="sub-title text-body sbs" *ngIf="isVisibleProductions">
                         PRODUTTIVITA'
                     </span>
@@ -197,52 +183,22 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <!--<mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <i-feather name="key"></i-feather>
-                                <span class="title">
-                                    Magazzino
-                                </span>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <ul class="sidebar-sub-menu">
-                            <li class="sidemenu-item">
-                                <a routerLink="/warehouse" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Vedi tutti
-                                </a>
-                            </li>
-                            <li class="sidemenu-item">
-                                <a routerLink="/warehouse/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Aggiungi
-                                </a>
-                            </li>
-                        </ul>
-                    </mat-expansion-panel>
+                    <span class="sub-title text-body sbs" *ngIf="isVisibleAdmin">
+                        SETTINGS
+                    </span>
+                    <a routerLink="/sectors" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                        <i-feather name="credit-card"></i-feather>
+                        <span class="title">
+                            Settori
+                        </span>
+                    </a>                
 
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <i-feather name="map-pin"></i-feather>
-                                <span class="title">
-                                    Spedizione
-                                </span>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <ul class="sidebar-sub-menu">
-                            <li class="sidemenu-item">
-                                <a routerLink="/shipment" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Vedi tutti
-                                </a>
-                            </li>
-                            <li class="sidemenu-item">
-                                <a routerLink="/shipment/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Aggiungi
-                                </a>
-                            </li>
-                        </ul>
-                    </mat-expansion-panel>
-                    -->
+                    <a routerLink="/agents" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                        <i-feather name="users"></i-feather>
+                        <span class="title">
+                            Agenti
+                        </span>
+                    </a>                
 
                     <a class="sidebar-menu-link sbs" (click)="logout()" href="#">
                         <i-feather name="Lock"></i-feather>

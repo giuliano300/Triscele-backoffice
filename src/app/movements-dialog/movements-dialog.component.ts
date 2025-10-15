@@ -11,6 +11,7 @@ import { ProductViewModel } from '../classess/productViewModel';
 import { MovementType } from '../enum/enum';
 import { ProductMovements } from '../interfaces/productMovements';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'movements-dialog',
@@ -55,6 +56,27 @@ export class MovementsComponent {
 
       this.dataSource = new MatTableDataSource<ProductMovements>(this.data.productMovements);
   }
+
+   exportToExcel() {
+      // Usa dataSource.data invece di dataSource
+      const dataToExport = this.dataSource.data.map(item => ({
+        'Data': new Date(item.createdAt).toLocaleString('it-IT'),
+        'Movimento': item.movementType == 1 ? "Carico" : "Scarico",
+        'Quantità': item.stock,
+        'Fornitore': item.supplierName,
+        'Codice fornitore': item.supplierCode
+      }));
+  
+      // Crea worksheet
+      const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+  
+      // Crea workbook
+      const wb: XLSX.WorkBook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Storico Movimentazoni');
+  
+      // Salva file
+      XLSX.writeFile(wb, 'storico_movimentazioni.xlsx');
+    }
 
   onClose(): void {
     this.dialogRef.close(false); // L'utente ha annullato

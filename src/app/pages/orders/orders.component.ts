@@ -26,6 +26,7 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Operators } from '../../interfaces/operators';
 import { OperatorService } from '../../services/Operator.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { OrderChangeStateComponent } from '../../order-change-state-dialog/order-change-state-dialog.component';
 
 declare const pdfMake: any;
 
@@ -225,6 +226,11 @@ export class OrdersComponent {
       this.admin = false;
     }
 
+    if (!this.IsOperatorView && !this.displayedColumns.includes('history')) {
+      const lastIndex = this.displayedColumns.length - 1;
+      this.displayedColumns.splice(lastIndex, 0, 'history');
+    }
+
     if (customerId || operatorId || sectorId || status|| start || end || pageIndex || pageSize || this.admin) {
       const params = new URLSearchParams();
       params.append('page', (pageIndex + 1).toString()); 
@@ -250,6 +256,7 @@ export class OrdersComponent {
             action: {
               edit: 'ri-edit-line',
               download: 'ri-edit-line',
+              history: 'ri-search-line',
               delete: 'ri-delete-bin-line'
             }
           }));
@@ -258,6 +265,14 @@ export class OrdersComponent {
           this.dataSource.sort = this.sort;
           this.firstLoading = false;
       });
+  }
+
+  History(item: Order){
+    const dialogRef = this.dialog.open(OrderChangeStateComponent, {
+      data: item.orderChangeState,
+      width: '80vw',
+      maxWidth: '1000px'
+    });    
   }
 
   onSubmit(){

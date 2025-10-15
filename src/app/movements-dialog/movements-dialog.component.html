@@ -1,4 +1,9 @@
-<h1 mat-dialog-title>Storico movimentazioni</h1>
+<h1 mat-dialog-title>
+    <span>Storico movimentazioni</span>
+    <button mat-raised-button class="filter" (click)="exportToExcel()">
+      Esporta in Excel
+    </button>
+</h1>
 <mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
   <mat-card-content>
     <div class="to-do-list-table">

@@ -546,8 +546,8 @@ export class AddOrderComponent {
 
       if (this.id) {
         formData._id = this.id;
-        this.orderService.updateOrder(formData)
-          .subscribe((data: boolean) => {
+        this.orderService.updateOrder(formData, formData.operatorId?.toString())
+          .subscribe((data: Order) => {
             if (data)
               this.router.navigate([navigation]);
             else
