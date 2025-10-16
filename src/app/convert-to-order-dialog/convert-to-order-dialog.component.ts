@@ -15,6 +15,8 @@ import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { SectorService } from '../services/Sector.service';
 import { OperatorService } from '../services/Operator.service';
+import { OrderStateService } from '../services/OrderState.service';
+import { OrderState } from '../interfaces/order-state';
 
 @Component({
   selector: 'app-convert-to-order-dialog',
@@ -45,20 +47,9 @@ export class ConvertToOrderDialogComponent {
 
   suppliers: any[] = [];
 
-  stock_type: string = "";
+  orderState: any[] = [];
 
-  orderStatusOptions = [
-    { value: OrderStatus.COMPLETATO, label: 'Completato' },
-    { value: OrderStatus.IN_LAVORAZIONE, label: 'In lavorazione' },
-    { value: OrderStatus.RIMBORSATO, label: 'Rimborsato' },
-    { value: OrderStatus.IN_SOSPESO, label: 'In sospeso' },
-    { value: OrderStatus.CANCELLATO, label: 'Cancellato' },
-    { value: OrderStatus.FALLITO, label: 'Fallito' },
-    { value: OrderStatus.SPEDITO, label: 'Spedito' },
-    { value: OrderStatus.CONSEGNATO, label: 'Consegnato' },
-    { value: OrderStatus.COMPLETATO_DUPLICATO, label: 'Completato duplicato' },
-    { value: OrderStatus.IN_CONSEGNA, label: 'In consegna' }
-  ];
+  stock_type: string = "";
 
   sectors: any[] = [];
   operators: any[] = [];
@@ -67,6 +58,7 @@ export class ConvertToOrderDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: string,
     private sectorService: SectorService,
     private operatorService: OperatorService,
+    private orderStateService: OrderStateService,
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
@@ -75,7 +67,7 @@ export class ConvertToOrderDialogComponent {
       operatorId: [null]
     });
   }
-
+  
   // carica operatori
   selectOperators(c:any){
     this.operatorService.getOperators(c.value).subscribe((data: any[]) => {
@@ -94,6 +86,12 @@ export class ConvertToOrderDialogComponent {
     this.operatorService.getOperators(this.data!).subscribe((data: any[]) => {
       this.operators = data;
     });
+
+    this.orderStateService.getOrderStates()
+      .subscribe((data: OrderState[]) => {
+        this.orderState = data;
+    });
+
   }
 
   onSave() {

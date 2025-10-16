@@ -18,6 +18,7 @@ import { AddOrderComponent } from './pages/orders/add-order/add-order.component'
 import { SectorsComponent } from './pages/sectors/sectors.component';
 import { QuotationsComponent } from './pages/orders/quotations/quotations.component';
 import { AgentsComponent } from './pages/agents/agents.component';
+import { OrderStateComponent } from './pages/order-state/order-state.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -45,6 +46,7 @@ export const routes: Routes = [
             { path: 'agents', component: AgentsComponent },
             { path: 'categories', component: CategoriesComponent },
             { path: 'sectors', component: SectorsComponent },
+            { path: 'order-state', component: OrderStateComponent },
             { path: 'products', component: ProductsComponent },
             { path: 'product/add/:id', component: AddProductComponent },
             { path: 'product/add', component: AddProductComponent },

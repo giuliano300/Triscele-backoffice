@@ -213,7 +213,7 @@ export class QuotationsComponent {
     this.firstLoading = true;
     
     const params = new URLSearchParams();
-    params.append('status', OrderStatus.PREVENTIVO.toString());
+    params.append('preventivo', 'true');
 
     if (customerId || sectorId || start || end || pageIndex || pageSize) {
       params.append('page', (pageIndex + 1).toString()); 

@@ -2,6 +2,7 @@ import { OrderStatus, PaymentMethod } from '../enum/enum';
 import { OrderProducts } from '../interfaces/orderProducts';
 import { Customers } from './customers';
 import { Operators } from './operators';
+import { OrderState } from './order-state';
 import { OrderChangeState } from './orderChangeState';
 import { Sectors } from './sectors';
 
@@ -10,7 +11,7 @@ export interface Order {
   customerId: Customers;
   operatorId?: Operators;
   sectorId?: Sectors;
-  status: OrderStatus;
+  status?: OrderState;
   insertDate: string;
   paymentMethod: PaymentMethod;
   expectedDelivery: string;

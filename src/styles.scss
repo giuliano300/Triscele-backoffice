@@ -59,6 +59,7 @@ $trinta-theme: mat.define-theme((
     --infoColor: #2DB6F5;
     --warningColor: #ffb264;
     --successColor: #2ed47e;
+    --validColor: #31c97a;
     --darkColor: #262626;
     --blackColor: #5b5b98;
     --whiteColor: #ffffff;
@@ -358,7 +359,28 @@ h5{
 }
 
 .error{
-    color: var(--dangerColor);
+    color: var(--dangerColor)!important;
+    opacity: 0.8;
+    &:hover{
+        opacity: 1;
+    }
+}
+
+
+.warning{
+    color: var(--warningColor)!important;
+    opacity: 0.8;
+    &:hover{
+        opacity: 1;
+    }
+}
+
+.valid{
+    color: var(--validColor)!important;
+    opacity: 0.8;
+    &:hover{
+        opacity: 1;
+    }
 }
 
 .ngx-file-drop__drop-zone{

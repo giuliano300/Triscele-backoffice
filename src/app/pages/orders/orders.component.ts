@@ -27,6 +27,8 @@ import { Operators } from '../../interfaces/operators';
 import { OperatorService } from '../../services/Operator.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { OrderChangeStateComponent } from '../../order-change-state-dialog/order-change-state-dialog.component';
+import { OrderStateService } from '../../services/OrderState.service';
+import { OrderState } from '../../interfaces/order-state';
 
 declare const pdfMake: any;
 
@@ -99,6 +101,8 @@ export class OrdersComponent {
 
   operators: Operators[] = [];
 
+  orderState: OrderState[] = [];
+
   IsOperatorView: boolean = false;
 
   firstLoading: boolean = false;
@@ -123,26 +127,13 @@ export class OrdersComponent {
     'delete'
   ];
 
-  OrderStatusLabels: Record<number, string> = {
-    1: 'Completato',
-    2: 'In lavorazione',
-    3: 'Rimborsato',
-    4: 'In sospeso',
-    5: 'Cancellato',
-    6: 'Fallito',
-    10: 'Spedito',
-    11: 'Preventivo',
-    14: 'Consegnato',
-    15: 'Completato duplicato',
-    16: 'In consegna'
-  };
-
-  constructor(
+ constructor(
       private router: Router,
       private fb: FormBuilder,
       private orderService: OrderService,
       private customerService: CustomerService,
       private operatorService: OperatorService,
+      private orderStateService: OrderStateService,
       private adapter: DateAdapter<any>,
       private dialog: MatDialog
     ) 
@@ -172,6 +163,11 @@ export class OrdersComponent {
     this.operatorService.getOperators()
       .subscribe((data: Operators[]) => {
         this.operators = data;
+    });
+
+    this.orderStateService.getOrderStates()
+      .subscribe((data: OrderState[]) => {
+        this.orderState = data;
     });
   }
 
@@ -213,7 +209,7 @@ export class OrdersComponent {
     });
   }
 
-  getOrders(customerId?: string, operatorId?: string, status?: number, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
+  getOrders(customerId?: string, operatorId?: string, status?: string, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
     let sectorId = '';
     this.firstLoading = true;
@@ -231,7 +227,7 @@ export class OrdersComponent {
       this.displayedColumns.splice(lastIndex, 0, 'history');
     }
 
-    if (customerId || operatorId || sectorId || status|| start || end || pageIndex || pageSize || this.admin) {
+    if (customerId || operatorId || sectorId || status || start || end || pageIndex || pageSize || this.admin) {
       const params = new URLSearchParams();
       params.append('page', (pageIndex + 1).toString()); 
       params.append('limit', pageSize.toString());

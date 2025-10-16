@@ -138,7 +138,7 @@
                     <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleAdmin">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
-                                <i-feather name="share-2"></i-feather>
+                                <i-feather name="file-text"></i-feather>
                                 <span class="title">
                                     Preventivi
                                 </span>
@@ -163,7 +163,7 @@
                     <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleOrders">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
-                                <i-feather name="share-2"></i-feather>
+                                <i-feather name="file-text"></i-feather>
                                 <span class="title">
                                     Ordini
                                 </span>
@@ -197,6 +197,13 @@
                         <i-feather name="users"></i-feather>
                         <span class="title">
                             Agenti
+                        </span>
+                    </a>                
+
+                    <a routerLink="/order-state" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                        <i-feather name="bar-chart-2"></i-feather>
+                        <span class="title">
+                            Stato ordini
                         </span>
                     </a>                
 

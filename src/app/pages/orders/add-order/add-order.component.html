@@ -91,8 +91,8 @@
             <i-feather name="bar-chart-2"></i-feather>
             <mat-label>Seleziona uno stato</mat-label>
             <mat-select formControlName="status">
-              <mat-option *ngFor="let o of orderStatusOptions" [value]="o.value">
-                {{ o.label }}
+              <mat-option *ngFor="let o of orderState" [value]="o._id">
+                {{ o.name }}
               </mat-option>
             </mat-select>
           </mat-form-field>        

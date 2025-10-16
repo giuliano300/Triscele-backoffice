@@ -10,6 +10,8 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { OrderChangeState } from '../interfaces/orderChangeState';
 import { OrderStatus } from '../enum/enum';
 import * as XLSX from 'xlsx';
+import { OrderState } from '../interfaces/order-state';
+import { OrderStateService } from '../services/OrderState.service';
 
 
 @Component({
@@ -35,6 +37,8 @@ export class OrderChangeStateComponent {
 
   dataSource = new MatTableDataSource<OrderChangeState>();
 
+  orderState: any[] = [];
+
   displayedColumns: string[] = [
     'changedAt',
     'oldStatus',
@@ -44,6 +48,7 @@ export class OrderChangeStateComponent {
 
   constructor(public dialogRef: MatDialogRef<OrderChangeStateComponent>,
     @Inject(MAT_DIALOG_DATA) public data:  OrderChangeState[],
+    private orderStateService: OrderStateService
   ) {
     
   }
@@ -68,29 +73,21 @@ export class OrderChangeStateComponent {
     XLSX.writeFile(wb, 'storico_cambi_stato.xlsx');
   }
 
-  getStatusName(id: number): string{
-    const map: Record<number, string> = {
-      [OrderStatus.COMPLETATO]: 'Completato',
-      [OrderStatus.IN_LAVORAZIONE]: 'In lavorazione',
-      [OrderStatus.RIMBORSATO]: 'Rimborsato',
-      [OrderStatus.IN_SOSPESO]: 'In sospeso',
-      [OrderStatus.CANCELLATO]: 'Cancellato',
-      [OrderStatus.FALLITO]: 'Fallito',
-      [OrderStatus.SPEDITO]: 'Spedito',
-      [OrderStatus.PREVENTIVO]: 'Preventivo',
-      [OrderStatus.CONSEGNATO]: 'Consegnato',
-      [OrderStatus.COMPLETATO_DUPLICATO]: 'Completato duplicato',
-      [OrderStatus.IN_CONSEGNA]: 'In consegna',
-    };
-
-    return map[id] || 'Sconosciuto';
+  getStatusName(id: string): string{
+    const status = this.orderState.find(s => s._id === id);
+    return status.name || 'Sconosciuto';
   }
 
   ngOnInit(): void {
     if(!this.data)
       this.onClose();
 
-      this.dataSource = new MatTableDataSource<OrderChangeState>(this.data);
+    this.dataSource = new MatTableDataSource<OrderChangeState>(this.data);
+
+    this.orderStateService.getOrderStates()
+       .subscribe((data: OrderState[]) => {
+         this.orderState = data;
+    });
   }
 
   onClose(): void {

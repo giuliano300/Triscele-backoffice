@@ -1,0 +1,29 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup] = "categoryForm">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Stato</label>
+          <mat-form-field class="w-100">
+            <i-feather name="user"></i-feather>
+            <mat-label>Inserisci lo stato dell'ordine</mat-label>
+            <input matInput formControlName="name" type="text">
+          </mat-form-field>
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Colore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="command"></i-feather>
+            <mat-label>Inserisci il colore dello stato</mat-label>
+            <input matInput formControlName="color" type="color">
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()" class="btn back">Chiudi</button>
+  <button mat-flat-button (click)="onSave()" class="btn" [disabled]="categoryForm.invalid">Salva</button>
+</mat-dialog-actions>

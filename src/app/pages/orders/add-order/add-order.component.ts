@@ -33,6 +33,8 @@ import { SectorService } from '../../../services/Sector.service';
 import { AlertDialogComponent } from '../../../alert-dialog/alert-dialog.component';
 import { Agents } from '../../../interfaces/agents';
 import { AgentService } from '../../../services/Agent.service';
+import { OrderState } from '../../../interfaces/order-state';
+import { OrderStateService } from '../../../services/OrderState.service';
 
 registerLocaleData(localeIt);
 
@@ -95,20 +97,6 @@ export class AddOrderComponent {
   operators: any[] = [];
   sectors: any[] = [];
 
-  orderStatusOptions = [
-    { value: OrderStatus.COMPLETATO, label: 'Completato' },
-    { value: OrderStatus.IN_LAVORAZIONE, label: 'In lavorazione' },
-    { value: OrderStatus.RIMBORSATO, label: 'Rimborsato' },
-    { value: OrderStatus.IN_SOSPESO, label: 'In sospeso' },
-    { value: OrderStatus.CANCELLATO, label: 'Cancellato' },
-    { value: OrderStatus.FALLITO, label: 'Fallito' },
-    { value: OrderStatus.SPEDITO, label: 'Spedito' },
-    { value: OrderStatus.CONSEGNATO, label: 'Consegnato' },
-    { value: OrderStatus.COMPLETATO_DUPLICATO, label: 'Completato duplicato' },
-    { value: OrderStatus.IN_CONSEGNA, label: 'In consegna' }
-    //{ value: OrderStatus.PREVENTIVO, label: 'Preventivo' }
-  ];
-
   paymentMethods = Object.values(PaymentMethod);
  
   agents: Agents[] = [];
@@ -118,6 +106,8 @@ export class AddOrderComponent {
   products: ProductViewModel[] = [];
 
   orderProducts: OrderProducts[] = [];
+
+  orderState: OrderState[] = [];
 
   state: number | undefined;
 
@@ -135,7 +125,8 @@ export class AddOrderComponent {
     private utilsService: UtilsService,
     private orderService: OrderService,
     private sectorService: SectorService,
-    private agentService: AgentService
+    private agentService: AgentService,
+    private orderStateService: OrderStateService
   ) {
     this.adapter.setLocale('it-IT');
     this.productForm = this.fb.group({
@@ -323,7 +314,10 @@ export class AddOrderComponent {
       this.sectors = data;
     });
 
-
+    this.orderStateService.getOrderStates()
+      .subscribe((data: OrderState[]) => {
+        this.orderState = data;
+    });
 
     this.route.paramMap.subscribe(params => {
       this.id = params.get('id');
@@ -349,7 +343,7 @@ export class AddOrderComponent {
               sectorId: data.sectorId?._id!.toString(),
               agentId: data.agentId,
               paymentMethod: data.paymentMethod,
-              status: data.status,
+              status: data.status ?  data.status?._id!.toString() : '',
               insertDate: new Date(year, month - 1, day),
               expectedDelivery: new Date(yearEx, monthEx - 1, dayEx),
               shippingAddress: data.shippingAddress,
@@ -540,7 +534,7 @@ export class AddOrderComponent {
       if(this.state)
       {
         navigation = "/quotations";
-        formData.status = OrderStatus.PREVENTIVO;
+        formData.status = undefined;
         formData.operatorId = undefined;
       }
 

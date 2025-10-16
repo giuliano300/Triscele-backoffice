@@ -81,7 +81,6 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
-                    min-width: 120px;
 
                     .task-name {
                         padding-left: 28px;
@@ -317,66 +316,8 @@
 @media only screen and (min-width: 1600px) {}
 
 
-.filter {
-    width: 100%;
-    height: auto;
-    display: block;
-    min-width: auto;
-    margin-top: 0px;
-    border-radius: 6px;
-    padding: 18px 25px;
-    color: var(--whiteColor)!important;
-    background-color: var(--primaryColor);
-    font-size: 14px;
-    font-weight: 400;
-    font-family: var(--headingFontFamily);
-    border: none;
-    cursor: pointer;
-}
-
-.mini{
-    max-width: 90px!important;
-    width: 90px!important;
-}
-
-
-.remove {
-    width: 100%;
-    height: auto;
-    display: block;
-    min-width: auto;
-    margin-top: 0px;
-    border-radius: 6px;
-    padding: 18px 25px;
-    color: var(--whiteColor)!important;
-    background-color: var(--dangerColor);
-    font-size: 14px;
-    font-weight: 400;
-    font-family: var(--headingFontFamily);
-}
-
-::ng-deep .mat-form-field-label {
-  font-size: 14px !important;
-  color: #888; /* opzionale */
-}
-
-.note-cell {
-  white-space: pre-line;
-  span{
-    font-size: 11px;
-    color: #6f6e81;
-  }
-}
-
 .span-color{
-    color: var(--whiteColor);
-    opacity: 0.7;
-    padding: 6px 10px 8px;
-    font-weight: 300;
-    border-radius: 5px;
-    box-shadow: 0px 1px 1px #a6a5bb;
-    font-size: 14px;
-    min-width: 130px;
+    width: 48px;
+    height: 22px;
     float: left;
-    text-align: center;
 }

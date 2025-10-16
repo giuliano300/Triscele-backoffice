@@ -48,6 +48,8 @@ export class OrderService {
 
       const url = this.apiUrl + "/" + c._id + o;
 
+      console.log(JSON.stringify(c));
+
       return this.http.put<Order>(url, c);
     }
 

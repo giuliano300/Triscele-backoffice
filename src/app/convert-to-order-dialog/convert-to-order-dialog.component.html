@@ -9,8 +9,8 @@
             <i-feather name="bar-chart-2"></i-feather>
             <mat-label>Stato lavorazione</mat-label>
             <mat-select formControlName="status">
-              <mat-option *ngFor="let m of orderStatusOptions" [value]="m.value">
-                {{ m.label }}
+              <mat-option *ngFor="let m of orderState" [value]="m._id">
+                {{ m.name }}
               </mat-option>
             </mat-select>
           </mat-form-field>        
