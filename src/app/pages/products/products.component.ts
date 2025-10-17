@@ -29,6 +29,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatInput } from "@angular/material/input";
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MovementType } from '../../enum/enum';
+import { AddGeneralMovementComponent } from '../../add-general-movement-dialog/add-general-movement-dialog.component';
 
 @Component({
   selector: 'app-products',
@@ -67,6 +68,7 @@ export class ProductsComponent {
     'cost',
     'theshold',
     'stock',
+    'duplicate',
     'edit',
     'movements',
     'delete'
@@ -166,6 +168,7 @@ export class ProductsComponent {
           this.Products = data.map((p: any) => ({
             ...p,
             action: {
+              duplicate: 'ri-file-copy-line',
               edit: 'ri-edit-line',
               movements: 'ri-search-line',
               delete: 'ri-delete-bin-line'
@@ -196,6 +199,26 @@ export class ProductsComponent {
     });
   }
 
+  DuplicateItem(item: ProductViewModel) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {title: "Duplicazione prodotto" , description: "Sei sicuro di voler duplicare " + item.name + "?", confirm: "Conferma"},
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.productService.duplicateProduct(item!.id!)
+          .subscribe((data: any) => {
+            if (data) {
+              this.getProducts();
+            }
+          });
+      } else {
+        console.log("Close");
+      }
+    });
+  }
+
   ShowMovements(item: ProductViewModel){
     const dialogRef = this.dialog.open(MovementsComponent, {
       data: item,
@@ -210,6 +233,34 @@ export class ProductsComponent {
 
   getEnabledStatus(enabled: boolean): string {
     return enabled ? "Attivo" : "Disattivo";
+  }
+
+
+  AddGeneralMovement(){
+    const dialogRef = this.dialog.open(AddGeneralMovementComponent, {
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) 
+      {
+        if(result.movementType != MovementType[0].id)
+        {
+          result.supplierId = null,
+          result.supplierName = null,
+          result.supplierCode = null
+        }
+
+        this.productMovementsService.setProductMovements(result)
+          .subscribe((data: ProductMovements) => {
+            if (data) {
+              this.getProducts();
+            }
+          });
+      } else {
+        console.log("Close");
+      }
+    });
   }
 
   addMovements(item: ProductViewModel){

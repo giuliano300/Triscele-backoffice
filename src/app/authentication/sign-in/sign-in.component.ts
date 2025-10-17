@@ -56,6 +56,7 @@ export class SignInComponent {
             };
             
             this.userService.login(login).subscribe((data: any) => {
+                console.log(data);
                 if(data == null)
                 {
                     this.operatorService.loginOperator(login).subscribe((data: any) => {

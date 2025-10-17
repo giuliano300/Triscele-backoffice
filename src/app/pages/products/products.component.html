@@ -48,6 +48,11 @@
                             Rimuovi
                         </button>               
                     </div>
+                    <div class="col-lg-2">
+                         <button mat-button class="movements" type="button" [disabled]="form.invalid" (click)="AddGeneralMovement()">
+                            Carico/Scarico
+                        </button>               
+                    </div>
                 </div>
             </div>
         </form>
@@ -139,6 +144,18 @@
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="duplicate">
+              <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
+                  Duplica
+              </th>
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini">
+                  <div class="action">
+                      <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DuplicateItem(element)">
+                          <i class="{{element.action.duplicate}}"></i>
+                      </button>
+                  </div>
+              </td>
+          </ng-container>
           <ng-container matColumnDef="edit">
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Modifica
@@ -153,8 +170,8 @@
           </ng-container>
 
           <ng-container matColumnDef="movements">
-              <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
-                  Movimentazioni
+              <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
+                  Mov.
               </th>
               <td mat-cell *matCellDef="let element" class="text-center pr-0">
                   <div class="action">

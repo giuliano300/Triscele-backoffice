@@ -89,10 +89,8 @@ export class AddCustomerComponent {
       vatNumber: ['', [Validators.required, partitaIvaValidator]],
       name: [''],
       lastName: [''],
-      birthDate: [''],
       mobile: [''],
       sdi: [''],
-      status: [null, Validators.required],
       email: ['', Validators.required],
       agentName: [''],
       address: [''],
@@ -155,7 +153,8 @@ export class AddCustomerComponent {
     if (this.disciplinaryForm.valid) {
       const formData = {
         ...this.disciplinaryForm.value,
-        status: Number(this.disciplinaryForm.value.status),      
+        status: Number(this.disciplinaryForm.value.status),   
+        customerNote: this.disciplinaryForm.value.customerNote ?? ''   
       };
 
       const w: Customers = formData;
