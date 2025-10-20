@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { NotFoundComponent } from './common/not-found/not-found.component';
 import { SignInComponent } from './authentication/sign-in/sign-in.component';
 import { AuthenticationComponent } from './authentication/authentication.component';
-import { AuthGuard } from './authGuard/AuthGuard';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { CustomersComponent } from './pages/customers/customers.component';
 import { AddCustomerComponent } from './pages/customers/add/add-customer.component';
@@ -19,6 +18,9 @@ import { SectorsComponent } from './pages/sectors/sectors.component';
 import { QuotationsComponent } from './pages/orders/quotations/quotations.component';
 import { AgentsComponent } from './pages/agents/agents.component';
 import { OrderStateComponent } from './pages/order-state/order-state.component';
+import { OperatorOrdersComponent } from './pages/orders/operator-orders/operator-orders.component';
+import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
+import { RoleGuard } from './authGuard/AuthGuard';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -31,29 +33,101 @@ export const routes: Routes = [
     },
     {
         path: '',
-        canActivate: [AuthGuard],
         children: [
-            { path: 'dashboard', component: DashboardComponent },
-            { path: 'customers', component: CustomersComponent },
-            { path: 'customer/add/:id', component: AddCustomerComponent },
-            { path: 'customer/add', component: AddCustomerComponent },
-            { path: 'suppliers', component: SuppliersComponent },
-            { path: 'supplier/add/:id', component: AddSupplierComponent },
-            { path: 'supplier/add', component: AddSupplierComponent },
-            { path: 'operators', component: OperatorsComponent },
-            { path: 'operator/add/:id', component: AddOperatorComponent },
-            { path: 'operator/add', component: AddOperatorComponent },
-            { path: 'agents', component: AgentsComponent },
-            { path: 'categories', component: CategoriesComponent },
-            { path: 'sectors', component: SectorsComponent },
-            { path: 'order-state', component: OrderStateComponent },
-            { path: 'products', component: ProductsComponent },
-            { path: 'product/add/:id', component: AddProductComponent },
-            { path: 'product/add', component: AddProductComponent },
-            { path: 'orders', component: OrdersComponent },
-            { path: 'quotations', component: QuotationsComponent },
-            { path: 'order/add/:id', component: AddOrderComponent },
-            { path: 'order/add', component: AddOrderComponent },
+            { path: 'dashboard', 
+                component: DashboardComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+             },
+            { path: 'customers', component: CustomersComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] } 
+            },
+            { path: 'customer/add/:id', component: AddCustomerComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] } 
+            },
+            { path: 'customer/add', component: AddCustomerComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] } 
+            },
+            { path: 'suppliers', component: SuppliersComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'supplier/add/:id', component: AddSupplierComponent ,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'supplier/add', component: AddSupplierComponent ,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'operators', component: OperatorsComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+                
+            },
+            { path: 'operator/add/:id', component: AddOperatorComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'operator/add', component: AddOperatorComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'agents', component: AgentsComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'categories', component: CategoriesComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'sectors', component: SectorsComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'order-state', component: OrderStateComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'products', component: ProductsComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore']  }
+            },
+            { path: 'product/add/:id', component: AddProductComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore']  }
+            },
+            { path: 'product/add', component: AddProductComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'orders', component: OrdersComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'operator-orders', component: OperatorOrdersComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'operatore' }
+            },
+            { path: 'quotations', component: QuotationsComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'order/add/:id', component: AddOrderComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'order/add', component: AddOrderComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            {
+                path: 'access-denied',
+                component: AccessDeniedComponent
+            }
         ]
     },
     { path: '**', component: NotFoundComponent},

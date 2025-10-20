@@ -59,6 +59,7 @@ export class OperatorService {
       localStorage.setItem('isAdmin', "false");
       localStorage.setItem('isOperator', "true");
       localStorage.setItem('loginName', c.name!);
+      localStorage.setItem('role', 'operatore');
       this.authService.setIsLogin(true);
       this.authService.setIsAdmin(false);
       this.authService.setIsOperator(true);

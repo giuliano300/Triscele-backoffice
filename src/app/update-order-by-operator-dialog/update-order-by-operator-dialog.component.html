@@ -1,0 +1,38 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup] = "form">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Modifica stato ordine</label>
+          <mat-form-field class="w-100">
+            <i-feather name="bar-chart-2"></i-feather>
+            <mat-label>Stato ordine</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let m of orderState" [value]="m._id">
+                {{ m.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Assegna ad un altro operatore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="user"></i-feather>
+            <mat-label>Assegna ad un altro operatore</mat-label>
+            <mat-select formControlName="operatorId">
+              <mat-option *ngFor="let m of operators" [value]="m._id">
+                {{ m.businessName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <input type="hidden" formControlName="orderId">
+</form>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()" class="btn back">Chiudi</button>
+  <button mat-flat-button (click)="onSave()" class="btn" [disabled]="form.invalid">Salva</button>
+</mat-dialog-actions>

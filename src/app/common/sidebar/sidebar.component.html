@@ -160,6 +160,13 @@
                         </ul>
                     </mat-expansion-panel>
 
+                    <a routerLink="/operator-orders" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleOperatorOrders">
+                        <i-feather name="file-text"></i-feather>
+                        <span class="title">
+                            Ordini
+                        </span>
+                    </a>
+
                     <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleOrders">
                         <mat-expansion-panel-header>
                             <mat-panel-title>

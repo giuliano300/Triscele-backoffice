@@ -15,11 +15,12 @@ import { UsersService } from '../../services/User.service';
 import { JwtPayloads } from '../../interfaces/JwtPayloads';
 import { OperatorService } from '../../services/Operator.service';
 import { Permission } from '../../interfaces/permissions';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-sign-in',
     imports: [MatButton, MatIconButton, FormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, FeathericonsModule, MatCheckboxModule, 
-        ReactiveFormsModule, NgIf],
+        ReactiveFormsModule, NgIf, MatProgressSpinnerModule],
     templateUrl: './sign-in.component.html',
     styleUrl: './sign-in.component.scss'
 })
@@ -27,6 +28,7 @@ export class SignInComponent {
     isError: boolean = false;
     user: JwtPayloads | null = null;
     options: any [] = [];
+    submit: boolean = false;
 
     constructor(
         private fb: FormBuilder,
@@ -49,6 +51,7 @@ export class SignInComponent {
     // Form
     authForm: FormGroup;
     onSubmit() {
+        this.submit = true;
         if (this.authForm.valid) {
             let login:Login = {
                 "email": this.authForm.value["email"],
@@ -56,7 +59,7 @@ export class SignInComponent {
             };
             
             this.userService.login(login).subscribe((data: any) => {
-                console.log(data);
+                this.submit = false;
                 if(data == null)
                 {
                     this.operatorService.loginOperator(login).subscribe((data: any) => {
@@ -92,7 +95,7 @@ export class SignInComponent {
                                     this.router.navigate(['/products']);
                                     break;
                                     case 'ORDERSMODULE':
-                                    this.router.navigate(['/orders']);
+                                    this.router.navigate(['/operator-orders']);
                                     break;
                                     case 'OPERATORSSMODULE':
                                     this.router.navigate(['/operators']);
@@ -114,6 +117,7 @@ export class SignInComponent {
                     localStorage.setItem('isLogin', "true");
                     localStorage.setItem('isAdmin', "true");
                     localStorage.setItem('isOperator', "false");
+                    localStorage.setItem('role', 'admin');
                     localStorage.setItem('loginName', this.user!.name!);
                     this.authService.setIsLogin(true);
                     this.authService.setIsAdmin(true);

@@ -24,7 +24,7 @@ export class SidebarComponent {
     isVisibleOrders: boolean = true;
     isVisibleSectors: boolean = true;
     isVisibleAdmin: boolean = true;
-    
+    isVisibleOperatorOrders: boolean = false;
 
     constructor(
         private router: Router,
@@ -87,6 +87,7 @@ export class SidebarComponent {
                 this.isVisibleSectors = false;
                 this.isVisibleDashboard = false;
                 this.isVisibleAdmin = false;
+                this.isVisibleOrders = false;
 
                 const permissions = operator.permission || [];
                 this.saveLocal('persistentPermissions', permissions);
@@ -104,16 +105,17 @@ export class SidebarComponent {
         this.isVisibleOperators = has("OperatorsModule");
         this.isVisibleSuppliers = has("SuppliersModule");
         this.isVisibleProducts = has("ProductsModule");
-        this.isVisibleOrders = has("OrdersModule");
+        this.isVisibleOperatorOrders = has("OrdersModule");
 
         this.isVisibleUsers = this.isVisibleCustomers || this.isVisibleOperators || this.isVisibleSuppliers;
-        this.isVisibleProductions = this.isVisibleProducts || this.isVisibleOrders;
+        this.isVisibleProductions = this.isVisibleProducts || this.isVisibleOperatorOrders;
     }
 
     /** Set visibilità completa per admin */
     private setAdminVisibility() {
         this.isAdmin = true;
         this.isOperator = false;
+        this.isVisibleOperatorOrders = false;
 
         this.isVisibleDashboard = true;
         this.isVisibleCustomers = true;
@@ -123,6 +125,7 @@ export class SidebarComponent {
         this.isVisibleProductions = true;
         this.isVisibleProducts = true;
         this.isVisibleOrders = true;
+
     }
 
     /** Utility per leggere/scrivere su localStorage */
@@ -149,6 +152,7 @@ export class SidebarComponent {
         localStorage.removeItem('isLogin');
         localStorage.removeItem('isAdmin');
         localStorage.removeItem('isOperator');
+        localStorage.removeItem('role');
         this.authService.clearRoles();
         this.router.navigate(['/']);
     }

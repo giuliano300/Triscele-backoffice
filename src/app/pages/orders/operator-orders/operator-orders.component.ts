@@ -1,37 +1,37 @@
 import { Component, LOCALE_ID, ViewChild } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
-import { FeathericonsModule } from "../../icons/feathericons/feathericons.module";
+import { FeathericonsModule } from "../../../icons/feathericons/feathericons.module";
 import { MatSelect } from "@angular/material/select";
 import { MatNativeDateModule, MatOptionModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, DateAdapter  } from "@angular/material/core";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, registerLocaleData } from '@angular/common';
-import { Customers } from '../../interfaces/customers';
+import { Customers } from '../../../interfaces/customers';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { Order } from '../../interfaces/orders';
-import { OrderService } from '../../services/Order.service';
-import { CustomerService } from '../../services/Customer.service';
+import { Order } from '../../../interfaces/orders';
+import { OrderService } from '../../../services/Order.service';
+import { CustomerService } from '../../../services/Customer.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDatepickerModule, MatDatepickerToggle } from "@angular/material/datepicker";
 import { MatInputModule } from '@angular/material/input';
 import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Operators } from '../../interfaces/operators';
-import { OperatorService } from '../../services/Operator.service';
+import { Operators } from '../../../interfaces/operators';
+import { OperatorService } from '../../../services/Operator.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { OrderChangeStateComponent } from '../../order-change-state-dialog/order-change-state-dialog.component';
-import { OrderStateService } from '../../services/OrderState.service';
-import { OrderState } from '../../interfaces/order-state';
-import { Bold } from 'angular-feather/icons';
-import { clause } from '../../../main';
-import { MatTooltip } from "@angular/material/tooltip";
+import { OrderChangeStateComponent } from '../../../order-change-state-dialog/order-change-state-dialog.component';
+import { OrderStateService } from '../../../services/OrderState.service';
+import { OrderState } from '../../../interfaces/order-state';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { UpdateOerderByOperatorComponent } from '../../../update-order-by-operator-dialog/update-order-by-operator-dialog.component';
+import { clause } from '../../../../main';
 
 declare const pdfMake: any;
 
@@ -50,7 +50,7 @@ export const MY_DATE_FORMATS = {
 };
 
 @Component({
-  selector: 'app-orders',
+  selector: 'app-operator-orders',
   imports: [
     MatCardModule,
     MatButtonModule,
@@ -73,10 +73,10 @@ export const MY_DATE_FORMATS = {
     MatInputModule,
     MatNativeDateModule,
     MatProgressBarModule,
-    MatTooltip
+    MatTooltipModule
 ],
-  templateUrl: './orders.component.html',
-  styleUrl: './orders.component.scss',
+  templateUrl: './operator-orders.component.html',
+  styleUrl: './operator-orders.component.scss',
   providers: [
     { provide: LOCALE_ID, useValue: 'it-IT' },
     { provide: MAT_DATE_LOCALE, useValue: 'it-IT' },
@@ -91,7 +91,7 @@ export const MY_DATE_FORMATS = {
     ]
 })
 
-export class OrdersComponent {
+export class OperatorOrdersComponent {
   form: FormGroup;
 
   orders: Order[] = [];
@@ -122,13 +122,10 @@ export class OrdersComponent {
     'shippingBusinessName',
     'orderProducts',
     'insertDate',
-    'totalPrice',
-    'paymentMethod',
+    'expectedDelivery',
     'status',
-    'edit',
-    'downloadCustomer',
     'downloadOperator',
-    'delete'
+    'edit'
   ];
 
  constructor(
@@ -322,189 +319,6 @@ export class OrdersComponent {
     return note ? note.replace(/<br\s*\/?>/gi, '\n') : '';
   }
 
-
-  DownloadDoc(item: Order) {
-    const form = item;
-    const products = item.orderProducts;
-
-    const docDefinition = {
-      pageSize: 'A4',
-      pageMargins: [40, 60, 40, 60],
-      defaultStyle: {
-        fontSize: 11,
-        color: '#333'
-      },
-      content: [
-        // Header con titolo ordine e data prevista
-        {
-          columns: [
-            {
-              stack: [
-                { text: 'Triscele Srl', style: 'header' },
-                { text: `Data ordine: ${new Date(form.insertDate).toLocaleDateString()}`, style: 'smallInfo', alignment: 'left', margin: [0, 10, 0, 10] }
-              ]
-            },
-            {
-              stack: [
-                { text: `Ordine N. ${form._id}`, style: 'subheader', alignment: 'right' },
-                { text: `Consegna prevista: ${new Date(form.expectedDelivery).toLocaleDateString()}`, style: 'smallInfo', alignment: 'right', margin: [0, 10, 0, 10] }
-              ]
-            }
-          ]
-        },
-
-        // Dati cliente
-        {
-          style: 'section',
-          table: {
-            widths: ['*', '*'],
-            body: [
-              [
-                { text: 'Cliente', bold: true, margin: [5, 5, 5, 5] },
-                { text: 'Spedizione', bold: true, margin: [5, 5, 5, 5] }
-              ],
-              [
-                {
-                  text: `${form.shippingName} ${form.shippingLastName}\nProvincia: ${form.shippingProvince}\nTEL: ${form.shippingTelephone}`,
-                  lineHeight: 1.4, margin: [5, 5, 5, 5]
-                },
-                {
-                  text: `Indirizzo: ${form.shippingAddress}\nCAP: ${form.shippingZipcode}\nComune: ${form.shippingCity}\nProvincia: ${form.shippingProvince}`,
-                  lineHeight: 1.4, margin: [5, 5, 5, 5]
-                }
-              ]
-            ]
-          },
-          layout: {
-            hLineWidth: () => 0.5,
-            vLineWidth: () => 0.5,
-            hLineColor: () => '#ccc',
-            vLineColor: () => '#ccc'
-          },
-          margin: [0, 5, 0, 15]
-        },
-
-        // Box note cliente
-        form.customerNote ? {
-          layout: {
-            hLineWidth: () => 0.5,
-            vLineWidth: () => 0.5,
-            hLineColor: () => '#ccc',
-            vLineColor: () => '#ccc'
-          },
-          table: {
-            widths: ['*'],
-            body: [[
-              {
-                stack: [
-                  { text: 'Note cliente', bold: true, margin: [0, 0, 0, 5] },
-                  { text: form.customerNote, fontSize: 10, lineHeight: 1.3, margin: [0, 2, 0, 0] }
-                ],
-                fillColor: '#f3f3f3',
-                margin: [10, 8, 10, 8]
-              }
-            ]]
-          },
-          margin: [0, 0, 0, 20]
-        } : {},
-
-        // Tabella prodotti
-        {
-          style: 'section',
-          table: {
-            headerRows: 1,
-            widths: ['*', 'auto', 'auto', 'auto'],
-            body: [
-              ['Prodotto', 'Quantità', 'Prezzo', 'Totale'].map(h => ({
-                text: h, style: 'tableHeader', margin: [5, 5, 5, 5]
-              })),
-              ...products
-                .filter(p => !p.isSubs)
-                .map(p => [
-                  {
-                    stack: [
-                      { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
-                      ...(p.note ? [{
-                        text: this.cleanNote(p.note),
-                        fontSize: 9,
-                        italics: true,
-                        color: '#555',
-                        margin: [5, -10, 5, 5],
-                        lineHeight: 1.3
-                      }] : [])
-                    ]
-                  },
-                  { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' },
-                  { text: `€${p.price.toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' },
-                  { text: `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
-                ])
-            ]
-          },
-          layout: {
-            hLineWidth: () => 0.5,
-            vLineWidth: () => 0.5,
-            hLineColor: () => '#ccc',
-            vLineColor: () => '#ccc'
-          },
-          margin: [3, 0, 3, 25]
-        },
-
-        // Box note ordine
-        form.note ? {
-          layout: {
-            hLineWidth: () => 0.5,
-            vLineWidth: () => 0.5,
-            hLineColor: () => '#ccc',
-            vLineColor: () => '#ccc'
-          },
-          table: {
-            widths: ['*'],
-            body: [[
-              {
-                stack: [
-                  { text: 'Note ordine', bold: true, margin: [0, 0, 0, 5] },
-                  { text: form.note, fontSize: 10, lineHeight: 1.3, margin: [0, 2, 0, 0] }
-                ],
-                fillColor: '#f3f3f3',
-                margin: [10, 8, 10, 8]
-              }
-            ]]
-          },
-          margin: [0, 0, 0, 20]
-        } : {},
-
-        // Totale generale
-        {
-          columns: [
-            { text: '' },
-            { text: `Totale: €${form.totalPrice.toFixed(2)}`, style: 'total' }
-          ]
-        },
-
-        //Clausola 
-        {
-          text: clause,
-          fontSize: 8,
-          color: '#555',
-          lineHeight: 1.4, 
-          margin: [0, 10, 0, 0]
-        }
-
-      ],
-      styles: {
-        header: { fontSize: 18, bold: true, color: '#222' },
-        subheader: { fontSize: 14, color: '#444' },
-        date: { fontSize: 11, color: '#777' },
-        smallInfo: { fontSize: 11, color: '#333', bold: true },
-        section: { margin: [0, 5, 0, 5] },
-        tableHeader: { bold: true, fillColor: '#eeeeee' },
-        total: { fontSize: 12, bold: true, alignment: 'right', color: '#222', margin: [0, 2, 0, 30] }
-      }
-    };
-
-    pdfMake.createPdf(docDefinition).open();
-  }
-
   DownloadDocOperator(item: Order) {
     const form = item;
     const products = item.orderProducts;
@@ -652,7 +466,7 @@ export class OrdersComponent {
           },
           margin: [0, 0, 0, 20]
         } : {},
-
+        
         //Clausola 
         {
           text: clause,
@@ -661,7 +475,7 @@ export class OrdersComponent {
           lineHeight: 1.4, 
           margin: [0, 10, 0, 0]
         }
-
+        
       ],
       styles: {
         header: { fontSize: 18, bold: true, color: '#222' },
@@ -695,8 +509,24 @@ export class OrdersComponent {
     });
   }
 
-  UpdateItem(item: Order) {
-    this.router.navigate(["/order/add/" + item._id]);
+  UpdateOrder(item: Order) {
+    const dialogRef = this.dialog.open(UpdateOerderByOperatorComponent, {
+      data: item,
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.orderService.updateOnlyOperatorDataOrder(result)
+          .subscribe((data: boolean) => {
+            if (data) {
+              this.getOrders();
+            }
+          });
+      } else {
+        console.log("Close");
+      }
+    });
   }
 
 }

@@ -94,11 +94,13 @@
           <ng-container matColumnDef="orderProducts">
             <th mat-header-cell *matHeaderCellDef class="pl-0" style="width: 250px;"> Prodotti </th>
             <td mat-cell *matCellDef="let element" class="pl-0">
-              <div *ngFor="let p of getMainProducts(element.orderProducts)">
-                <h6 class="mt-0 mb-10 note-cell">
-                  {{ p.name }} (x{{ p.quantity }}) 
-                  <span>{{getTableNote(p.note)}}</span>
-                </h6>
+              <div class="note-cell-container">
+                <div *ngFor="let p of getMainProducts(element.orderProducts)">
+                  <h6 class="mt-0 mb-10 note-cell">
+                    {{ p.name }} (x{{ p.quantity }}) 
+                    <span>{{getTableNote(p.note)}}</span>
+                  </h6>
+                </div>
               </div>
             </td>
           </ng-container>
@@ -118,16 +120,9 @@
           </ng-container>
 
           <ng-container matColumnDef="paymentMethod">
-            <th mat-header-cell *matHeaderCellDef class="pl-0"> Metodo di pagamento </th>
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Pagamento </th>
             <td mat-cell *matCellDef="let element" class="pl-0">
               <h6 class="mt-0 mb-0">{{element.paymentMethod}}</h6>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="note">
-            <th mat-header-cell *matHeaderCellDef class="pl-0"> Note </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
-              <h6 class="mt-0 mb-0">{{element.note}} </h6>
             </td>
           </ng-container>
 
@@ -153,13 +148,26 @@
               </td>
           </ng-container>
 
-          <ng-container matColumnDef="download">
+          <ng-container matColumnDef="downloadCustomer">
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
-                  Doc
+                  Copia Cliente
               </th>
               <td mat-cell *matCellDef="let element" class="text-center pr-0">
                   <div class="action">
-                      <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" title="scarica documento" (click)="DownloadDoc(element)">
+                      <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" matTooltip="scarica documento" (click)="DownloadDoc(element)">
+                          <i class="ri-file-download-line"></i>
+                      </button>
+                  </div>
+              </td>
+          </ng-container>
+
+          <ng-container matColumnDef="downloadOperator">
+              <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
+                  Copia Op.
+              </th>
+              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+                  <div class="action">
+                      <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" matTooltip="scarica documento" (click)="DownloadDocOperator(element)">
                           <i class="ri-file-download-line"></i>
                       </button>
                   </div>

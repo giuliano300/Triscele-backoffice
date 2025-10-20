@@ -206,6 +206,15 @@
                     &[disabled] {
                         background-color: #eff3f9;
                     }
+
+                    
+                    ::ng-deep .mat-progress-spinner circle, .mat-spinner circle {
+                        stroke: #e3eaef;
+                        display: block;
+                        position: fixed;
+                        z-index: 1031; /* High z-index so it is on top of the page */
+                    }
+
                 }
             }
         }
@@ -276,6 +285,7 @@
                         padding: 15px 25px;
                         margin-top: 20px;
                         font-size: 13px;
+                        text-align: center;
                     }
                 }
             }
@@ -311,4 +321,8 @@
 a.recovery{
     cursor: pointer;
     color: var(--primaryColor);
+}
+
+.mat-mdc-progress-spinner {
+    margin: 0 auto;
 }

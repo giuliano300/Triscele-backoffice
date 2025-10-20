@@ -1,3 +1,8 @@
+
+.toggle-checkbox, .toggle-label{
+    display: none;
+}
+
 .trinta-card {
     &.to-do-list-card {
         .search-box {
@@ -185,99 +190,130 @@
     }
 }
 
-/* Max width 767px */
-@media only screen and (max-width : 767px) {
-
-    .trinta-card {
-        &.to-do-list-card {
-            .search-box {
-                margin-bottom: 20px;
-                
-                input {
-                    height: 45px;
-                    padding: {
-                        left: 15px;
-                        right: 15px;
-                    };
-                }
-                button {
-                    right: 15px;
-                    font-size: 18px;
-                }
-            }
-            .to-do-list-table {
-                .mat-mdc-table {
-                    .mat-mdc-header-row {
-                        font-size: 13px;
-                    }
-                    .mat-mdc-row, .mdc-data-table__content {
-                        font-size: 13px;
-                    }
-                    .mat-mdc-cell {
-                        padding: 15px;
-    
-                        .task-name {
-                            h6 {
-                                font-size: 13px;
-                            }
-                        }
-                        .trinta-badge {
-                            font-size: 11px;
-                        }
-                        .action {
-                            .mat-mdc-button {
-                                font-size: 15px;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-}
-
 /* Min width 576px to Max width 767px */
 @media only screen and (min-width : 576px) and (max-width : 767px) {}
 
-/* Min width 768px to Max width 991px */
-@media only screen and (min-width : 768px) and (max-width : 991px) {
+/* Max width 767px */
+@media (max-width: 991px) {
+  ::ng-deep {
+    .trinta-card.to-do-list-card {
+      .to-do-list-table {
+        .mat-mdc-table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
 
-    .trinta-card {
-        &.to-do-list-card {
-            .search-box {
-                margin-bottom: 20px;
-                
-                input {
-                    padding: {
-                        left: 18px;
-                        right: 18px;
-                    };
-                }
-                button {
-                    font-size: 20px;
-                }
-            }
-            .to-do-list-table {
-                .mat-mdc-table {
-                    .mat-mdc-cell {
-                        .task-name {
-                            h6 {
-                                font-size: 14px;
-                            }
-                        }
-                        .action {
-                            .mat-mdc-button {
-                                font-size: 17px;
-                            }
-                        }
-                    }
-                }
-            }
+        thead tr {
+          display: none;
+        }
+
+        .mat-mdc-row {
+          margin-bottom: 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 10px;
+          background-color: #fff !important;
+        }
+
+        .mat-mdc-cell {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 10px !important;
+          white-space: normal !important;
+          text-align: left !important;
+          border-bottom: 1px dotted #ccc;
+
+          &::before {
+            content: attr(data-label);
+            font-weight: bold;
+            margin-right: 10px;
+          }
+
+          &:last-child {
+            border-bottom: 0!important;
+          }
+
+          h6 {
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            margin: 0;
+          }
+        }
+      }
+
+      .mat-mdc-paginator {
+        padding-top: 10px;
+      }
+    }
+  }
+
+    ::ng-deep {
+    .trinta-card.to-do-list-card {
+      .to-do-list-table {
+        .mat-mdc-cell[data-label="Prodotti"] {
+          flex-direction: column; /* mette i div in colonna */
+          align-items: flex-start; /* allinea a sinistra */
+        }
+      }
+    }
+  }
+
+    /* CSS per il panel collapsible */
+    .filter-panel {
+    .toggle-checkbox {
+        display: none;
+    }
+
+    .toggle-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f5f7fa;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+
+        .arrow {
+        transition: transform 0.3s ease;
         }
     }
 
+    .filter-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+    }
+
+    /* Checkbox checked: mostra il contenuto e ruota l'icona */
+    .toggle-checkbox:checked ~ .toggle-label .arrow {
+        transform: rotate(180deg);
+    }
+    .toggle-checkbox:checked ~ .filter-content {
+        max-height: 1000px; /* altezza sufficiente a contenere il form */
+        margin-top: 10px;
+    }
+    }
+
+    /* Nasconde su desktop */
+    @media (min-width: 992px) {
+    .filter-panel {
+        .toggle-label,
+        .toggle-checkbox,
+        .filter-content {
+        display: block !important;
+        max-height: none !important;
+        }
+    }
+    }
+
+
 }
+
 
 /* Min width 992px to Max width 1199px */
 @media only screen and (min-width : 992px) and (max-width : 1199px) {
@@ -335,8 +371,8 @@
 }
 
 .mini{
-    max-width: 120px!important;
-    width: 120px!important;
+    max-width: 140px!important;
+    width: 140px!important;
 }
 
 

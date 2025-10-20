@@ -194,7 +194,7 @@ export class OperatorsComponent {
                       this.router.navigate(['/products']);
                       break;
                     case 'ORDERSMODULE':
-                      this.router.navigate(['/orders']);
+                      this.router.navigate(['/operator-orders']);
                       break;
                     case 'OPERATORSSMODULE':
                       this.router.navigate(['/operators']);

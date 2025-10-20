@@ -53,4 +53,11 @@ export class OrderService {
       return this.http.put<Order>(url, c);
     }
 
+    updateOnlyOperatorDataOrder(c: any):Observable<boolean>{
+
+      const url = this.apiUrl + "/updateOnlyOperatorDataOrder";
+
+      return this.http.post<boolean>(url, c);
+    }
+
 }

@@ -1,17 +1,26 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { AuthService } from '../../app/services/auth.service';
+import { CanActivate, ActivatedRouteSnapshot, Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
-  constructor(private auth: AuthService, private router: Router) {}
+export class RoleGuard implements CanActivate {
+  constructor(private router: Router) {}
 
-  canActivate(): boolean {
+  canActivate(route: ActivatedRouteSnapshot): boolean {
     const isLogin = localStorage.getItem('isLogin') === 'true';
-    if (isLogin) {
-      return true;
+    const userRole = localStorage.getItem('role'); // 'admin' o 'operatore'
+    const expectedRole = route.data['role'];      // ruolo richiesto dalla route
+
+    if (!isLogin) {
+      this.router.navigate(['/']);
+      return false;
     }
-    this.router.navigate(['/']);
-    return false;
+
+    if (expectedRole && userRole !== expectedRole) {
+      // se il ruolo non coincide, redirect a una pagina di accesso negato
+      this.router.navigate(['/access-denied']);
+      return false;
+    }
+
+    return true;
   }
 }

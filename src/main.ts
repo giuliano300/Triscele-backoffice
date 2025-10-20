@@ -8,10 +8,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
 
 // Definisci l'URL globale dell'API
-export const API_URL = 'http://localhost:3000/';
+export const API_URL = 'https://api-demo.ewtlab.it/';
 export const TOKEN_KEY = 'a-string-secret-at-least-256-bits-long';
 export const exceedsLimit = 3;
 export const maxLenghtUploadFile = 10;
+export const clause = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 
 bootstrapApplication(AppComponent, {

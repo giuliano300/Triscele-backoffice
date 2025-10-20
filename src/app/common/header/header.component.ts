@@ -73,6 +73,7 @@ export class HeaderComponent {
         localStorage.setItem('isAdmin', "true");
         localStorage.setItem('isOperator', "false");
         localStorage.setItem('loginName', user!.name!);
+        localStorage.setItem('role', 'admin');
         this.authService.setIsLogin(true);
         this.authService.setIsAdmin(true);
         this.authService.setIsOperator(false);

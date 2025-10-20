@@ -52,7 +52,8 @@
                         </div>
                     </div>
                     <button mat-button type="submit" [disabled]="authForm.invalid" class="mb-15">
-                        Log In
+                        <span *ngIf="submit"><mat-spinner class="mat-spinner" diameter="22"></mat-spinner></span>
+                        <span *ngIf="!submit">Log In</span>                       
                     </button>
                 </form>
             </div>
