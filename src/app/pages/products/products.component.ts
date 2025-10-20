@@ -132,6 +132,18 @@ export class ProductsComponent {
         this.paginator.pageSize
       );
     });
+
+    this.sort.sortChange.subscribe(sort => {
+      this.getProducts(
+        this.form.value.categoryId,
+        this.form.value.supplierId,
+        this.form.value.name,
+        this.pageIndex,
+        this.pageSize,
+        sort.active,
+        sort.direction === '' ? 'desc' : sort.direction
+      );
+    });
   }
 
   onSubmit(){
@@ -148,36 +160,48 @@ export class ProductsComponent {
     });
   }
 
-  getProducts(categoryId?: string, supplierId?: string, name?: string, pageIndex: number = 0, pageSize: number = 20) {
-    let query = '';
+  getProducts(
+    categoryId?: string,
+    supplierId?: string,
+    name?: string,
+    pageIndex: number = 0,
+    pageSize: number = 20,
+    sortField: string = '_id',
+    sortDirection: 'asc' | 'desc' = 'desc'
+  ) {
     const params = new URLSearchParams();
-    params.append('page', (pageIndex + 1).toString()); 
+
+    params.append('page', (pageIndex + 1).toString());
     params.append('limit', pageSize.toString());
+    params.append('sortField', sortField);
+    params.append('sortDirection', sortDirection);
+
     if (categoryId) params.append('categoryId', categoryId);
     if (supplierId) params.append('supplierId', supplierId);
     if (name) params.append('name', name);
-    query = `?${params.toString()}`;
 
-    this.productService.getProducts(query)
-      .subscribe((response: any) => {
-          const data = response.data || [];
-          this.totalItems = response.total;
-          this.pageSize = response.limit;
-          this.pageIndex = response.page - 1;
+    const query = `?${params.toString()}`;
 
-          this.Products = data.map((p: any) => ({
-            ...p,
-            action: {
-              duplicate: 'ri-file-copy-line',
-              edit: 'ri-edit-line',
-              movements: 'ri-search-line',
-              delete: 'ri-delete-bin-line'
-            }
-          }));
+    this.productService.getProducts(query).subscribe((response: any) => {
+      const data = response.data || [];
+      this.totalItems = response.total;
+      this.pageSize = response.limit;
+      this.pageIndex = response.page - 1;
 
-          this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
-          this.dataSource.sort = this.sort;
-      });
+      this.Products = data.map((p: any) => ({
+        ...p,
+        action: {
+          duplicate: 'ri-file-copy-line',
+          edit: 'ri-edit-line',
+          movements: 'ri-search-line',
+          delete: 'ri-delete-bin-line'
+        }
+      }));
+
+      // 🔹 Aggiornamento datasource e sort
+      this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
+      this.dataSource.sort = this.sort;
+    });
   }
 
   DeleteItem(item: ProductViewModel) {
