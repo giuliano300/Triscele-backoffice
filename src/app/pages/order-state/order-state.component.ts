@@ -13,10 +13,11 @@ import { OrderStateService } from '../../services/OrderState.service';
 import { AddUpdateOrderStateDialogComponent } from '../../add-update-order-state-dialog/add-update-order-state-dialog.component';
 import { OrderStatus } from '../../enum/enum';
 import { NgIf } from '@angular/common';
+import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-order-state',
-  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, NgIf],
+  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, NgIf, MatTooltip],
   templateUrl: './order-state.component.html',
   styleUrl: './order-state.component.scss'
 })

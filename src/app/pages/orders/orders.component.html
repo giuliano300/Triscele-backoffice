@@ -6,69 +6,78 @@
 
 <mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters">
     <mat-card-content>
-        <form [formGroup]="form">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-2">
-                        <mat-form-field>
-                            <i-feather name="users"></i-feather>
-                            <mat-label>Filtra per cliente</mat-label>
-                            <mat-select formControlName="customerId">
-                                <mat-option *ngFor="let option of customers" [value]="option._id">
-                                {{ option.businessName }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>                        
-                    </div>
-                    <div class="col-lg-2" *ngIf="!IsOperatorView">
-                        <mat-form-field>
-                            <i-feather name="users"></i-feather>
-                            <mat-label>Filtra per operatore</mat-label>
-                            <mat-select formControlName="operatorId">
-                                <mat-option *ngFor="let option of operators" [value]="option._id">
-                                {{ option.businessName }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>                        
-                    </div>
-                    <div class="col-lg-2">
-                        <mat-form-field>
-                            <i-feather name="bar-chart-2"></i-feather>
-                            <mat-label>Stato</mat-label>
-                            <mat-select formControlName="status">
-                                <mat-option *ngFor="let option of orderState" [value]="option._id">
-                                  {{ option.name }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>                        
-                    </div>
-                    <div class="col-lg-3">
-                      <mat-form-field appearance="fill">
-                        <i-feather name="calendar"></i-feather>
-                        <mat-label>Seleziona intervallo</mat-label>
-                        <div formGroupName="dateRange">
-                          <mat-date-range-input [rangePicker]="picker">
-                            <input matStartDate formControlName="start" placeholder="Da">
-                            <input matEndDate formControlName="end" placeholder="A">
-                          </mat-date-range-input>
+        <div class="filter-panel">
+            <input type="checkbox" id="toggleFilter" class="toggle-checkbox">
+            <label for="toggleFilter" class="toggle-label">
+                Filtro ordini <span class="arrow">&#9660;</span>
+            </label>
+
+            <div class="filter-content">
+              <form [formGroup]="form">
+                  <div class="container">
+                      <div class="row">
+                          <div class="col-lg-2">
+                              <mat-form-field>
+                                  <i-feather name="users"></i-feather>
+                                  <mat-label>Filtra per cliente</mat-label>
+                                  <mat-select formControlName="customerId">
+                                      <mat-option *ngFor="let option of customers" [value]="option._id">
+                                      {{ option.businessName }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>                        
+                          </div>
+                          <div class="col-lg-2" *ngIf="!IsOperatorView">
+                              <mat-form-field>
+                                  <i-feather name="users"></i-feather>
+                                  <mat-label>Filtra per operatore</mat-label>
+                                  <mat-select formControlName="operatorId">
+                                      <mat-option *ngFor="let option of operators" [value]="option._id">
+                                      {{ option.businessName }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>                        
+                          </div>
+                          <div class="col-lg-2">
+                              <mat-form-field>
+                                  <i-feather name="bar-chart-2"></i-feather>
+                                  <mat-label>Stato</mat-label>
+                                  <mat-select formControlName="status">
+                                      <mat-option *ngFor="let option of orderState" [value]="option._id">
+                                        {{ option.name }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>                        
+                          </div>
+                          <div class="col-lg-3">
+                            <mat-form-field appearance="fill">
+                              <i-feather name="calendar"></i-feather>
+                              <mat-label>Seleziona intervallo</mat-label>
+                              <div formGroupName="dateRange">
+                                <mat-date-range-input [rangePicker]="picker">
+                                  <input matStartDate formControlName="start" placeholder="Da">
+                                  <input matEndDate formControlName="end" placeholder="A">
+                                </mat-date-range-input>
+                              </div>
+                              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                              <mat-date-range-picker #picker></mat-date-range-picker>
+                            </mat-form-field>
                         </div>
-                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                        <mat-date-range-picker #picker></mat-date-range-picker>
-                      </mat-form-field>
-                   </div>
-                   <div class="col-lg-1">
-                         <button mat-button class="filter" type="submit" (click)="onSubmit()">
-                            Filtra
-                        </button>               
-                   </div>
-                   <div class="col-lg-1">
-                        <button mat-button class="remove" type="submit" (click)="remove()">
-                          Rimuovi
-                      </button>               
-                   </div>
-                </div>
+                        <div class="col-lg-1">
+                              <button mat-button class="filter" type="submit" (click)="onSubmit()">
+                                  Filtra
+                              </button>               
+                        </div>
+                        <div class="col-lg-1">
+                              <button mat-button class="remove" type="submit" (click)="remove()">
+                                Rimuovi
+                            </button>               
+                        </div>
+                      </div>
+                  </div>
+              </form>
             </div>
-        </form>
+        </div>
     </mat-card-content>
 </mat-card>
 <mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
@@ -77,23 +86,24 @@
       <div class="table-responsive">
         <table mat-table [dataSource]="dataSource" matSort>
 
-          <ng-container matColumnDef="shippingBusinessName">
-            <th mat-header-cell *matHeaderCellDef class="pl-0"> Cliente </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
-              <h6 class="mt-0 mb-0">{{element.shippingBusinessName}}</h6>
-            </td>
-          </ng-container>
-
           <ng-container matColumnDef="operatorId">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Operatore </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Operatore">
               <h6 class="mt-0 mb-0">{{element.operatorId ? element.operatorId.businessName : ''}}</h6>
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="shippingBusinessName">
+            <th mat-header-cell *matHeaderCellDef class="pl-0"> Cliente </th>
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Cliente">
+              <h6 class="mt-0 mb-0">{{element.shippingBusinessName}}</h6>
+            </td>
+          </ng-container>
+
+
           <ng-container matColumnDef="orderProducts">
             <th mat-header-cell *matHeaderCellDef class="pl-0" style="width: 250px;"> Prodotti </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Prodotti">
               <div class="note-cell-container">
                 <div *ngFor="let p of getMainProducts(element.orderProducts)">
                   <h6 class="mt-0 mb-10 note-cell">
@@ -107,28 +117,28 @@
 
           <ng-container matColumnDef="insertDate">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Data </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Data inserimento">
               <h6 class="mt-0 mb-0">{{ element.insertDate | date:'dd/MM/yyyy' : 'UTC' }}</h6>
             </td>
           </ng-container>
           
           <ng-container matColumnDef="totalPrice">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Totale </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Totale">
               <h6 class="mt-0 mb-0">{{element.totalPrice}} €</h6>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="paymentMethod">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Pagamento </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Pagamento">
               <h6 class="mt-0 mb-0">{{element.paymentMethod}}</h6>
             </td>
           </ng-container>
 
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Stato </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Stato">
               <h6 class="mt-0 mb-0">
                 <span [style.background]="element.status.color" class="span-color">{{ element.status.name }}</span>
               </h6>
@@ -139,7 +149,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Modifica
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Modifica">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
                           <i class="{{element.action.edit}}"></i>
@@ -152,7 +162,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Copia Cliente
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Copia cliente">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" matTooltip="scarica documento" (click)="DownloadDoc(element)">
                           <i class="ri-file-download-line"></i>
@@ -165,7 +175,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Copia Op.
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Copia operatore">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" matTooltip="scarica documento" (click)="DownloadDocOperator(element)">
                           <i class="ri-file-download-line"></i>
@@ -178,7 +188,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Storico
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Storico">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" title="storico cambi di stato" (click)="History(element)">
                           <i class="{{element.action.history}}"></i>
@@ -191,7 +201,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Elimina
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Elimina">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DeleteItem(element)">
                           <i class="{{element.action.delete}}"></i>

@@ -315,3 +315,132 @@
 /* Min width 1600px */
 @media only screen and (min-width: 1600px) {}
 
+
+/* Max width 991px */
+/*TABELLA RESONSIVE*/
+
+.toggle-checkbox, .toggle-label{
+    display: none;
+}
+@media (max-width: 991px) {
+  ::ng-deep {
+    .trinta-card.to-do-list-card {
+      .to-do-list-table {
+        .mat-mdc-table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+
+        thead tr {
+          display: none;
+        }
+
+        .mat-mdc-row {
+          margin-bottom: 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 10px;
+          background-color: #fff !important;
+        }
+
+        .mat-mdc-cell {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 10px !important;
+          white-space: normal !important;
+          text-align: left !important;
+          border-bottom: 1px dotted #ccc;
+
+          &::before {
+            content: attr(data-label);
+            font-weight: bold;
+            margin-right: 10px;
+          }
+
+          &:last-child {
+            border-bottom: 0!important;
+          }
+
+          h6 {
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            margin: 0;
+          }
+        }
+      }
+
+      .mat-mdc-paginator {
+        padding-top: 10px;
+      }
+    }
+  }
+
+    ::ng-deep {
+    .trinta-card.to-do-list-card {
+      .to-do-list-table {
+        .mat-mdc-cell[data-label="Prodotti"] {
+          flex-direction: column; /* mette i div in colonna */
+          align-items: flex-start; /* allinea a sinistra */
+        }
+      }
+    }
+  }
+
+    /* CSS per il panel collapsible */
+    .filter-panel {
+    .toggle-checkbox {
+        display: none;
+    }
+
+    .toggle-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f5f7fa;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+
+        .arrow {
+        transition: transform 0.3s ease;
+        }
+    }
+
+    .filter-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+    }
+
+    /* Checkbox checked: mostra il contenuto e ruota l'icona */
+    .toggle-checkbox:checked ~ .toggle-label .arrow {
+        transform: rotate(180deg);
+    }
+    .toggle-checkbox:checked ~ .filter-content {
+        max-height: 1000px; /* altezza sufficiente a contenere il form */
+        margin-top: 10px;
+    }
+    }
+
+    /* Nasconde su desktop */
+    @media (min-width: 992px) {
+        .filter-panel {
+            .toggle-label,
+            .toggle-checkbox,
+            .filter-content {
+            display: block !important;
+            max-height: none !important;
+            }
+        }
+    }
+
+    .filter {
+        margin-bottom: 10px;
+    }
+}
+

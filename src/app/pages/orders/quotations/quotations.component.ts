@@ -28,6 +28,7 @@ import { OperatorService } from '../../../services/Operator.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { OrderStatus } from '../../../enum/enum';
 import { ConvertToOrderDialogComponent } from '../../../convert-to-order-dialog/convert-to-order-dialog.component';
+import { clause } from '../../../../main';
 
 declare const pdfMake: any;
 
@@ -114,7 +115,6 @@ export class QuotationsComponent {
     'insertDate',
     'totalPrice',
     'paymentMethod',
-    'note',
     'convert',
     'edit',
     'download',
@@ -294,97 +294,186 @@ export class QuotationsComponent {
     return note ? note.replace(/<br\s*\/?>/gi, '\n') : '';
   }
 
-  DownloadDoc(item: Order){
+  DownloadDoc(item: Order) {
     const form = item;
     const products = item.orderProducts;
 
     const docDefinition = {
-    pageSize: 'A4',
-    pageMargins: [40, 60, 40, 60],
-    content: [
-      // Header con titolo ordine
-      {
-        columns: [
-          { text: 'Triscele Srl', style: 'header' },
-          { text: `Preventivo N. ${form._id}`, style: 'subheader', alignment: 'right' }
-        ]
+      pageSize: 'A4',
+      pageMargins: [40, 60, 40, 60],
+      defaultStyle: {
+        fontSize: 11,
+        color: '#333'
       },
-      { text: `Data: ${new Date(form.insertDate).toLocaleDateString()}`, style: 'date', margin: [0, 5, 0, 15] },
-
-      // Dati cliente
-      {
-        style: 'section',
-        table: {
-          widths: ['*', '*'],
-          body: [
-            [
-              { text: 'Cliente', bold: true, lineHeight: 1.5 },
-              { text: 'Spedizione', bold: true, lineHeight: 1.5 }
-            ],
-            [
-              {
-                text: `${form.shippingName} ${form.shippingLastName}\nProvincia: ${form.shippingProvince}\nTEL: ${form.shippingTelephone}`,
-                lineHeight: 1.5
-              },
-              {
-                text: `Indirizzo: ${form.shippingAddress}\nCAP: ${form.shippingZipcode}\nComune: ${form.shippingCity}\nProvincia: ${form.shippingProvince}`,
-                lineHeight: 1.5
-              }
-            ]
+      content: [
+        // Header con titolo ordine e data prevista
+        {
+          columns: [
+            {
+              stack: [
+                { text: 'Triscele Srl', style: 'header' },
+                { text: `Data ordine: ${new Date(form.insertDate).toLocaleDateString()}`, style: 'smallInfo', alignment: 'left', margin: [0, 10, 0, 10] }
+              ]
+            },
+            {
+              stack: [
+                { text: `Ordine N. ${form._id}`, style: 'subheader', alignment: 'right' },
+                { text: `Consegna prevista: ${new Date(form.expectedDelivery).toLocaleDateString()}`, style: 'smallInfo', alignment: 'right', margin: [0, 10, 0, 10] }
+              ]
+            }
           ]
         },
-        layout: 'lightHorizontalLines',
-        margin: [0, 0, 0, 25] // spaziatura tra tabelle
-      },
 
-      // Tabella prodotti con note prodotto
-      {
-        style: 'section',
-        table: {
-          headerRows: 1,
-          widths: ['*', 'auto', 'auto', 'auto'],
-          body: [
-            ['Prodotto', 'Quantità', 'Prezzo', 'Totale'].map(h => ({ text: h, bold: true, fillColor: '#eeeeee', margin: [5, 5, 5, 5] })),
-            ...products.filter(p => !p.isSubs).map(p => [
+        // Dati cliente
+        {
+          style: 'section',
+          table: {
+            widths: ['*', '*'],
+            body: [
+              [
+                { text: 'Cliente', bold: true, margin: [5, 5, 5, 5] },
+                { text: 'Spedizione', bold: true, margin: [5, 5, 5, 5] }
+              ],
+              [
+                {
+                  text: `${form.shippingName} ${form.shippingLastName}\nProvincia: ${form.shippingProvince}\nTEL: ${form.shippingTelephone}`,
+                  lineHeight: 1.4, margin: [5, 5, 5, 5]
+                },
+                {
+                  text: `Indirizzo: ${form.shippingAddress}\nCAP: ${form.shippingZipcode}\nComune: ${form.shippingCity}\nProvincia: ${form.shippingProvince}`,
+                  lineHeight: 1.4, margin: [5, 5, 5, 5]
+                }
+              ]
+            ]
+          },
+          layout: {
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#ccc',
+            vLineColor: () => '#ccc'
+          },
+          margin: [0, 5, 0, 15]
+        },
+
+        // Box note cliente
+        form.customerNote ? {
+          layout: {
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#ccc',
+            vLineColor: () => '#ccc'
+          },
+          table: {
+            widths: ['*'],
+            body: [[
               {
                 stack: [
-                  { text: p.name, fontSize: 12, bold: true },
-                  ...(p.note ? [{ text: this.cleanNote(p.note), fontSize: 9, italics: true }] : [])
-                ]
-              },
-              p.quantity,
-              `€${p.price.toFixed(2)}`,
-              `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`
-            ])
+                  { text: 'Note cliente', bold: true, margin: [0, 0, 0, 5] },
+                  { text: form.customerNote, fontSize: 10, lineHeight: 1.3, margin: [0, 2, 0, 0] }
+                ],
+                fillColor: '#f3f3f3',
+                margin: [10, 8, 10, 8]
+              }
+            ]]
+          },
+          margin: [0, 0, 0, 20]
+        } : {},
+
+        // Tabella prodotti
+        {
+          style: 'section',
+          table: {
+            headerRows: 1,
+            widths: ['*', 'auto', 'auto', 'auto'],
+            body: [
+              ['Prodotto', 'Quantità', 'Prezzo', 'Totale'].map(h => ({
+                text: h, style: 'tableHeader', margin: [5, 5, 5, 5]
+              })),
+              ...products
+                .filter(p => !p.isSubs)
+                .map(p => [
+                  {
+                    stack: [
+                      { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
+                      ...(p.note ? [{
+                        text: this.cleanNote(p.note),
+                        fontSize: 9,
+                        italics: true,
+                        color: '#555',
+                        margin: [5, -10, 5, 5],
+                        lineHeight: 1.3
+                      }] : [])
+                    ]
+                  },
+                  { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' },
+                  { text: `€${p.price.toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' },
+                  { text: `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
+                ])
+            ]
+          },
+          layout: {
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#ccc',
+            vLineColor: () => '#ccc'
+          },
+          margin: [3, 0, 3, 25]
+        },
+
+        // Box note ordine
+        form.note ? {
+          layout: {
+            hLineWidth: () => 0.5,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#ccc',
+            vLineColor: () => '#ccc'
+          },
+          table: {
+            widths: ['*'],
+            body: [[
+              {
+                stack: [
+                  { text: 'Note ordine', bold: true, margin: [0, 0, 0, 5] },
+                  { text: form.note, fontSize: 10, lineHeight: 1.3, margin: [0, 2, 0, 0] }
+                ],
+                fillColor: '#f3f3f3',
+                margin: [10, 8, 10, 8]
+              }
+            ]]
+          },
+          margin: [0, 0, 0, 20]
+        } : {},
+
+        // Totale generale
+        {
+          columns: [
+            { text: '' },
+            { text: `Totale: €${form.totalPrice.toFixed(2)}`, style: 'total' }
           ]
         },
-        layout: 'lightHorizontalLines',
-        margin: [3, 0, 3, 25] // maggiore spaziatura
-      },
 
-      // Note cliente
-      form.customerNote ? { text: `Note cliente:\n${form.customerNote}`, margin: [0, 0, 0, 15] } : {},
+        //Clausola 
+        {
+          text: clause,
+          fontSize: 8,
+          color: '#555',
+          lineHeight: 1.4, 
+          margin: [0, 10, 0, 0]
+        }
 
-      // Note ordine
-      form.note ? { text: `Note ordine:\n${form.note}`, margin: [0, 0, 0, 25] } : {},
-
-      // Totale generale
-      {
-        columns: [
-          { text: '' },
-          { text: `Totale: €${form.totalPrice.toFixed(2)}`, bold: true, alignment: 'right' }
-        ]
+      ],
+      styles: {
+        header: { fontSize: 18, bold: true, color: '#222' },
+        subheader: { fontSize: 14, color: '#444' },
+        date: { fontSize: 11, color: '#777' },
+        smallInfo: { fontSize: 11, color: '#333', bold: true },
+        section: { margin: [0, 5, 0, 5] },
+        tableHeader: { bold: true, fillColor: '#eeeeee' },
+        total: { fontSize: 12, bold: true, alignment: 'right', color: '#222', margin: [0, 2, 0, 30] }
       }
-    ],
-    styles: {
-      header: { fontSize: 18, bold: true },
-      subheader: { fontSize: 14 },
-      date: { fontSize: 12 },
-      section: { margin: [0, 5, 0, 5] }
-    }
-  };
+    };
 
-  pdfMake.createPdf(docDefinition).open();
+    pdfMake.createPdf(docDefinition).open();
   }
 
   DeleteItem(item: Order) {

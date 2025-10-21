@@ -5,31 +5,40 @@
 </nav>
 <mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters">
     <mat-card-content>
-        <form [formGroup]="form">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <mat-form-field>
-                            <i-feather name="map"></i-feather>
-                            <mat-label>Settore</mat-label>
-                            <mat-select formControlName="sectorId" placeholder="Seleziona il settore">
-                                <mat-option *ngFor="let p of sectors" [value]="p._id">{{p.name}}</mat-option>
-                            </mat-select>          
-                        </mat-form-field>                        
+        <div class="filter-panel">
+            <input type="checkbox" id="toggleFilter" class="toggle-checkbox">
+            <label for="toggleFilter" class="toggle-label">
+                Filtro operatori <span class="arrow">&#9660;</span>
+            </label>
+
+            <div class="filter-content">
+                <form [formGroup]="form">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <mat-form-field>
+                                    <i-feather name="map"></i-feather>
+                                    <mat-label>Settore</mat-label>
+                                    <mat-select formControlName="sectorId" placeholder="Seleziona il settore">
+                                        <mat-option *ngFor="let p of sectors" [value]="p._id">{{p.name}}</mat-option>
+                                    </mat-select>          
+                                </mat-form-field>                        
+                            </div>
+                        <div class="col-lg-1">
+                                <button mat-button class="filter" type="submit" (click)="onSubmit()">
+                                    Filtra
+                                </button>               
+                        </div>
+                        <div class="col-lg-1">
+                                <button mat-button class="remove" type="submit" (click)="remove()">
+                                Rimuovi
+                            </button>               
+                        </div>
+                        </div>
                     </div>
-                   <div class="col-lg-1">
-                         <button mat-button class="filter" type="submit" (click)="onSubmit()">
-                            Filtra
-                        </button>               
-                   </div>
-                   <div class="col-lg-1">
-                        <button mat-button class="remove" type="submit" (click)="remove()">
-                          Rimuovi
-                      </button>               
-                   </div>
-                </div>
+                </form>
             </div>
-        </form>
+        </div>
     </mat-card-content>
 </mat-card>
 <mat-card
@@ -45,7 +54,7 @@
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
                             Settore
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Settore">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
                                     {{element.sectorId.name}}
@@ -57,7 +66,7 @@
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
                             Ragione sociale
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Ragione sociale">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
                                     {{element.businessName}}
@@ -69,7 +78,7 @@
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
                             Codice fiscale
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Codice fiscale">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
                                     {{element.fiscalCode}}
@@ -81,7 +90,7 @@
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
                             Email
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Email">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
                                     {{element.email}}
@@ -94,7 +103,7 @@
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
                             Telefono
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Telefono">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
                                     {{element.mobile }}
@@ -107,7 +116,7 @@
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
                             Status
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Status">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
                                     {{getElementStatus(element.status) }}
@@ -120,7 +129,7 @@
                         <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
                             Modifica
                         </th>
-                        <td mat-cell *matCellDef="let element" class="text-center pr-0">
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Modifica">
                             <div class="action">
                                 <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
                                     <i class="{{element.action.edit}}"></i>
@@ -133,7 +142,7 @@
                         <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
                             Login
                         </th>
-                        <td mat-cell *matCellDef="let element" class="text-center pr-0">
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Login">
                             <div class="action">
                                 <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="LoginAs(element)">
                                     <i class="{{element.action.login}}"></i>
@@ -146,7 +155,7 @@
                         <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
                             Elimina
                         </th>
-                        <td mat-cell *matCellDef="let element" class="text-center pr-0">
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Elimina">
                             <div class="action">
                                 <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DeleteItem(element)">
                                     <i class="{{element.action.delete}}"></i>

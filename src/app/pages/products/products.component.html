@@ -6,56 +6,65 @@
 
 <mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters">
     <mat-card-content>
-        <form [formGroup]="form">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-3">
-                        <mat-form-field>
-                            <i-feather name="star"></i-feather>
-                            <mat-label>Filtra per categorie</mat-label>
-                            <mat-select formControlName="categoryId">
-                                <mat-option *ngFor="let option of categories" [value]="option._id">
-                                {{ option.name }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>                        
-                    </div>
-                    <div class="col-lg-2">
-                        <mat-form-field>
-                            <i-feather name="star"></i-feather>
-                            <mat-label>Filtra per fornitore</mat-label>
-                            <mat-select formControlName="supplierId">
-                                <mat-option *ngFor="let option of suppliers" [value]="option._id">
-                                {{ option.businessName }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>                        
-                    </div>
-                    <div class="col-lg-3">
-                        <mat-form-field>
-                            <i-feather name="tag"></i-feather>
-                            <mat-label>Cerca prodotto</mat-label>
-                            <input matInput formControlName="name">
-                        </mat-form-field>                        
-                    </div>
-                    <div class="col-lg-1">
-                         <button mat-button class="filter" type="submit" [disabled]="form.invalid" (click)="onSubmit()">
-                            Filtra
-                        </button>               
-                    </div>
-                    <div class="col-lg-1">
-                         <button mat-button class="remove" type="submit" [disabled]="form.invalid" (click)="remove()">
-                            Rimuovi
-                        </button>               
-                    </div>
-                    <div class="col-lg-2">
-                         <button mat-button class="movements" type="button" [disabled]="form.invalid" (click)="AddGeneralMovement()">
-                            Carico/Scarico
-                        </button>               
-                    </div>
-                </div>
+        <div class="filter-panel">
+            <input type="checkbox" id="toggleFilter" class="toggle-checkbox">
+            <label for="toggleFilter" class="toggle-label">
+                Filtro prodotti <span class="arrow">&#9660;</span>
+            </label>
+
+            <div class="filter-content">
+              <form [formGroup]="form">
+                  <div class="container">
+                      <div class="row">
+                          <div class="col-lg-3">
+                              <mat-form-field>
+                                  <i-feather name="star"></i-feather>
+                                  <mat-label>Filtra per categorie</mat-label>
+                                  <mat-select formControlName="categoryId">
+                                      <mat-option *ngFor="let option of categories" [value]="option._id">
+                                      {{ option.name }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>                        
+                          </div>
+                          <div class="col-lg-2">
+                              <mat-form-field>
+                                  <i-feather name="star"></i-feather>
+                                  <mat-label>Filtra per fornitore</mat-label>
+                                  <mat-select formControlName="supplierId">
+                                      <mat-option *ngFor="let option of suppliers" [value]="option._id">
+                                      {{ option.businessName }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>                        
+                          </div>
+                          <div class="col-lg-3">
+                              <mat-form-field>
+                                  <i-feather name="tag"></i-feather>
+                                  <mat-label>Cerca prodotto</mat-label>
+                                  <input matInput formControlName="name">
+                              </mat-form-field>                        
+                          </div>
+                          <div class="col-lg-1">
+                              <button mat-button class="filter" type="submit" [disabled]="form.invalid" (click)="onSubmit()">
+                                  Filtra
+                              </button>               
+                          </div>
+                          <div class="col-lg-1">
+                              <button mat-button class="remove" type="submit" [disabled]="form.invalid" (click)="remove()">
+                                  Rimuovi
+                              </button>               
+                          </div>
+                          <div class="col-lg-2">
+                              <button mat-button class="movements" type="button" [disabled]="form.invalid" (click)="AddGeneralMovement()">
+                                  Carico/Scarico
+                              </button>               
+                          </div>
+                      </div>
+                  </div>
+              </form>
             </div>
-        </form>
+        </div>
     </mat-card-content>
 </mat-card>
 <mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
@@ -67,7 +76,7 @@
           <!-- Nome -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Nome </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Nome">
               <h6 class="mt-0 mb-0">{{element.name}}</h6>
             </td>
           </ng-container>
@@ -75,7 +84,7 @@
           <!-- Categoria -->
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Categoria </th>
-            <td mat-cell *matCellDef="let element" class="pl-0 position-relative">
+            <td mat-cell *matCellDef="let element" class="pl-0 position-relative" data-label="Categoria">
               <h6 #el
                 class="truncate"
                 (mouseenter)="element.showTooltip = el.scrollWidth > el.clientWidth"
@@ -86,7 +95,7 @@
           <!-- Fornitore -->
           <ng-container matColumnDef="supplier">
             <th mat-header-cell *matHeaderCellDef class="pl-0"> Fornitore </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Fornitore">
               <h6 class="mt-0 mb-0">{{element.supplier.businessName}}</h6>
             </td>
           </ng-container>
@@ -94,7 +103,7 @@
           <!-- Codice Fornitore -->
           <ng-container matColumnDef="supplierCode">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Codice Fornitore </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Codice fornitore">
               <h6 class="mt-0 mb-0">{{element.supplierCode}}</h6>
             </td>
           </ng-container>
@@ -102,7 +111,7 @@
           <!-- Prezzo -->
           <ng-container matColumnDef="price">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Prezzo </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Prezzo">
               <h6 class="mt-0 mb-0">{{element.price}} €</h6>
             </td>
           </ng-container>
@@ -110,7 +119,7 @@
           <!-- costo -->
           <ng-container matColumnDef="cost">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Costo </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Costo">
               <h6 class="mt-0 mb-0">{{element.cost}} €</h6>
             </td>
           </ng-container>
@@ -118,7 +127,7 @@
           <!-- soglia -->
           <ng-container matColumnDef="theshold">
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Soglia </th>
-            <td mat-cell *matCellDef="let element" class="pl-0">
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Soglia">
               <h6 class="mt-0 mb-0">{{element.theshold}} </h6>
             </td>
           </ng-container>
@@ -126,7 +135,7 @@
           <!-- Giacenza -->
           <ng-container matColumnDef="stock">
             <th mat-header-cell *matHeaderCellDef class="pl-0" mat-sort-header> Giacenza </th>
-            <td mat-cell *matCellDef="let element" class="pl-1">
+            <td mat-cell *matCellDef="let element" class="pl-1" data-label="Giacenza">
               <h6 class="mt-0 mb-0">
                 <a (click)="addMovements(element)" [ngClass]="{
                   'pointer': true,
@@ -148,7 +157,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Duplica
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Duplica">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DuplicateItem(element)">
                           <i class="{{element.action.duplicate}}"></i>
@@ -160,7 +169,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Modifica
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Modifica">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
                           <i class="{{element.action.edit}}"></i>
@@ -173,7 +182,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Mov.
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Movimentazioni">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="ShowMovements(element)">
                           <i class="{{element.action.movements}}"></i>
@@ -186,7 +195,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Elimina
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Elimina">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DeleteItem(element)">
                           <i class="{{element.action.delete}}"></i>

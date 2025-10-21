@@ -193,7 +193,7 @@
 /* Min width 576px to Max width 767px */
 @media only screen and (min-width : 576px) and (max-width : 767px) {}
 
-/* Max width 767px */
+/* Max width 991px */
 @media (max-width: 991px) {
   ::ng-deep {
     .trinta-card.to-do-list-card {
@@ -301,16 +301,19 @@
 
     /* Nasconde su desktop */
     @media (min-width: 992px) {
-    .filter-panel {
-        .toggle-label,
-        .toggle-checkbox,
-        .filter-content {
-        display: block !important;
-        max-height: none !important;
+        .filter-panel {
+            .toggle-label,
+            .toggle-checkbox,
+            .filter-content {
+            display: block !important;
+            max-height: none !important;
+            }
         }
     }
-    }
 
+    .filter {
+        margin-bottom: 10px;
+    }
 
 }
 

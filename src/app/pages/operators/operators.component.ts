@@ -94,6 +94,7 @@ export class OperatorsComponent {
     .subscribe((data: Operators[]) => {
       if (!data || data.length === 0) {
         console.log('Nessun dato disponibile');
+        this.dataSource.data = [];
       } 
       else 
       {
