@@ -39,7 +39,6 @@ export class AddUpdateCategoryDialogComponent {
   ) {
     this.categoryForm = this.fb.group({
       name: ['', Validators.required],
-      source: ['', Validators.required]
     });
   }
 
@@ -49,8 +48,7 @@ export class AddUpdateCategoryDialogComponent {
     if(this.data){
       this.title = "Modifica categoria";
       this.categoryForm.patchValue({
-        name: this.data.name,
-        source: this.data.source
+        name: this.data.name
       });
     }
   }

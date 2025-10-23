@@ -47,7 +47,7 @@ export class OperatorsComponent {
 
   Operators: Operators[] = [];
 
-  displayedColumns: string[] = ['sectorId', 'businessName', 'fiscalCode', 'email', 'mobile', 'status', 'edit', 'delete'];
+  displayedColumns: string[] = ['sectorId', 'name', 'lastName', 'email', 'status', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Operators>(this.Operators);
 

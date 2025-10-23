@@ -358,10 +358,10 @@
 
         <!-- Pulsanti -->
         <div class="col-sm-6 mt-10 text-start">
-          <button mat-flat-button class="back" type="button" (click)="returnBack()">Back</button>
+          <button mat-flat-button class="back" type="button" (click)="returnBack()">Indietro</button>
         </div>
         <div class="col-sm-6 mt-10 text-end">
-          <button mat-flat-button color="primary" type="submit" [disabled]="productForm.invalid || productsForm.controls.length == 0">
+          <button mat-flat-button color="primary" type="submit" [disabled]="productForm.invalid">
             Salva
           </button>
         </div>

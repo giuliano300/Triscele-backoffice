@@ -147,6 +147,6 @@ export class SignInComponent {
    
 
    passwordRecovery(){
-        this.router.navigate(['/authentication/forgot-password']);
+        this.router.navigate(['/authentication/pwd-recovery']);
    }
 }

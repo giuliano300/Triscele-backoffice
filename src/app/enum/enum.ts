@@ -18,3 +18,19 @@ export const MovementType: any[] = [
   { id: 1, name: "Carico" },
   { id: 2, name: "Scarico" }
 ]
+
+export enum FieldTypes {
+  select = 1,
+  selectMultiple, 
+  date,
+  color,
+  checkbox, 
+  radio,
+  text,
+  texarea
+}
+
+export enum ConditionalLogic{
+  show = 1,
+  hide
+}

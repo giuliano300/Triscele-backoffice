@@ -26,21 +26,8 @@
                             </div>
                         </td>
                     </ng-container>
-                    <ng-container matColumnDef="source">
-                        <th mat-header-cell *matHeaderCellDef class="pl-0">
-                            Fonte
-                        </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Fonte">
-                            <div class="position-relative">
-                                <h6 class="mt-0 mb-0">
-                                    {{element.source}}
-                                </h6>
-                            </div>
-                        </td>
-                    </ng-container>
-
                     <ng-container matColumnDef="edit">
-                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
+                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                             Modifica
                         </th>
                         <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Modifica">
@@ -53,7 +40,7 @@
                     </ng-container>
 
                     <ng-container matColumnDef="delete">
-                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0">
+                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                             Elimina
                         </th>
                         <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Elimina">

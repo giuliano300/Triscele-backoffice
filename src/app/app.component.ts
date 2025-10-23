@@ -1,4 +1,4 @@
-import { CommonModule, isPlatformBrowser, LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { CommonModule, isPlatformBrowser} from '@angular/common';
 import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { NavigationCancel, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './common/sidebar/sidebar.component';
@@ -6,18 +6,14 @@ import { HeaderComponent } from './common/header/header.component';
 import { FooterComponent } from './common/footer/footer.component';
 import { ToggleService } from './common/header/toggle.service';
 import { filter } from 'rxjs';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, CommonModule, SidebarComponent, HeaderComponent, FooterComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-    providers: [
-        Location, {
-            provide: LocationStrategy,
-            useClass: PathLocationStrategy
-        }
-    ]
+    providers: []
 })
 export class AppComponent {
   title = 'TRISCELE';
@@ -25,6 +21,7 @@ export class AppComponent {
   constructor(
     public router: Router,  
     public toggleService: ToggleService, 
+    private loc: Location,
     @Inject(PLATFORM_ID) private platformId: Object
 ) {
   this.toggleService.isToggled$.subscribe(isToggled => {
@@ -52,7 +49,7 @@ export class AppComponent {
    // ngOnInit
    ngOnInit(){
      const token = localStorage.getItem('authToken');
-     if(!token)
+     if(!token && this.loc.path().indexOf("/reset-password") < 0)
         this.router.navigate(['/authentication']);
      
     if (isPlatformBrowser(this.platformId)) 

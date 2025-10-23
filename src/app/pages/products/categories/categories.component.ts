@@ -22,7 +22,7 @@ export class CategoriesComponent {
 
   categories: Categories[] = [];
 
-  displayedColumns: string[] = ['name', 'source', 'edit', 'delete'];
+  displayedColumns: string[] = ['name', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Categories>(this.categories);
 

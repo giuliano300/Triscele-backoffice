@@ -99,8 +99,6 @@ export class AddOperatorComponent {
     this.adapter.setLocale('it-IT');
     this.disciplinaryForm = this.fb.group({
         personalData: this.fb.group({
-          businessName: ['', Validators.required],
-          fiscalCode: ['', [Validators.required, codiceFiscaleValidator]],
           name: [''],
           lastName: [''],
           birthDate: [''],
@@ -146,13 +144,10 @@ export class AddOperatorComponent {
           // patch dei dati principali
           this.disciplinaryForm.patchValue({
             personalData: {
-              businessName: data.businessName,
               name: data.name,
               lastName: data.lastName,
-              birthDate: data.birthDate,
               mobile: data.mobile,
               status: Number(data.status),
-              fiscalCode: data.fiscalCode,
               sectorId: data.sectorId
             },
             accessData: {

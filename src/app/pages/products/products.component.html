@@ -214,6 +214,10 @@
           </tr>
         </table>
       </div>
+      <div class="progress">
+          <mat-progress-bar *ngIf="firstLoading" mode="indeterminate"></mat-progress-bar>
+      </div>
+
       <mat-paginator  
         [length]="totalItems"
         [pageSize]="pageSize"

@@ -55,6 +55,9 @@
                         <span *ngIf="submit"><mat-spinner class="mat-spinner" diameter="22"></mat-spinner></span>
                         <span *ngIf="!submit">Log In</span>                       
                     </button>
+                    <a (click)="passwordRecovery()" class="recovery">
+                       Non ricordi la password? Clicca qui per recuperarla
+                    </a>
                 </form>
             </div>
         </div>

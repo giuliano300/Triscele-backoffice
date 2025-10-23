@@ -1,5 +1,5 @@
 <div
-    [ngClass]="{'blank-page': router.url === '/authentication'}"
+    [ngClass]="{'blank-page': router.url === '/authentication' || router.url.indexOf('/authentication/reset-password') >= 0 || router.url.indexOf('/authentication/pwd-recovery') >= 0}"
     [class.dark-theme]="toggleService.isDark()"
 >
 

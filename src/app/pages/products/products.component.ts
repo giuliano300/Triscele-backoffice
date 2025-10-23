@@ -30,6 +30,7 @@ import { MatInput } from "@angular/material/input";
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MovementType } from '../../enum/enum';
 import { AddGeneralMovementComponent } from '../../add-general-movement-dialog/add-general-movement-dialog.component';
+import { MatProgressBar } from "@angular/material/progress-bar";
 
 @Component({
   selector: 'app-products',
@@ -50,7 +51,8 @@ import { AddGeneralMovementComponent } from '../../add-general-movement-dialog/a
     FormsModule,
     MatSortModule,
     MatInput,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressBar
 ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
@@ -87,6 +89,8 @@ export class ProductsComponent {
   totalItems = 0;
   pageSize = 20;
   pageIndex = 0;
+
+  firstLoading: boolean = false;
 
   constructor(
     private router: Router,
@@ -169,6 +173,7 @@ export class ProductsComponent {
     sortField: string = '_id',
     sortDirection: 'asc' | 'desc' = 'desc'
   ) {
+    this.firstLoading = true;
     const params = new URLSearchParams();
 
     params.append('page', (pageIndex + 1).toString());
@@ -201,6 +206,8 @@ export class ProductsComponent {
       // 🔹 Aggiornamento datasource e sort
       this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
       this.dataSource.sort = this.sort;
+
+      this.firstLoading = false;
     });
   }
 

@@ -21,6 +21,8 @@ import { OrderStateComponent } from './pages/order-state/order-state.component';
 import { OperatorOrdersComponent } from './pages/orders/operator-orders/operator-orders.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { RoleGuard } from './authGuard/AuthGuard';
+import { ResetPasswordComponent } from './authentication/reset-password/reset-password.component';
+import { PwdRecoveryComponent } from './authentication/pwd-recovery/pwd-recovery.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -127,6 +129,14 @@ export const routes: Routes = [
             {
                 path: 'access-denied',
                 component: AccessDeniedComponent
+            },
+            {
+                path: 'authentication/reset-password',
+                component: ResetPasswordComponent
+            },
+            {
+                path: 'authentication/pwd-recovery',
+                component: PwdRecoveryComponent
             }
         ]
     },

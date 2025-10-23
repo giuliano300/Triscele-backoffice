@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { JwtPayloads } from '../interfaces/JwtPayloads';
 import { jwtDecode } from 'jwt-decode';
 import { Operators } from '../interfaces/operators';
+import { API_URL } from '../../main';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -76,6 +77,14 @@ export class AuthService {
   // Legge da localStorage
   private getBooleanFromStorage(key: string): boolean {
     return localStorage.getItem(key) === 'true';
+  }
+    
+  passwordRecovery(value: any): Observable<boolean> {
+    return this.http.post<any>(API_URL + "users/changePassword", value);
+  }
+  
+  passwordChange(value: any): Observable<boolean> {
+    return this.http.post<any>(API_URL + "users/changePasswordRequest", value);
   }
 
 }

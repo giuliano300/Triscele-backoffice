@@ -1,0 +1,53 @@
+<div class="sign-in-area">
+    <div class="d-table">
+        <div class="d-table-cell">
+            <div
+                class="trinta-form ml-auto mr-auto bg-white border-radius">
+                <div class="title d-flex">
+                    <div class="d-flex align-items-center">
+                        <img src="images/logo.png" width = "40"> 
+                        <span>TRISCELE</span>
+                    </div>
+                </div>
+                <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+                    <div class="form-group mt-10">
+                        <div class="title text-center mb-10">
+                            <h3>
+                                Hai dimenticato la password?
+                            </h3>
+                            <p class="text-black fs-15 line-h-22">
+                                Inserisci l'indirizzo email che hai utilizzato al momento dell'iscrizione e ti invieremo le istruzioni per reimpostare la password.
+                            </p>
+                        </div>
+                        <label class="label d-block fw-medium mb-10">
+                            Email
+                        </label>
+                        <mat-form-field>
+                            <i-feather name="mail"></i-feather>
+                            <mat-label>Inserisci l'email di registrazione</mat-label>
+                            <input matInput type="email" id="email" formControlName="email">
+                        </mat-form-field>
+                        <div class="error text-danger" *ngIf="authForm.get('email')!.hasError('required') && authForm.get('email')!.touched">
+                            Campo obbligatorio
+                        </div>
+                        <div class="error text-danger" *ngIf="authForm.get('email')!.hasError('email') && authForm.get('email')!.touched">
+                            Inserisci una email valida
+                        </div>
+                    </div>
+                    <button mat-button type="submit" [disabled]="authForm.invalid" class="mb-15">
+                        Invia richiesta
+                    </button>
+                    <div class="error text-danger mb-10" *ngIf="isError">
+                        email non presente nel nostro database 
+                    </div>
+                    <div class="success text-success mb-10" *ngIf="isSuccess">
+                        email inviata correttamente
+                    </div>
+                    <a (click)="havePassword()" class="recovery">
+                       Ricordi la password? Clicca qui per tornare al login
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -86,53 +86,55 @@
       <div class="table-responsive">
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
 
-        <!-- Cliente -->
-        <ng-container matColumnDef="shippingBusinessName">
-          <th mat-header-cell *matHeaderCellDef> Cliente </th>
-          <td mat-cell *matCellDef="let element" data-label="Cliente">
-            {{element.shippingBusinessName}}
-          </td>
-        </ng-container>
-
-        <!-- Operatore -->
         <ng-container matColumnDef="operatorId">
-          <th mat-header-cell *matHeaderCellDef> Operatore </th>
-          <td mat-cell *matCellDef="let element" data-label="Operatore">
-            {{element.operatorId?.businessName || ''}}
+          <th mat-header-cell *matHeaderCellDef class="pl-0"> Operatore </th>
+          <td mat-cell *matCellDef="let element" class="pl-0" data-label="Operatore">
+            <h6 class="mt-0 mb-0">{{element.operatorId ? element.operatorId.businessName : ''}}</h6>
           </td>
         </ng-container>
 
-        <!-- Prodotti -->
+        <ng-container matColumnDef="shippingBusinessName">
+          <th mat-header-cell *matHeaderCellDef class="pl-0"> Cliente </th>
+          <td mat-cell *matCellDef="let element" class="pl-0" data-label="Cliente">
+            <h6 class="mt-0 mb-0">{{element.shippingBusinessName}}</h6>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="orderProducts">
-          <th mat-header-cell *matHeaderCellDef> Prodotti </th>
-          <td mat-cell *matCellDef="let element" data-label="Prodotti">
-            <div *ngFor="let p of getMainProducts(element.orderProducts)">
-              {{ p.name }} (x{{ p.quantity }})
+          <th mat-header-cell *matHeaderCellDef class="pl-0" style="width: 250px;"> Prodotti </th>
+          <td mat-cell *matCellDef="let element" class="pl-0" data-label="Prodotti">
+            <div class="note-cell-container">
+              <div *ngFor="let p of getMainProducts(element.orderProducts)">
+                <h6 class="mt-0 mb-10 note-cell">
+                  {{ p.name }} (x{{ p.quantity }}) 
+                  <span>{{getTableNote(p.note)}}</span>
+                </h6>
+              </div>
             </div>
           </td>
         </ng-container>
 
-        <!-- Data -->
         <ng-container matColumnDef="insertDate">
-          <th mat-header-cell *matHeaderCellDef> Data </th>
-          <td mat-cell *matCellDef="let element" data-label="Data">
-            {{ element.insertDate | date:'dd/MM/yyyy'}}
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Data </th>
+          <td mat-cell *matCellDef="let element" class="pl-0" data-label="Data inserimento">
+            <h6 class="mt-0 mb-0">{{ element.insertDate | date:'dd/MM/yyyy' : 'UTC' }}</h6>
           </td>
         </ng-container>
 
         <!-- Data consegna-->
         <ng-container matColumnDef="expectedDelivery">
-          <th mat-header-cell *matHeaderCellDef> Consegna prevista </th>
-          <td mat-cell *matCellDef="let element" data-label="Consegna prevista">
-            {{ element.expectedDelivery | date:'dd/MM/yyyy'}}
+          <th mat-header-cell *matHeaderCellDef class="pl-0"> Consegna prevista </th>
+          <td mat-cell *matCellDef="let element" data-label="Consegna prevista" class="pl-0">
+            <h6 class="mt-0 mb-0">{{ element.expectedDelivery | date:'dd/MM/yyyy'}}</h6>
           </td>
         </ng-container>
 
-        <!-- Stato -->
         <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef> Stato </th>
-          <td mat-cell *matCellDef="let element" data-label="Stato">
-            {{ element.status.name }}
+          <th mat-header-cell *matHeaderCellDef class="pl-0"> Stato </th>
+          <td mat-cell *matCellDef="let element" class="pl-0" data-label="Stato">
+            <h6 class="mt-0 mb-0">
+              <span [style.background]="element.status.color" class="span-color">{{ element.status.name }}</span>
+            </h6>
           </td>
         </ng-container>
 

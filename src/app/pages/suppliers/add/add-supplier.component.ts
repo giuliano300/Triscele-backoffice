@@ -87,18 +87,14 @@ export class AddSupplierComponent {
     this.disciplinaryForm = this.fb.group({
       businessName: ['', Validators.required],
       vatNumber: ['', [Validators.required, partitaIvaValidator]],
-      name: [''],
-      lastName: [''],
       birthDate: [''],
       mobile: [''],
       sdi: [''],
       status: [null, Validators.required],
       email: ['', Validators.required],
-      agentName: [''],
       address: [''],
       zipCode: [''],
       province: ['', Validators.required],
-      pwd: ['', Validators.required],
       city: [''],
       id: [''],
     });
@@ -124,20 +120,16 @@ export class AddSupplierComponent {
           .subscribe((data: Supplier) => {
             this.disciplinaryForm.patchValue({
               businessName: data.businessName,
-              name: data.name,
-              lastName: data.lastName,
               birthDate: data.birthDate,
               mobile: data.mobile,
               sdi: data.sdi,
               status: Number(data.status),
               email: data.email,
               vatNumber: data.vatNumber,
-              agentName: data.agentName,
               address: data.address,
               zipCode: data.zipCode,
               province: data.province,
               city: data.city,
-              pwd: data.pwd,
               id: this.id
             });
           });
