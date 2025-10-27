@@ -23,6 +23,7 @@ import { AccessDeniedComponent } from './pages/access-denied/access-denied.compo
 import { RoleGuard } from './authGuard/AuthGuard';
 import { ResetPasswordComponent } from './authentication/reset-password/reset-password.component';
 import { PwdRecoveryComponent } from './authentication/pwd-recovery/pwd-recovery.component';
+import { ProductsOptionsComponent } from './pages/products/options/products-options.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -105,6 +106,10 @@ export const routes: Routes = [
             { path: 'product/add', component: AddProductComponent,
                 canActivate: [RoleGuard],
                 data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'products/options', component: ProductsOptionsComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
             },
             { path: 'orders', component: OrdersComponent,
                 canActivate: [RoleGuard],

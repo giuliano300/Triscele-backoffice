@@ -30,7 +30,24 @@ export enum FieldTypes {
   texarea
 }
 
+
+export const FieldTypesLabels: Record<keyof typeof FieldTypes, string> = {
+  select: 'Select',
+  selectMultiple: 'Select Multipla',
+  date: 'Campo data',
+  color: ' Campo colore',
+  checkbox: 'Checkbox(Selezione multipla)',
+  radio: 'Radio button(Selezione singola)',
+  text: 'Campo di testo',
+  texarea: 'Area di testo'
+};
+
 export enum ConditionalLogic{
-  show = 1,
-  hide
+  depends = 1,
+  notDepends
 }
+
+export const ConditionalLogicLabels: Record<keyof typeof ConditionalLogic, string> = {
+  depends: 'Dipende da',
+  notDepends: 'Indipendente'
+};

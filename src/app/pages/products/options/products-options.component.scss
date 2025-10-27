@@ -1,89 +1,3 @@
-.files-uploaded{
-    color:var(--primaryColor);
-}
-
-.preview-list{
-    float: left;
-    width: 100%;
-
-    h4{
-        font-size: 15px;
-        font-weight: 500;
-        margin: 10px 0 0;
-    }
-
-    .preview-item{
-        float: left;
-        width: 100%;
-        background-color: #fafafa;
-        margin: 2px 0;
-        padding: 5px 10px
-    }
-}
-
-.dropzone-disabled{
-    opacity: 0.5;
-}
-
-.ri-delete-bin-line{
-    font-size: 20px;
-    color: var(--dangerColor);
-    margin-top: -10px;
-}
-
-.thumbnail {
-  height: 80px;
-  margin: 5px;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: transform 0.2s;
-}
-.thumbnail:hover {
-  transform: scale(1.05);
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.big-image {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 5px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
-}
-
-.material-symbols-outlined{
-   position: absolute;
-   left: 15px;
-   font-size: 22px;
-   top: 17px;
-}
-
-.in-mat{
-    left: -42px;
-    font-size: 25px;
-    color: var(--blackColor);
-    top: 15px;
-}
-
-.btn-add{
-    margin: -10px 0 20px -5px;
-    opacity: 1;
-
-    &:hover{
-        color: var(--whiteColor);
-        opacity: 0.8;
-        cursor: pointer;
-    }
-}
-
 .trinta-card {
     &.to-do-list-card {
         .search-box {
@@ -120,7 +34,6 @@
                 width: 100%;
                 overflow: hidden;
                 background-color: transparent;
-                margin-top: 25px;
 
                 .mat-mdc-header-row {
                     height: auto;
@@ -168,7 +81,6 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
-                    min-width: 70px;
 
                     .task-name {
                         padding-left: 28px;
@@ -235,7 +147,7 @@
                     }
 
                     .mat-mdc-cell {
-                        /*padding: 15px 0!important;*/
+                        padding: 15px 0!important;
                         h6{
                             font-weight: 500!important;
                             font-size: 14px!important;
@@ -403,39 +315,135 @@
 /* Min width 1600px */
 @media only screen and (min-width: 1600px) {}
 
+/* Max width 991px */
+/*TABELLA RESONSIVE*/
 
-.filter {
-    width: 100%;
-    height: auto;
-    display: block;
-    min-width: auto;
-    margin-top: 0px;
-    border-radius: 6px;
-    padding: 18px 25px;
-    color: var(--whiteColor)!important;
-    background-color: var(--primaryColor);
-    font-size: 14px;
-    font-weight: 400;
-    font-family: var(--headingFontFamily);
+.toggle-checkbox, .toggle-label{
+    display: none;
+}
+@media (max-width: 991px) {
+  ::ng-deep {
+    .trinta-card.to-do-list-card {
+      .to-do-list-table {
+        .mat-mdc-table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+        }
+
+        thead tr {
+          display: none;
+        }
+
+        .mat-mdc-row {
+          margin-bottom: 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 10px;
+          background-color: #fff !important;
+        }
+
+        .mat-mdc-cell {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 10px !important;
+          white-space: normal !important;
+          text-align: left !important;
+          border-bottom: 1px dotted #ccc;
+
+          &::before {
+            content: attr(data-label);
+            font-weight: bold;
+            margin-right: 10px;
+          }
+
+          &:last-child {
+            border-bottom: 0!important;
+          }
+
+          h6 {
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            margin: 0;
+          }
+        }
+      }
+
+      .mat-mdc-paginator {
+        padding-top: 10px;
+      }
+    }
+  }
+
+    ::ng-deep {
+    .trinta-card.to-do-list-card {
+      .to-do-list-table {
+        .mat-mdc-cell[data-label="Prodotti"] {
+          flex-direction: column; /* mette i div in colonna */
+          align-items: flex-start; /* allinea a sinistra */
+        }
+      }
+    }
+  }
+
+    /* CSS per il panel collapsible */
+    .filter-panel {
+    .toggle-checkbox {
+        display: none;
+    }
+
+    .toggle-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f5f7fa;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+
+        .arrow {
+        transition: transform 0.3s ease;
+        }
+    }
+
+    .filter-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+    }
+
+    /* Checkbox checked: mostra il contenuto e ruota l'icona */
+    .toggle-checkbox:checked ~ .toggle-label .arrow {
+        transform: rotate(180deg);
+    }
+    .toggle-checkbox:checked ~ .filter-content {
+        max-height: 1000px; /* altezza sufficiente a contenere il form */
+        margin-top: 10px;
+    }
+    }
+
+    /* Nasconde su desktop */
+    @media (min-width: 992px) {
+        .filter-panel {
+            .toggle-label,
+            .toggle-checkbox,
+            .filter-content {
+            display: block !important;
+            max-height: none !important;
+            }
+        }
+    }
+
+    .filter {
+        margin-bottom: 10px;
+    }
 }
 
-.remove {
-    width: 100%;
-    height: auto;
-    display: block;
-    min-width: auto;
-    margin-top: 0px;
-    border-radius: 6px;
-    padding: 18px 25px;
-    color: var(--whiteColor)!important;
-    background-color: var(--dangerColor);
-    font-size: 14px;
-    font-weight: 400;
-    font-family: var(--headingFontFamily);
-}
 
-.p-20{
-    padding: 20px;
-    background-color: #f5f7fa;
-    font-size: 15px;
+.mini{
+    max-width: 200px;
 }

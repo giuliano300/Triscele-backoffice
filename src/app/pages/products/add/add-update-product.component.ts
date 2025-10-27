@@ -24,8 +24,10 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatMenuModule } from '@angular/material/menu';
 import { SubProducts } from '../../../interfaces/subProducts';
-import { AddUpdateSubProductsDialogComponent } from '../../../add-update-sub-product-dialog/add-update-sub-product-dialog.component';
+import { AddUpdateOptionsDialogComponent } from '../../../add-update-sub-product-dialog/add-update-options-dialog.component';
 import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
+import { ProductOptions } from '../../../interfaces/productOptions';
+import { AddUpdateSubProductsDialogComponent } from '../../../add-update-options-dialog/add-update-sub-product-dialog.component';
 
 @Component({
   selector: 'app-add-product',
@@ -66,9 +68,15 @@ export class AddProductComponent {
 
   subProducts: SubProducts[] = [];
 
+  productOptions: ProductOptions[] = [];
+
   dataSource = new MatTableDataSource<SubProducts>(this.subProducts);
 
+  dataSourceOptions = new MatTableDataSource<ProductOptions>(this.productOptions);
+
   displayedColumns: string[] = ['name', 'suuplierName', 'supplierCode', 'price', 'quantity', 'edit', 'delete'];
+
+  displayedColumnsOptions: string[] = ['name', 'position', 'options', 'parentId', 'parentProductId', 'edit', 'delete'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -185,6 +193,19 @@ export class AddProductComponent {
       }));
 
       this.dataSource = new MatTableDataSource<SubProducts>(this.subProducts);
+  }
+
+  getOptions(opt: ProductOptions[]){
+      this.productOptions = opt.map(p => ({
+        ...p,
+        action: {
+          edit: 'ri-edit-line',
+          movements: 'ri-search-line',
+          delete: 'ri-delete-bin-line'
+        }
+      }));
+
+      this.dataSourceOptions = new MatTableDataSource<ProductOptions>(this.productOptions);
   }
 
   UpdateItem(item: SubProducts){
@@ -392,5 +413,51 @@ export class AddProductComponent {
     this.openedImage = null;
   }
 
+  addOption(){
+    const dialogRef = this.dialog.open(AddUpdateOptionsDialogComponent, {
+        width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) 
+        this.addOrUpdateSubProduct(result);
+      else 
+        console.log("Close");
+    });  }
+
+
+  UpdateOption(item: ProductOptions){
+    const dialogRef = this.dialog.open(AddUpdateOptionsDialogComponent, {
+        data: item,
+        width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) 
+        this.addOrUpdateSubProduct(result);
+      else 
+        console.log("Close");
+    });
+  }
+
+  DeleteOption(item: ProductOptions){
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        const index = this.productOptions.findIndex(p => p._id === item._id);
+        if (index !== -1) {
+          this.productOptions.splice(index, 1); 
+          this.getOptions(this.productOptions);
+        }      
+      } 
+      else 
+      {
+        console.log("Close");
+      }
+    });
+  }
 
 }

@@ -1,15 +1,10 @@
-import { ConditionalLogic, FieldTypes } from "../enum/enum";
 import { OptionRow } from "./optionRow";
+import { ProductsOptions } from "./productsOptions";
 
 export interface ProductOptions {
-  _id?: string;
-  position?: number;
-  label?: string;
-  name?: string;
-  fieldType?: FieldTypes;
-  required?: boolean;
-  conditionalLogic?: ConditionalLogic;
+   _id: string;
+  position: number;
+  option: ProductsOptions;
   parentId?: string;
-  parentOptionRowId?: string;
-  optionRows?: OptionRow[];
+  parentProductId?: string;
 }
