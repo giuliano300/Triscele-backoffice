@@ -1,5 +1,6 @@
 import { Categories } from "../interfaces/categories";
 import { ProductMovements } from "../interfaces/productMovements";
+import { ProductOptions } from "../interfaces/productOptions";
 import { SubProducts } from "../interfaces/subProducts";
 import { Supplier } from "../interfaces/suppliers";
 
@@ -29,4 +30,6 @@ export class ProductViewModel {
     productMovements: ProductMovements[] = [];
     
     subProducts: SubProducts[] = [];
+    
+    options: ProductOptions[] = [];
 }

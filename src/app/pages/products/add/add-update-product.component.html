@@ -316,23 +316,25 @@
               <ng-container matColumnDef="options">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Opzioni </th>
                 <td mat-cell *matCellDef="let element" class="pl-0">
-                  <h6 class="mt-0 mb-0">{{element.option}}</h6>
+                  <div *ngFor="let item of element.option.products">
+                  <h6 class="mt-0 mb-10">{{item.name}} ({{item.price}}€)</h6>
+                  </div>
                 </td>
               </ng-container>
 
               <!-- Prezzo -->
-              <ng-container matColumnDef="parentId">
+              <ng-container matColumnDef="parent">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Dipende da </th>
                 <td mat-cell *matCellDef="let element" class="pl-0">
-                  <h6 class="mt-0 mb-0">{{element.parentId}} €</h6>
+                  <h6 class="mt-0 mb-0">{{element.parent?.name}}</h6>
                 </td>
               </ng-container>
 
               <!-- costo -->
-              <ng-container matColumnDef="parentProductId">
+              <ng-container matColumnDef="parentProduct">
                 <th mat-header-cell *matHeaderCellDef class="pl-0" mat-sort-header> Dipende da prodotto </th>
                 <td mat-cell *matCellDef="let element" class="pl-1">
-                  <h6 class="mt-0 mb-0">{{element.parentProductId}}</h6>
+                  <h6 class="mt-0 mb-0">{{element.parentProduct?.name}}</h6>
                 </td>
               </ng-container>
 

@@ -1,0 +1,37 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup] = "form">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Seleziona opzione</label>
+          <mat-form-field class="w-100">
+            <i-feather name="tag"></i-feather>
+            <mat-label>Seleziona opzione</mat-label>
+            <mat-select formControlName="option" (selectionChange)="selectOtherOptions($event)">
+              <mat-option *ngFor="let o of options" [value]="o">
+                {{ o.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Prodotto</label>
+          <mat-form-field class="w-100">
+            <i-feather name="layers"></i-feather>
+            <mat-label>Dipende da prodotto</mat-label>
+            <mat-select formControlName="parentProduct">
+              <mat-option *ngFor="let o of products" [value]="o">
+                {{ o.name }}
+              </mat-option>
+            </mat-select>          
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()" class="btn back">Chiudi</button>
+  <button mat-flat-button (click)="onSave()" class="btn" [disabled]="form.invalid">Salva</button>
+</mat-dialog-actions>

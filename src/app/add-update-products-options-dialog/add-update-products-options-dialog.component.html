@@ -32,12 +32,23 @@
         <div formArrayName="products" class="ctn-products">
           <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
             
-            <div class="col-lg-10">
+            <div class="col-lg-7">
               <label class="label d-block fw-medium mb-10" *ngIf="i === 0">Nome del prodotto</label>
               <mat-form-field class="w-100">
                 <i-feather name="tag"></i-feather>
                 <mat-label>Nome del prodotto</mat-label>
                 <input matInput formControlName="name">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-3">
+              <label class="label d-block fw-medium mb-10" *ngIf="i === 0">Prezzo(€)</label>
+              <mat-form-field class="w-100">
+                <span class="material-symbols-outlined in-mat">
+                  euro
+                </span>
+                <mat-label>Prezzo(€)</mat-label>
+                <input matInput formControlName="price">
               </mat-form-field>
             </div>
 

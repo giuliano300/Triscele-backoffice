@@ -1,10 +1,10 @@
-import { OptionRow } from "./optionRow";
-import { ProductsOptions } from "./productsOptions";
+import { Options } from "./options";
+import { ProductUp } from "./productsUp";
 
 export interface ProductOptions {
    _id: string;
   position: number;
-  option: ProductsOptions;
-  parentId?: string;
-  parentProductId?: string;
+  option: Options;
+  parent?: Options;
+  parentProduct?: ProductUp;
 }

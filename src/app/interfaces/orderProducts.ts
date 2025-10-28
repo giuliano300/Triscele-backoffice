@@ -1,3 +1,5 @@
+import { ProductOptions } from "./productOptions";
+
 export interface OrderProducts {
   _id: string;
   name: string;
@@ -9,4 +11,6 @@ export interface OrderProducts {
   isSubs:boolean;
   note?:string;
   parentId?:string;
+  options?: ProductOptions[];
+  
 }

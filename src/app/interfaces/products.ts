@@ -1,3 +1,4 @@
+import { ProductOptions } from "./productOptions";
 import { SubProducts } from "./subProducts";
 
 export interface Product {
@@ -15,5 +16,6 @@ export interface Product {
   description?: string;
   files?: any[];
   subProducts?: SubProducts[];
+  options: ProductOptions[];
   purchasePackage?: string;
 }

@@ -24,10 +24,10 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatMenuModule } from '@angular/material/menu';
 import { SubProducts } from '../../../interfaces/subProducts';
-import { AddUpdateOptionsDialogComponent } from '../../../add-update-sub-product-dialog/add-update-options-dialog.component';
 import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
 import { ProductOptions } from '../../../interfaces/productOptions';
-import { AddUpdateSubProductsDialogComponent } from '../../../add-update-options-dialog/add-update-sub-product-dialog.component';
+import { AddUpdateSubProductsDialogComponent } from '../../../add-update-sub-product-dialog/add-update-sub-product-dialog.component';
+import { AddUpdateOptionsDialogComponent } from '../../../add-update-options-dialog/add-update-options-dialog.component';
 
 @Component({
   selector: 'app-add-product',
@@ -76,7 +76,7 @@ export class AddProductComponent {
 
   displayedColumns: string[] = ['name', 'suuplierName', 'supplierCode', 'price', 'quantity', 'edit', 'delete'];
 
-  displayedColumnsOptions: string[] = ['name', 'position', 'options', 'parentId', 'parentProductId', 'edit', 'delete'];
+  displayedColumnsOptions: string[] = ['name', 'position', 'options', 'parent', 'parentProduct', 'edit', 'delete'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -177,6 +177,7 @@ export class AddProductComponent {
               this.dropZoneIsDisabled = true;
 
             this.getSubProducts(data.subProducts);
+            this.getOptions(data.options);
           });
       }
     });
@@ -196,7 +197,9 @@ export class AddProductComponent {
   }
 
   getOptions(opt: ProductOptions[]){
-      this.productOptions = opt.map(p => ({
+      this.productOptions = opt
+      .sort((a, b) => a.position - b.position)
+      .map(p => ({
         ...p,
         action: {
           edit: 'ri-edit-line',
@@ -254,6 +257,7 @@ export class AddProductComponent {
     });
   }
 
+
   addProduct(){
     const dialogRef = this.dialog.open(AddUpdateSubProductsDialogComponent, {
         width: '500px'
@@ -280,6 +284,7 @@ export class AddProductComponent {
       formData.files = this.uploadedFiles;
       formData.subProducts = this.subProducts;
       formData.enabled = true;
+      formData.options = this.productOptions;
 
       //console.log(JSON.stringify(formData));
 
@@ -413,14 +418,27 @@ export class AddProductComponent {
     this.openedImage = null;
   }
 
+  addOrUpdateOptions(result: any) 
+  {
+    const index = this.productOptions.findIndex(p => p.option._id === result.option._id);
+
+    if (index !== -1) 
+      this.productOptions[index] = result;
+    else 
+      this.productOptions.push(result);
+
+    this.getOptions(this.productOptions);
+  }
+
   addOption(){
     const dialogRef = this.dialog.open(AddUpdateOptionsDialogComponent, {
-        width: '500px'
+      width: '80vw',
+      maxWidth: '1000px'
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) 
-        this.addOrUpdateSubProduct(result);
+        this.addOrUpdateOptions(result);
       else 
         console.log("Close");
     });  }
@@ -429,12 +447,13 @@ export class AddProductComponent {
   UpdateOption(item: ProductOptions){
     const dialogRef = this.dialog.open(AddUpdateOptionsDialogComponent, {
         data: item,
-        width: '500px'
+        width: '80vw',
+        maxWidth: '1000px'
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) 
-        this.addOrUpdateSubProduct(result);
+        this.addOrUpdateOptions(result);
       else 
         console.log("Close");
     });

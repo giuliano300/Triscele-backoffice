@@ -2,27 +2,27 @@ import { Injectable } from '@angular/core';
 import { API_URL } from '../../main';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ProductsOptions } from '../interfaces/productsOptions';
+import { Options } from '../interfaces/options';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProductsOptionsService {
+export class OptionsService {
 
-    private apiUrl = API_URL + "productsOptions";
+    private apiUrl = API_URL + "options";
     
     constructor(private http: HttpClient) {}
 
-    getProductsOptions(): Observable<ProductsOptions[]>{
+    getOptions(): Observable<Options[]>{
       const token = localStorage.getItem('authToken'); 
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });      
-      return this.http.get<ProductsOptions[]>(this.apiUrl, { headers });
+      return this.http.get<Options[]>(this.apiUrl, { headers });
     }
 
-    getProductsOption(id: string): Observable<ProductsOptions>{
-      return this.http.get<ProductsOptions>(this.apiUrl + "/" + id);
+    getProductsOption(id: string): Observable<Options>{
+      return this.http.get<Options>(this.apiUrl + "/" + id);
     }
 
     delete(id: string):Observable<boolean>{
@@ -33,11 +33,11 @@ export class ProductsOptionsService {
       return this.http.delete<boolean>(this.apiUrl + "/" + id, { headers });
     }
   
-    setProductsOptions(c: ProductsOptions):Observable<ProductsOptions>{
-      return this.http.post<ProductsOptions>(this.apiUrl, c);
+    setOptions(c: Options):Observable<Options>{
+      return this.http.post<Options>(this.apiUrl, c);
     }
 
-    updateProductsOptions(c: ProductsOptions):Observable<boolean>{
+    updateOptions(c: Options):Observable<boolean>{
       return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
     }
 

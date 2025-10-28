@@ -263,7 +263,7 @@
       <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
         
         <div class="col-sm-1 center" *ngIf="group.get('isSubs')!.value === true"> <span class="sub-element"> <i class="ri-corner-down-right-line"></i> </span></div>
-        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-5' : 'col-sm-3'">
+        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-4' : 'col-sm-2'">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Nome del prodotto</label>
           <mat-form-field class="w-100">
             <i-feather name="tag"></i-feather>
@@ -294,23 +294,26 @@
         </div>
 
         <div class="col-sm-2" *ngIf="group.get('isSubs')!.value === false">
-          <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Sconto</label>
+          <label class="label d-block fw-medium mb-10" *ngIf="i === 0">Sconto</label>
           <mat-form-field class="w-100">
             <span class="material-symbols-outlined in-mat">
               euro
             </span>
-            <mat-label>Sconto</mat-label>
             <input matInput formControlName="discount" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
 
         <div class="col-sm-2" *ngIf="group.get('isSubs')!.value === false">
-          <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Sconto %</label>
+          <label class="label d-block fw-medium mb-10" *ngIf="i === 0">Sconto %</label>
           <mat-form-field class="w-100">
             <i-feather name="percent"></i-feather>
-            <mat-label>Sconto %</mat-label>
             <input matInput formControlName="discountPercentage" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
+        </div>
+        <div class="col-sm-1">
+          <span [ngClass]="i === 0 ? 'config' : 'config no-margin-top'" (click)="openConfigurator(group.value)">
+            Configura
+          </span>
         </div>
 
         <div class="col-sm-2">

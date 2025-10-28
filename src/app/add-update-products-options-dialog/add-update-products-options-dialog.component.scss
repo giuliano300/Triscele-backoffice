@@ -30,3 +30,17 @@
     max-height: 30vh;
     overflow-y: auto;
 }
+
+.material-symbols-outlined{
+   position: absolute;
+   left: 15px;
+   font-size: 22px;
+   top: 17px;
+}
+
+.in-mat{
+    left: -42px;
+    font-size: 25px;
+    color: var(--blackColor);
+    top: 15px;
+}

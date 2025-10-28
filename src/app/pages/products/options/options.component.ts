@@ -8,79 +8,78 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.component';
-import { ProductsOptions } from '../../../interfaces/productsOptions';
-import { CategoryService } from '../../../services/Category.service';
-import { AddUpdateCategoryDialogComponent } from '../../../add-update-category-dialog/add-update-category-dialog.component';
-import { ProductsOptionsService } from '../../../services/Products-Options.service';
+import { Options } from '../../../interfaces/options';
+import { OptionsService } from '../../../services/Options.service';
 import { AddUpdateProductsOptionsDialogComponent } from '../../../add-update-products-options-dialog/add-update-products-options-dialog.component';
+
 
 @Component({
   selector: 'app-options',
   imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule],
-  templateUrl: './products-options.component.html',
-  styleUrl: './products-options.component.scss'
+  templateUrl: './options.component.html',
+  styleUrl: './options.component.scss'
 })
-export class ProductsOptionsComponent {
+export class OptionsComponent {
 
-  productsOptions: ProductsOptions[] = [];
+  Options: Options[] = [];
 
   displayedColumns: string[] = ['name', 'edit', 'delete'];
 
-  dataSource = new MatTableDataSource<ProductsOptions>(this.productsOptions);
+  dataSource = new MatTableDataSource<Options>(this.Options);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   
   constructor(
       private router: Router,
-      private productsOptionsService: ProductsOptionsService,
+      private OptionsService: OptionsService,
       private dialog: MatDialog
   ) {}
 
    ngOnInit(): void {
-    this.getproductsOptions();
+    this.getOptions();
    }
 
-  getproductsOptions(){
-    this.productsOptionsService.getProductsOptions()
-    .subscribe((data: ProductsOptions[]) => {
+  getOptions(){
+    this.OptionsService.getOptions()
+    .subscribe((data: Options[]) => {
       if (!data || data.length === 0) {
         console.log('Nessun dato disponibile');
       } 
       else 
       {
-        this.productsOptions = data.map(c => ({
+        this.Options = data.map(c => ({
             ...c, 
             action: {
                 edit: 'ri-edit-line',
                 delete: 'ri-delete-bin-line'
             }
         }));;
-        this.dataSource = new MatTableDataSource<ProductsOptions>(this.productsOptions);
+        this.dataSource = new MatTableDataSource<Options>(this.Options);
         this.dataSource.paginator = this.paginator;
       }
     });
   }
 
-  OpenPopUp(item?:ProductsOptions){
+  OpenPopUp(item?:Options){
     const dialogRef = this.dialog.open(AddUpdateProductsOptionsDialogComponent, {
       data: item,
       width: '80vw',
       maxWidth: '1000px'
     });
-    dialogRef.afterClosed().subscribe((result: ProductsOptions) => {
+    dialogRef.afterClosed().subscribe((result: Options) => {
       if (result) 
       {
         if(!item)
-          this.productsOptionsService.setProductsOptions(result)
-            .subscribe((data: ProductsOptions) => {
+          this.OptionsService.setOptions(result)
+            .subscribe((data: Options) => {
               if(data) 
-                this.getproductsOptions();
+                this.getOptions();
           });
         else
-          this.productsOptionsService.updateProductsOptions(result)
+          this.OptionsService.updateOptions(result)
             .subscribe((success: boolean) => {
               if (success) 
-                this.getproductsOptions();
+                this.getOptions();
           });      
       } 
       else 
@@ -90,7 +89,7 @@ export class ProductsOptionsComponent {
     });  
   }
 
-  DeleteItem(item:ProductsOptions){
+  DeleteItem(item:Options){
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '500px'
@@ -98,10 +97,10 @@ export class ProductsOptionsComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.productsOptionsService.delete(item._id)
+        this.OptionsService.delete(item._id)
           .subscribe((data: boolean) => {
             if(data){
-              this.getproductsOptions();
+              this.getOptions();
             }
           });
       } 
@@ -112,7 +111,7 @@ export class ProductsOptionsComponent {
     });
   }
 
-  UpdateItem(item: ProductsOptions){
+  UpdateItem(item: Options){
     this.OpenPopUp(item);
   }
 

@@ -12,8 +12,8 @@ import { ProductService } from '../services/Product.service';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { ProductViewModel } from '../classess/productViewModel';
 import { AlertDialogComponent } from '../alert-dialog/alert-dialog.component';
-import { ProductsOptions } from '../interfaces/productsOptions';
-import { ProductsOptionsService } from '../services/Products-Options.service';
+import { Options } from '../interfaces/options';
+import { OptionsService } from '../services/Options.service';
 import { ProductUp } from '../interfaces/productsUp';
 
 @Component({
@@ -48,16 +48,16 @@ export class AddUpdateProductsOptionsDialogComponent {
 
   products: ProductViewModel[] = [];
 
-  productOptions: ProductsOptions[] = [];
+  productOptions: Options[] = [];
 
   productOptionsValue: ProductUp[] = [];
 
   constructor(public dialogRef: MatDialogRef<AddUpdateProductsOptionsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data:  ProductsOptions,
+    @Inject(MAT_DIALOG_DATA) public data:  Options,
     private fb: FormBuilder,
     private productService: ProductService,
     private dialog: MatDialog,
-    private productsOptionsService: ProductsOptionsService
+    private optionsService: OptionsService
   ) {
     this.optionForm = this.fb.group({
       name: ['', Validators.required],
@@ -93,6 +93,7 @@ export class AddUpdateProductsOptionsDialogComponent {
         const group = this.fb.group({
           _id: [product._id],
           name: [product.name],
+          price: [product.price],
         });
 
         this.productsForm.push(group);    
@@ -113,7 +114,7 @@ export class AddUpdateProductsOptionsDialogComponent {
 
   onSave() {
     if (this.optionForm.valid) {
-      const result: ProductsOptions = {
+      const result: Options = {
         ...this.data!,
         ...this.optionForm.value,
       };
@@ -161,6 +162,7 @@ export class AddUpdateProductsOptionsDialogComponent {
       const group = this.fb.group({
         _id: [product.id],
         name: [product.name],
+        price: [product.price]
       });
 
       this.productsForm.push(group);

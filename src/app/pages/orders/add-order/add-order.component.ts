@@ -35,6 +35,7 @@ import { Agents } from '../../../interfaces/agents';
 import { AgentService } from '../../../services/Agent.service';
 import { OrderState } from '../../../interfaces/order-state';
 import { OrderStateService } from '../../../services/OrderState.service';
+import { AddUpdateOptionsToOrderDialogComponent } from '../../../add-update-options-to-order-dialog/add-update-options-to-order-dialog.component';
 
 registerLocaleData(localeIt);
 
@@ -369,7 +370,8 @@ export class AddOrderComponent {
                 total: [product.total],
                 isSubs: [product.isSubs],
                 note: [product.note],
-                parentId: [product.parentId]
+                parentId: [product.parentId],
+                options: [product.options]
               });
 
               this.syncDiscount(group);
@@ -418,7 +420,8 @@ export class AddOrderComponent {
         discountPercentage: [0],
         isSubs: false,
         parentId: null,
-        note: ""
+        note: "",
+        options: [product.options]
       });
 
       this.productsForm.push(group);
@@ -561,4 +564,22 @@ export class AddOrderComponent {
     }
   }
 
+  openConfigurator(c: any){
+    const dialogRef = this.dialog.open(AddUpdateOptionsToOrderDialogComponent, {
+        data: c.options,
+        width: '80vw',
+        maxWidth: '1000px'
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) 
+        this.addOrUpdateProductOptions(result);
+      else 
+        console.log("Close");
+    });
+  }
+
+  addOrUpdateProductOptions(c: any){
+    console.log(c);
+  }
 }
