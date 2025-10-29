@@ -10,7 +10,7 @@ import { ProductViewModel } from '../classess/productViewModel';
 })
 export class ProductService {
 
-    private apiUrl = API_URL + "Products";
+    private apiUrl = API_URL + "products";
     
     constructor(private http: HttpClient) {}
 

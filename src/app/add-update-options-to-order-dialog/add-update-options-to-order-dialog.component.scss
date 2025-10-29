@@ -4,3 +4,15 @@
     top: 15px;
     color: var(--blackColor);
 }
+
+.option-bg{
+    border-bottom:solid 1px #e2e2e2;
+    padding: 10px 0 3px;
+    margin: 0px 0 20px;
+    font-size: 15px;
+    font-weight: 500;
+
+    span{
+        color: var(--primaryColor);
+    }
+}

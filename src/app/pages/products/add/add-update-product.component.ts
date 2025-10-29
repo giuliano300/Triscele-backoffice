@@ -284,7 +284,7 @@ export class AddProductComponent {
       formData.files = this.uploadedFiles;
       formData.subProducts = this.subProducts;
       formData.enabled = true;
-      formData.options = this.productOptions;
+      formData.options = (this.productOptions as any[]).map(({ action, ...rest }) => rest);
 
       //console.log(JSON.stringify(formData));
 

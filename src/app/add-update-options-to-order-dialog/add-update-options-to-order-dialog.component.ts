@@ -40,10 +40,11 @@ export class AddUpdateOptionsToOrderDialogComponent {
 
   form: FormGroup;
 
-
-  options: any[] = [];
+  masterOptions: any[] = [];
 
   products: ProductUp[] = [];
+
+  haveFirstOption: boolean = false;
 
   constructor(public dialogRef: MatDialogRef<AddUpdateOptionsToOrderDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any[],
@@ -61,7 +62,7 @@ export class AddUpdateOptionsToOrderDialogComponent {
   getProductsOptions(){
     this.optionService.getOptions()
     .subscribe(data => {
-      this.options = data;
+      this.masterOptions = data;
     });
   }
 
@@ -69,7 +70,7 @@ export class AddUpdateOptionsToOrderDialogComponent {
 
     console.log(this.data);
 
-    this.options = this.data || [];
+    this.masterOptions = this.data.filter(a => a.parent == null) || [];
 
   }
 
@@ -93,6 +94,10 @@ export class AddUpdateOptionsToOrderDialogComponent {
 
   selectProductsOption(c: any){
    
+ }
+
+ setSubOption(c: any){
+  
  }
 
 }

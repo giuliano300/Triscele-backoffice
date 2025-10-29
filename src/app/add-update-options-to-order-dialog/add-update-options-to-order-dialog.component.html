@@ -2,27 +2,29 @@
 <form [formGroup] = "form">
   <mat-card class="trinta-card mb-10 bg-white border-none d-block">
     <mat-card-content>
-      <div class="row g-3"> 
-        <div class="col-sm-6">
-          <label class="label d-block fw-medium mb-10">Seleziona opzione</label>
-          <mat-form-field class="w-100">
-            <i-feather name="tag"></i-feather>
-            <mat-label>Seleziona opzione</mat-label>
-            <mat-select formControlName="option" (selectionChange)="selectOtherOptions($event)">
-              <mat-option *ngFor="let o of options" [value]="o">
-                {{ o.name }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>        
-        </div>
-        <div class="col-sm-6">
-          <label class="label d-block fw-medium mb-10">Prodotto</label>
+      <div class="row g-3" *ngFor="let o of masterOptions"> 
+        <div class="col-sm-12">
+          <label class="d-block option-bg">Opzione: <span>{{ o.option.name | titlecase }}</span></label>
+          <label class="label d-block fw-medium">Prodotto</label>
           <mat-form-field class="w-100">
             <i-feather name="layers"></i-feather>
-            <mat-label>Dipende da prodotto</mat-label>
+            <mat-label>Prodotto</mat-label>
+            <mat-select formControlName="parentProduct" (selectionChange)="setSubOption($event)">
+              <mat-option *ngFor="let p of o.option.products" [value]="p">
+                {{ p.name }}
+              </mat-option>
+            </mat-select>          
+          </mat-form-field>
+        </div>
+        <div class="col-sm-12" *ngIf="haveFirstOption">
+          <label class="d-block option-bg">Opzione: <span>{{ o.option.name | titlecase }}</span></label>
+          <label class="label d-block fw-medium">Prodotto</label>
+          <mat-form-field class="w-100">
+            <i-feather name="layers"></i-feather>
+            <mat-label>Prodotto</mat-label>
             <mat-select formControlName="parentProduct">
-              <mat-option *ngFor="let o of products" [value]="o">
-                {{ o.name }}
+              <mat-option *ngFor="let p of o.option.products" [value]="p">
+                {{ p.name }}
               </mat-option>
             </mat-select>          
           </mat-form-field>
