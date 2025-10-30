@@ -11,6 +11,7 @@ import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.c
 import { Options } from '../../../interfaces/options';
 import { OptionsService } from '../../../services/Options.service';
 import { AddUpdateProductsOptionsDialogComponent } from '../../../add-update-products-options-dialog/add-update-products-options-dialog.component';
+import { OptionType, OptionTypeLabels } from '../../../enum/enum';
 
 
 @Component({
@@ -23,9 +24,11 @@ export class OptionsComponent {
 
   Options: Options[] = [];
 
-  displayedColumns: string[] = ['name', 'edit', 'delete'];
+  displayedColumns: string[] = ['name', 'layer', 'optionType', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Options>(this.Options);
+
+  OptionTypeLabels = OptionTypeLabels;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   
@@ -115,4 +118,9 @@ export class OptionsComponent {
     this.OpenPopUp(item);
   }
 
+
+  getOptionName(n: number): string{
+    const key = OptionType[n] as keyof typeof OptionType;
+    return OptionTypeLabels[key];
+  }
 }

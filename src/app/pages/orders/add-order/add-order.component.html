@@ -311,8 +311,9 @@
           </mat-form-field>
         </div>
         <div class="col-sm-1">
-          <span [ngClass]="i === 0 ? 'config' : 'config no-margin-top'" (click)="openConfigurator(group.value)">
-            Configura
+          <label *ngIf="i === 0" class="label d-block fw-medium mb-10 text-end sub">Configura</label>
+          <span class="config" (click)="openConfigurator(group.value)">
+            <i class="ri-contrast-2-line"></i>
           </span>
         </div>
 

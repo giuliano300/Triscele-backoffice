@@ -28,6 +28,7 @@ import { ConfirmDialogComponent } from '../../../confirm-dialog/confirm-dialog.c
 import { ProductOptions } from '../../../interfaces/productOptions';
 import { AddUpdateSubProductsDialogComponent } from '../../../add-update-sub-product-dialog/add-update-sub-product-dialog.component';
 import { AddUpdateOptionsDialogComponent } from '../../../add-update-options-dialog/add-update-options-dialog.component';
+import { OptionType, OptionTypeLabels } from '../../../enum/enum';
 
 @Component({
   selector: 'app-add-product',
@@ -76,7 +77,7 @@ export class AddProductComponent {
 
   displayedColumns: string[] = ['name', 'suuplierName', 'supplierCode', 'price', 'quantity', 'edit', 'delete'];
 
-  displayedColumnsOptions: string[] = ['name', 'position', 'options', 'parent', 'parentProduct', 'edit', 'delete'];
+  displayedColumnsOptions: string[] = ['name', 'position', 'optionTye', 'options', 'parent', 'parentProduct', 'edit', 'delete'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -86,6 +87,8 @@ export class AddProductComponent {
 
   dismissTimeout: any;
 
+  OptionTypeLabels = OptionTypeLabels;
+  
   stockTypes = [
     { value: 'pezzi', label: 'Pezzi' },
     { value: 'm', label: 'Metri' },
@@ -478,5 +481,11 @@ export class AddProductComponent {
       }
     });
   }
+
+  
+    getOptionName(n: number): string{
+      const key = OptionType[n] as keyof typeof OptionType;
+      return OptionTypeLabels[key];
+    }
 
 }

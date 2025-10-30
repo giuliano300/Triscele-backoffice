@@ -15,6 +15,8 @@ import { AlertDialogComponent } from '../alert-dialog/alert-dialog.component';
 import { Options } from '../interfaces/options';
 import { OptionsService } from '../services/Options.service';
 import { ProductUp } from '../interfaces/productsUp';
+import { OptionType, OptionTypeLabels } from '../enum/enum';
+import { MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'app-add-update-products-options-dialog',
@@ -33,7 +35,8 @@ import { ProductUp } from '../interfaces/productsUp';
     MatIconModule,
     MatLabel, 
     CommonModule,
-   ReactiveFormsModule
+   ReactiveFormsModule,
+   MatSelect
   ]
 })
 export class AddUpdateProductsOptionsDialogComponent {
@@ -50,7 +53,13 @@ export class AddUpdateProductsOptionsDialogComponent {
 
   productOptions: Options[] = [];
 
+  OptionTypeLabels = OptionTypeLabels;
+
+  isSelect: boolean = false;
+
   productOptionsValue: ProductUp[] = [];
+
+  OptionType = OptionType;
 
   constructor(public dialogRef: MatDialogRef<AddUpdateProductsOptionsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data:  Options,
@@ -61,8 +70,14 @@ export class AddUpdateProductsOptionsDialogComponent {
   ) {
     this.optionForm = this.fb.group({
       name: ['', Validators.required],
+      layer: [''],
+      optionType: [0, Validators.required],
       products: this.fb.array([])
     });
+  }
+
+  get optionTypeKeys(): (keyof typeof OptionType)[] {
+    return Object.keys(OptionTypeLabels) as (keyof typeof OptionType)[];
   }
 
   get productsForm() {
@@ -86,8 +101,12 @@ export class AddUpdateProductsOptionsDialogComponent {
     if(this.data){
       this.title = "Modifica opzione prodotti";
       this.optionForm.patchValue({
-        name: this.data.name
+        name: this.data.name,
+        layer: this.data.layer,
+        optionType: this.data.optionType
       });
+      if(this.data.optionType == OptionType.select)
+        this.isSelect = true;
 
       this.data.products!.forEach((product) => {
         const group = this.fb.group({
@@ -116,7 +135,7 @@ export class AddUpdateProductsOptionsDialogComponent {
     if (this.optionForm.valid) {
       const result: Options = {
         ...this.data!,
-        ...this.optionForm.value,
+        ...this.optionForm.value
       };
 
       //result.parentId = this.data.parentId ?? undefined;
@@ -173,5 +192,12 @@ export class AddUpdateProductsOptionsDialogComponent {
     
     this.productCtrl.setValue('');
     
+  }
+
+  changeType(c:any){
+    if(c.value == OptionType.select)
+      this.isSelect = true;
+    else
+      this.isSelect = false;
   }
 }

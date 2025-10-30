@@ -101,18 +101,18 @@ input[matinput] {
 
 .config{
     font-weight: 500;
-    font-size: 13px;
+    font-size: 20px;
     float: left;
     border-radius: 10px;
-    padding: 18px 15px 18px 15px;
-    border: 1px solid #ececec;
+    padding: 12px 15px 12px 15px;
+    border: 1px solid #f5f7fa;
     background-color: #f5f7fa;
     position: relative;
-    color: #000;
+    color: var(--blackColor);
     width: 100%;
     text-align: center;
-    margin: 31px 0 0;
-    opacity: 0.8;
+    margin:0;
+    cursor: pointer;
 
 
     label{
@@ -120,10 +120,6 @@ input[matinput] {
       left: 40px;
     }
 
-    &:hover{
-      cursor: pointer;
-      opacity: 1;
-    }
 }
 
 .no-margin-top{

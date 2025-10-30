@@ -1,3 +1,4 @@
+import { ConfigProductToOrder } from "./config-product-to-order";
 import { ProductOptions } from "./productOptions";
 
 export interface OrderProducts {
@@ -12,5 +13,5 @@ export interface OrderProducts {
   note?:string;
   parentId?:string;
   options?: ProductOptions[];
-  
+  selectedOptions?: ConfigProductToOrder[];
 }

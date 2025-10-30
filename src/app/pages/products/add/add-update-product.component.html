@@ -296,7 +296,6 @@
         <div class="table-responsive">
             <table mat-table [dataSource]="dataSourceOptions">
 
-              <!-- Nome -->
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Nome </th>
                 <td mat-cell *matCellDef="let element" class="pl-0">
@@ -304,7 +303,6 @@
                 </td>
               </ng-container>
 
-              <!-- Fornitore -->
               <ng-container matColumnDef="position">
                 <th mat-header-cell *matHeaderCellDef class="pl-0"> Posizione </th>
                 <td mat-cell *matCellDef="let element" class="pl-0">
@@ -312,7 +310,13 @@
                 </td>
               </ng-container>
               
-              <!-- Codice Fornitore -->
+              <ng-container matColumnDef="optionTye">
+                <th mat-header-cell *matHeaderCellDef class="pl-0"> Tipo </th>
+                <td mat-cell *matCellDef="let element" class="pl-0">
+                  <h6 class="mt-0 mb-0">{{getOptionName(element.option.optionType)}}</h6>
+                </td>
+              </ng-container>
+              
               <ng-container matColumnDef="options">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Opzioni </th>
                 <td mat-cell *matCellDef="let element" class="pl-0">
@@ -322,7 +326,6 @@
                 </td>
               </ng-container>
 
-              <!-- Prezzo -->
               <ng-container matColumnDef="parent">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Dipende da </th>
                 <td mat-cell *matCellDef="let element" class="pl-0">
@@ -330,7 +333,6 @@
                 </td>
               </ng-container>
 
-              <!-- costo -->
               <ng-container matColumnDef="parentProduct">
                 <th mat-header-cell *matHeaderCellDef class="pl-0" mat-sort-header> Dipende da prodotto </th>
                 <td mat-cell *matCellDef="let element" class="pl-1">

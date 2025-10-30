@@ -12,6 +12,26 @@
           </mat-form-field>
         </div>
         <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Label opzione</label>
+          <mat-form-field class="w-100">
+            <i-feather name="code"></i-feather>
+            <mat-label>Inserisci il nome della label</mat-label>
+            <input matInput formControlName="layer" type="text">
+          </mat-form-field>
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Tipo opzione</label>
+          <mat-form-field class="w-100">
+            <i-feather name="code"></i-feather>
+            <mat-label>Inserisci il tipo della opzione</mat-label>
+            <mat-select formControlName="optionType" (selectionChange)="changeType($event)">
+               <mat-option *ngFor="let key of optionTypeKeys" [value]="OptionType[key]">
+                {{ OptionTypeLabels[key] }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-12" *ngIf="isSelect">
           <label class="label d-block fw-medium mb-10">Seleziona un prodotto</label>
           <!-- Input di ricerca con autocomplete -->
           <mat-form-field class="w-100 mt-2">

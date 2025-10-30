@@ -19,27 +19,20 @@ export const MovementType: any[] = [
   { id: 2, name: "Scarico" }
 ]
 
-export enum FieldTypes {
+export enum OptionType{
   select = 1,
-  selectMultiple, 
-  date,
-  color,
-  checkbox, 
-  radio,
   text,
-  texarea
+  textarea,
+  date,
+  color
 }
 
-
-export const FieldTypesLabels: Record<keyof typeof FieldTypes, string> = {
+export const OptionTypeLabels: Record<keyof typeof OptionType, string> = {
   select: 'Select',
-  selectMultiple: 'Select Multipla',
   date: 'Campo data',
   color: ' Campo colore',
-  checkbox: 'Checkbox(Selezione multipla)',
-  radio: 'Radio button(Selezione singola)',
   text: 'Campo di testo',
-  texarea: 'Area di testo'
+  textarea: 'Area di testo'
 };
 
 export enum ConditionalLogic{

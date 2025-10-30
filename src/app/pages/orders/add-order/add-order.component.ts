@@ -1,6 +1,6 @@
 import { Component, LOCALE_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -36,6 +36,8 @@ import { AgentService } from '../../../services/Agent.service';
 import { OrderState } from '../../../interfaces/order-state';
 import { OrderStateService } from '../../../services/OrderState.service';
 import { AddUpdateOptionsToOrderDialogComponent } from '../../../add-update-options-to-order-dialog/add-update-options-to-order-dialog.component';
+import { ConfigProductToOrder } from '../../../interfaces/config-product-to-order';
+import { Product } from '../../../interfaces/products';
 
 registerLocaleData(localeIt);
 
@@ -371,7 +373,8 @@ export class AddOrderComponent {
                 isSubs: [product.isSubs],
                 note: [product.note],
                 parentId: [product.parentId],
-                options: [product.options]
+                options: [product.options],
+                selectedOptions: [product.selectedOptions || null]
               });
 
               this.syncDiscount(group);
@@ -421,7 +424,8 @@ export class AddOrderComponent {
         isSubs: false,
         parentId: null,
         note: "",
-        options: [product.options]
+        options: [product.options],
+        selectedOptions: []
       });
 
       this.productsForm.push(group);
@@ -564,22 +568,45 @@ export class AddOrderComponent {
     }
   }
 
-  openConfigurator(c: any){
+  openConfigurator(c: Product){
     const dialogRef = this.dialog.open(AddUpdateOptionsToOrderDialogComponent, {
-        data: c.options,
+        data: c,
         width: '80vw',
         maxWidth: '1000px'
     });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
+    dialogRef.afterClosed().subscribe((result: ConfigProductToOrder) => {
       if (result) 
-        this.addOrUpdateProductOptions(result);
+        this.addOrUpdateProductOptions(c, result);
       else 
         console.log("Close");
     });
   }
 
-  addOrUpdateProductOptions(c: any){
-    console.log(c);
+  addOrUpdateProductOptions(product: Product, result: ConfigProductToOrder) {
+    // Trova il FormGroup corrispondente
+    const fg = this.productsForm.controls.find(
+      (c: AbstractControl) => c.get('_id')?.value === product._id
+    ) as FormGroup;
+
+    if (!fg) return;
+
+    // Prendi l'array di selectedOptions
+    const selectedOptions = fg.get('selectedOptions')?.value || [];
+
+    // Controlla se l'opzione è già presente (update) o aggiungila (push)
+    const existingIndex = selectedOptions.findIndex((o: ConfigProductToOrder) => o._id === result._id);
+
+    if (existingIndex >= 0) {
+      // Aggiorna
+      selectedOptions[existingIndex] = result;
+    } else {
+      // Aggiungi
+      selectedOptions.push(result);
+    }
+
+    // Aggiorna il FormControl
+    fg.get('selectedOptions')?.setValue(selectedOptions);
+    fg.get('selectedOptions')?.updateValueAndValidity();
   }
 }
