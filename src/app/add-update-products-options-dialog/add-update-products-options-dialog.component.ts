@@ -112,7 +112,7 @@ export class AddUpdateProductsOptionsDialogComponent {
         const group = this.fb.group({
           _id: [product._id],
           name: [product.name],
-          price: [product.price],
+          price: [product.price || 0],
         });
 
         this.productsForm.push(group);    

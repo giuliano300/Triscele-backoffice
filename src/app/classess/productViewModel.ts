@@ -1,4 +1,5 @@
 import { Categories } from "../interfaces/categories";
+import { ConfigProductToOrder } from "../interfaces/config-product-to-order";
 import { ProductMovements } from "../interfaces/productMovements";
 import { ProductOptions } from "../interfaces/productOptions";
 import { SubProducts } from "../interfaces/subProducts";
@@ -32,4 +33,5 @@ export class ProductViewModel {
     subProducts: SubProducts[] = [];
     
     options: ProductOptions[] = [];
+    selectedOptions?: ConfigProductToOrder[];
 }

@@ -3,7 +3,9 @@
 <form [formGroup]="form">
   <mat-card class="trinta-card mb-10 bg-white border-none d-block">
     <mat-card-content>
-      <ng-container *ngTemplateOutlet="renderOption; context: { options: masterOptions }"></ng-container>
+      <ng-container
+        *ngTemplateOutlet="renderOption; context: { options: masterOptions, parentForm: form }">
+      </ng-container>
     </mat-card-content>
   </mat-card>
 </form>
@@ -13,71 +15,65 @@
   <button mat-flat-button (click)="onSave()" class="btn" [disabled]="form.invalid">Salva</button>
 </mat-dialog-actions>
 
-<!-- TEMPLATE RICORSIVO -->
-<ng-template #renderOption let-options="options">
+<ng-template #renderOption let-options="options" let-parentForm="parentForm">
   <div class="ctn-options">
     <div class="row g-3" *ngFor="let o of options">
-      <div class="col-sm-12">
+      <div class="col-sm-12" [formGroup]="parentForm">
         <label class="d-block option-bg">Opzione: <span>{{ o.option.name | titlecase }}</span></label>
 
         <ng-container [ngSwitch]="o.option.optionType">
-          <!--SELECT-->
+
           <mat-form-field class="w-100" *ngSwitchCase="OptionType.select">
-            <i-feather name="file"></i-feather>
+            <i-feather name="list"></i-feather>
             <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <mat-select (selectionChange)="setSubOption(o, $event.value)">
-              <mat-option *ngFor="let p of o.option.products" [value]="p">
-                {{ p.name }}
-              </mat-option>
+            <mat-select [formControlName]="o.option._id"
+                        [compareWith]="compareProducts"
+                        (selectionChange)="setSubOption(o, $event.value)">
+              <mat-option *ngFor="let p of o.option.products" [value]="p">{{ p.name }} (+{{p.price}}€)</mat-option>
             </mat-select>
           </mat-form-field>
-          
-          <!--INPUT-->
-         <mat-form-field class="w-100" *ngSwitchCase="OptionType.text">
+
+          <!--text-->
+          <mat-form-field class="w-100" *ngSwitchCase="OptionType.text">
             <i-feather name="file"></i-feather>
-            <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <input matInput type="text"
-                   [value]="o.value || ''"
-                   (input)="o.value = $any($event.target).value">
+            <mat-label>{{ o.option.layer ?? o.option.name | titlecase }} </mat-label>
+            <input matInput type="text" [formControlName]="o.option._id">
           </mat-form-field>
 
-          <!-- TEXTAREA -->
+          <!--text-->
           <mat-form-field class="w-100" *ngSwitchCase="OptionType.textarea">
             <i-feather name="file"></i-feather>
             <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <textarea matInput
-                      [value]="o.value || ''"
-                      (input)="o.value = $any($event.target).value"></textarea>
+            <textarea matInput 
+            [formControlName]="o.option._id"           
+            style="height: 80px;"></textarea>
           </mat-form-field>
 
-          <!-- COLOR -->
           <mat-form-field class="w-100" *ngSwitchCase="OptionType.color">
-            <i-feather name="file"></i-feather>
+            <i-feather name="circle"></i-feather>
             <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <input matInput type="color"
-                   [value]="o.value || '#000000'"
-                   (input)="o.value = $any($event.target).value">
+            <input matInput type="color" 
+            [formControlName]="o.option._id">
           </mat-form-field>
 
-          <!-- DATE -->
+          <!--Data-->
           <mat-form-field class="w-100" *ngSwitchCase="OptionType.date">
             <i-feather name="calendar"></i-feather>
             <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
             <input matInput [matDatepicker]="picker" 
-                   [value]="o.value"
-                   (dateChange)="o.value = $event.value">
+            [formControlName]="o.option._id">
             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
 
-          </mat-form-field>          
         </ng-container>
       </div>
 
-      <!-- RICORSIONE: se l'opzione ha figli -->
-      <div class="col-sm-12" *ngIf="o.children && o.children.length > 0">
-        <ng-container *ngTemplateOutlet="renderOption; context: { options: o.children }"></ng-container>
+      <!-- RICORSIONE FIGLI -->
+      <div class="col-sm-12" *ngIf="parentForm.get(o.option._id + '_children') as childForm">
+        <ng-container *ngTemplateOutlet="renderOption; context: { options: o.children, parentForm: childForm }">
+        </ng-container>
       </div>
     </div>
-
   </div>
 </ng-template>

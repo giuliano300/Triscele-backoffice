@@ -469,7 +469,7 @@ export class AddProductComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        const index = this.productOptions.findIndex(p => p._id === item._id);
+        const index = this.productOptions.findIndex(p => p.option._id === item.option._id);
         if (index !== -1) {
           this.productOptions.splice(index, 1); 
           this.getOptions(this.productOptions);

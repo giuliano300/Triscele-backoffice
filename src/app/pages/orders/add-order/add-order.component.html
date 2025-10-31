@@ -328,13 +328,7 @@
             <span class="material-symbols-outlined">
               euro
             </span>
-            {{
-              (group.get('price')?.value || 0) *
-              (group.get('quantity')?.value || 0)
-              -
-              (group.get('discount')?.value || 0)
-              | number:'1.2-2'
-            }} €
+            {{ groupTotals[i] | number:'1.2-2' }}
             <span class="delete" (click)="removeThis(i)">
               <i class="ri-delete-bin-line"></i>
             </span>

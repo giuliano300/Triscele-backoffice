@@ -202,7 +202,7 @@ export class AddOrderComponent {
       const subtotal = price * quantity;
 
       const total = Math.round((subtotal - discount) * 100) / 100;
-      group.get('total')?.setValue(total, { emitEvent: false });
+      this.getFinalPrice();
     };
 
     // 🔁 Sottoscrizioni
@@ -230,19 +230,25 @@ export class AddOrderComponent {
   get grandTotal(): number {
     return this.productsForm.controls.reduce((acc, ctrl) => {
       const isSubs = ctrl.get('isSubs')?.value;
-      if (!isSubs) {
-        const price = ctrl.get('price')?.value || 0;
-        const qty = ctrl.get('quantity')?.value || 0;
-        const discount = ctrl.get('discount')?.value || 0;
-        return acc + (price * qty - discount);
-      }
-      return acc; // se isSubs è true, non aggiungere al totale
+      if (isSubs) return acc; // salta i sub-items
+
+      const price = ctrl.get('price')?.value || 0;
+      const qty = ctrl.get('quantity')?.value || 0;
+      const discount = ctrl.get('discount')?.value || 0;
+      const selectedOptions = ctrl.get('selectedOptions')?.value || [];
+
+      // calcolo prezzo totale del gruppo includendo selectedOptions ricorsivamente
+      const optionsTotal = this.sumSelectedOptionsPrice(selectedOptions);
+
+      return acc + (price * qty - discount) + optionsTotal;
     }, 0);
   }
 
   selectedProducts: any[] = [];
   productCtrl = new FormControl('');
   filteredProducts!: Observable<any[]>;
+
+  groupTotals: number[] = [];
 
   private _filter(value: string): any[] {
     const filterValue = value.toLowerCase();
@@ -377,6 +383,7 @@ export class AddOrderComponent {
                 selectedOptions: [product.selectedOptions || null]
               });
 
+              //console.log(group);
               this.syncDiscount(group);
               this.productsForm.push(group);
             });      
@@ -389,10 +396,28 @@ export class AddOrderComponent {
                 operatorId: operatorId
              });
           }
-          });
-      }
+
+          this.getFinalPrice();
+
+      });
+    }
     });
   }
+
+  getFinalPrice(): number {
+    let total = 0;
+    (this.productsForm.controls as FormGroup[]).forEach((group: FormGroup, i: number) => {
+      this.groupTotals[i] = this.calculateFinalPrice(
+        +group.get('price')?.value || 0,
+        +group.get('quantity')?.value || 0,
+        +group.get('discount')?.value || 0,
+        group.get('selectedOptions')?.value || []
+      );
+      total += this.groupTotals[i];
+    });
+    return total;
+  }
+
 
   addProductToList(product: ProductViewModel){
     const exists = this.productsForm.controls.some(ctrl => {
@@ -446,6 +471,8 @@ export class AddOrderComponent {
             this.productsForm.push(group);
         }
       }
+
+      this.getFinalPrice();
 
       //console.log(this.productsForm.value);
 
@@ -533,9 +560,7 @@ export class AddOrderComponent {
       formData.origin = "1";
       formData.orderProducts = this.productsForm.value;
 
-      formData.totalPrice = formData.orderProducts.filter(p => !p.isSubs)
-        .map(p => (p.price * p.quantity) - (p.discount || 0))
-        .reduce((acc, curr) => acc + curr, 0);
+      formData.totalPrice = this.getFinalPrice();
 
       //CAMPI SE E' PREVENTIVO
       if(this.state)
@@ -605,8 +630,39 @@ export class AddOrderComponent {
       selectedOptions.push(result);
     }
 
+
+    console.log(JSON.stringify(selectedOptions));
+
     // Aggiorna il FormControl
     fg.get('selectedOptions')?.setValue(selectedOptions);
     fg.get('selectedOptions')?.updateValueAndValidity();
+
+    this.getFinalPrice();
+
   }
+
+// Funzione già vista prima
+calculateFinalPrice(basePrice: number, quantity: number, discount: number, selectedOptions: any[] = []): number {
+  const optionsPrice = this.sumSelectedOptionsPrice(selectedOptions);
+  return (basePrice + optionsPrice) * quantity - discount;
+}
+
+sumSelectedOptionsPrice(selectedOptions: any[]): number {
+  let total = 0;
+  const sum = (options: any[]) => {
+    for (const opt of options) {
+      for(const o of opt)
+        {
+          if (o.selectedProduct?.price) {
+            total += o.selectedProduct.price;
+          }
+          if (o.children && o.children.length > 0) {
+            sum(o.children);
+          }
+        }
+    }
+  };
+  sum(selectedOptions);
+  return total;
+}
 }
