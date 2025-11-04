@@ -23,15 +23,29 @@
 
         <ng-container [ngSwitch]="o.option.optionType">
 
-          <mat-form-field class="w-100" *ngSwitchCase="OptionType.select">
-            <i-feather name="list"></i-feather>
-            <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <mat-select [formControlName]="o.option._id"
-                        [compareWith]="compareProducts"
-                        (selectionChange)="setSubOption(o, $event.value)">
-              <mat-option *ngFor="let p of o.option.products" [value]="p">{{ p.name }} (+{{p.price}}€)</mat-option>
-            </mat-select>
-          </mat-form-field>
+
+        <!--select-->
+        <div class="row" *ngSwitchCase="OptionType.select">
+          <div class="col-sm-8">
+              <mat-form-field class="w-100">
+                <i-feather name="list"></i-feather>
+                <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
+                <mat-select [formControlName]="o.option._id"
+                            [compareWith]="compareProducts"
+                            (selectionChange)="setSubOption(o, $event.value)">
+                  <mat-option *ngFor="let p of o.option.products" [value]="p">{{ p.name }} (+{{p.price}}€)</mat-option>
+                </mat-select>
+              </mat-form-field>
+          </div>
+          <div class="col-sm-4">
+            <!--quantità select-->
+            <mat-form-field class="w-80" *ngSwitchCase="OptionType.select">
+              <i-feather name="layers"></i-feather>
+              <mat-label>Quantità</mat-label>
+              <input matInput type="number" [formControlName]="'qta_' + o.option._id">
+            </mat-form-field>
+          </div>
+        </div>
 
           <!--text-->
           <mat-form-field class="w-100" *ngSwitchCase="OptionType.text">
@@ -40,7 +54,7 @@
             <input matInput type="text" [formControlName]="o.option._id">
           </mat-form-field>
 
-          <!--text-->
+          <!--textarea-->
           <mat-form-field class="w-100" *ngSwitchCase="OptionType.textarea">
             <i-feather name="file"></i-feather>
             <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>

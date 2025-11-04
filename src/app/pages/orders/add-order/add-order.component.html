@@ -312,7 +312,10 @@
         </div>
         <div class="col-sm-1">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10 text-end sub">Configura</label>
-          <span class="config" (click)="openConfigurator(group.value)">
+          <span class="config" (click)="openConfigurator(group.value)" *ngIf="group.value.options">
+            <i class="ri-contrast-2-line"></i>
+          </span>
+          <span class="config-disabled" *ngIf="!group.value.options" matTooltip="il prodotto non contiene opzioni">
             <i class="ri-contrast-2-line"></i>
           </span>
         </div>

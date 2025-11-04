@@ -416,22 +416,44 @@ export class OperatorOrdersComponent {
               })),
               ...products
                 .filter(p => !p.isSubs)
-                .map(p => [
-                  {
-                    stack: [
-                      { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
-                      ...(p.note ? [{
-                        text: this.cleanNote(p.note),
-                        fontSize: 9,
-                        italics: true,
-                        color: '#555',
-                        margin: [5, -10, 5, 5],
-                        lineHeight: 1.3
-                      }] : [])
-                    ]
-                  },
-                  { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' }
-                ])
+                .map(p => {
+                  const optionTexts = (p.selectedOptions || [])
+                    .flatMap(opt => {
+                      if (Array.isArray(opt)) {
+                        return opt.map(o => {
+                          const sp = o.selectedProduct;
+                          if (!sp) return '';
+                          return `• ${sp.name} (x${sp.qta || 1})`;
+                        });
+                      } else if (opt.selectedProduct) {
+                        const sp = opt.selectedProduct;
+                        return [`• ${sp.name} (x${sp.qta || 1})`];
+                      } else {
+                        return [];
+                      }
+                    })
+                    .filter(Boolean);
+
+                  return [
+                    {
+                      stack: [
+                        { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
+                        ...(optionTexts.length
+                          ? [{ text: optionTexts.join('\n'), fontSize: 9, color: '#666', margin: [10, 0, 0, 5], lineHeight: 1.2 }]
+                          : []),
+                        ...(p.note ? [{
+                          text: this.cleanNote(p.note),
+                          fontSize: 9,
+                          italics: true,
+                          color: '#555',
+                          margin: [5, 0, 5, 5],
+                          lineHeight: 1.3
+                        }] : [])
+                      ]
+                    },
+                    { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' }
+                  ];
+                })
             ]
           },
           layout: {
@@ -466,7 +488,7 @@ export class OperatorOrdersComponent {
           },
           margin: [0, 0, 0, 20]
         } : {},
-        
+
         //Clausola 
         {
           text: clause,
@@ -475,7 +497,7 @@ export class OperatorOrdersComponent {
           lineHeight: 1.4, 
           margin: [0, 10, 0, 0]
         }
-        
+
       ],
       styles: {
         header: { fontSize: 18, bold: true, color: '#222' },

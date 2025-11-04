@@ -38,6 +38,7 @@ import { OrderStateService } from '../../../services/OrderState.service';
 import { AddUpdateOptionsToOrderDialogComponent } from '../../../add-update-options-to-order-dialog/add-update-options-to-order-dialog.component';
 import { ConfigProductToOrder } from '../../../interfaces/config-product-to-order';
 import { Product } from '../../../interfaces/products';
+import { MatTooltip } from '@angular/material/tooltip';
 
 registerLocaleData(localeIt);
 
@@ -71,7 +72,8 @@ export const MY_DATE_FORMATS = {
     MatNativeDateModule,
     MatChipsModule,
     MatAutocompleteModule,
-    FormsModule
+    FormsModule,
+    MatTooltip
 ],
   templateUrl: './add-order.component.html',
   styleUrl: './add-order.component.scss',
@@ -450,7 +452,8 @@ export class AddOrderComponent {
         parentId: null,
         note: "",
         options: [product.options],
-        selectedOptions: []
+        selectedOptions: [],
+        stock_type: [product.stock_type]
       });
 
       this.productsForm.push(group);
@@ -594,18 +597,20 @@ export class AddOrderComponent {
   }
 
   openConfigurator(c: Product){
-    const dialogRef = this.dialog.open(AddUpdateOptionsToOrderDialogComponent, {
-        data: c,
-        width: '80vw',
-        maxWidth: '1000px'
-    });
+    if(c.options){
+      const dialogRef = this.dialog.open(AddUpdateOptionsToOrderDialogComponent, {
+          data: c,
+          width: '80vw',
+          maxWidth: '1000px'
+      });
 
-    dialogRef.afterClosed().subscribe((result: ConfigProductToOrder) => {
-      if (result) 
-        this.addOrUpdateProductOptions(c, result);
-      else 
-        console.log("Close");
-    });
+      dialogRef.afterClosed().subscribe((result: ConfigProductToOrder) => {
+        if (result) 
+          this.addOrUpdateProductOptions(c, result);
+        else 
+          console.log("Close");
+      });
+    }
   }
 
   addOrUpdateProductOptions(product: Product, result: ConfigProductToOrder) {
@@ -631,7 +636,7 @@ export class AddOrderComponent {
     }
 
 
-    console.log(JSON.stringify(selectedOptions));
+    //console.log(JSON.stringify(selectedOptions));
 
     // Aggiorna il FormControl
     fg.get('selectedOptions')?.setValue(selectedOptions);
@@ -641,28 +646,33 @@ export class AddOrderComponent {
 
   }
 
-// Funzione già vista prima
-calculateFinalPrice(basePrice: number, quantity: number, discount: number, selectedOptions: any[] = []): number {
-  const optionsPrice = this.sumSelectedOptionsPrice(selectedOptions);
-  return (basePrice + optionsPrice) * quantity - discount;
-}
+  // Funzione già vista prima
+  calculateFinalPrice(basePrice: number, quantity: number, discount: number, selectedOptions: any[] = []): number {
+    const optionsPrice = this.sumSelectedOptionsPrice(selectedOptions);
+    return (basePrice + optionsPrice) * quantity - discount;
+  }
 
-sumSelectedOptionsPrice(selectedOptions: any[]): number {
-  let total = 0;
-  const sum = (options: any[]) => {
-    for (const opt of options) {
-      for(const o of opt)
-        {
+  sumSelectedOptionsPrice(selectedOptions: any[]): number {
+    let total = 0;
+    const sum = (options: any[]) => {
+      for (const opt of options) {
+        if (!Array.isArray(opt)) {
+          //console.warn("Attenzione: opt non è un array:", opt);
+          continue; // passa al prossimo elemento
+        }
+
+        for (const o of opt) {
           if (o.selectedProduct?.price) {
-            total += o.selectedProduct.price;
+            total += o.selectedProduct.price * o.selectedProduct.qta;
           }
-          if (o.children && o.children.length > 0) {
-            sum(o.children);
+
+          if (o.children && Array.isArray(o.children) && o.children.length > 0) {
+            sum(o.children); // ricorsione
           }
         }
-    }
-  };
-  sum(selectedOptions);
-  return total;
-}
+      }
+    };
+    sum(selectedOptions);
+    return total;
+  }
 }

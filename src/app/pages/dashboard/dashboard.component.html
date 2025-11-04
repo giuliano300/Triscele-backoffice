@@ -79,14 +79,17 @@
                     Prodotti in esaurimento
                 </h5>
                 <div class="to-do-list-table">
-                    <div class="table-responsive">
+                    <div class="table-responsive no-scroll-x">
                         <table mat-table [dataSource]="dataSource" matSort>
 
                         <!-- Nome -->
                         <ng-container matColumnDef="name">
                             <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Nome </th>
                             <td mat-cell *matCellDef="let element" class="pl-0">
-                            <h6 class="mt-0 mb-0">{{element.name}}</h6>
+                            <h6 class="mt-0 mb-0" #el1 class="truncate"
+                                (mouseenter)="element.showTooltip = el1.scrollWidth > el1.clientWidth"
+                                [matTooltip]="element.showTooltip ? element.name : ''" matTooltipPosition="right"
+                                >{{element.name}}</h6>
                             </td>
                         </ng-container>
 

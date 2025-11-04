@@ -48,6 +48,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   OptionType = OptionType;
   form: FormGroup;
 
+
   constructor(
     public dialogRef: MatDialogRef<AddUpdateOptionsToOrderDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Product,
@@ -111,6 +112,12 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
       // FormControl
       group[id] = new FormControl(initialValue);
 
+      if (type === OptionType.select) {
+        const qtaValue = selected?.selectedProduct?.qta ?? 1;
+        group['qta_' + id] = new FormControl(qtaValue);
+        
+      }
+
       // Figli ricorsivi
       if (optionNode.children && optionNode.children.length > 0) {
         group[id + '_children'] = this.createFormGroupForOptions(optionNode.children, selectedOptions);
@@ -165,6 +172,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     return options.map(optionNode => {
       const id = optionNode.option._id;
       const control = currentForm.get(id);
+      const qtaControl = currentForm.get('qta_' + id);
 
       const node: any = {
         _id: id,
@@ -174,8 +182,15 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
       };
 
       if (optionNode.option.optionType === OptionType.select) {
-        node.selectedProduct = control?.value || null;
-      } else {
+        const selectedProduct = control?.value || null;
+        const qtaValue = qtaControl?.value ?? 1;
+
+        // Inserisce la quantità nel selectedProduct
+        node.selectedProduct = selectedProduct
+          ? { ...selectedProduct, qta: qtaValue }
+          : null;
+      } 
+      else {
         node.value = control?.value ?? null;
       }
 
@@ -192,6 +207,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   onSave(): void {
     if (this.form.valid) {
       const fullTree: ConfigProductToOrder[] = this.getFullSelection(this.masterOptions);
+      //console.log(fullTree);
       this.dialogRef.close(fullTree);
     }
   }

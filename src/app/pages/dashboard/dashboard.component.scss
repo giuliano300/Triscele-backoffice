@@ -81,7 +81,7 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
-                    max-width: 180px;
+                    max-width: 160px;
                     min-width: 70px;
 
                     .task-name {
@@ -416,4 +416,8 @@ h5{
         color: var(--primaryColor);    
         font-weight: 400;           
     }
+}
+
+.no-scroll-x{
+    overflow-x: hidden!important;
 }

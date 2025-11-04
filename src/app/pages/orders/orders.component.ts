@@ -418,18 +418,40 @@ export class OrdersComponent {
               ['Prodotto', 'Quantità', 'Prezzo', 'Totale'].map(h => ({
                 text: h, style: 'tableHeader', margin: [5, 5, 5, 5]
               })),
-              ...products
-                .filter(p => !p.isSubs)
-                .map(p => [
+            ...products
+              .filter(p => !p.isSubs)
+              .map(p => {
+                const optionTexts = (p.selectedOptions || [])
+                  .flatMap(opt => {
+                    // Gestione di array di opzioni o singole opzioni
+                    if (Array.isArray(opt)) {
+                      return opt.map(o => {
+                        const sp = o.selectedProduct;
+                        if (!sp) return '';
+                        return `• ${sp.name} (x${sp.qta || 1}) - €${sp.price.toFixed(2)}`;
+                      });
+                    } else if (opt.selectedProduct) {
+                      const sp = opt.selectedProduct;
+                      return [`• ${sp.name} (x${sp.qta || 1}) - €${sp.price.toFixed(2)}`];
+                    } else {
+                      return [];
+                    }
+                  })
+                  .filter(Boolean); // rimuove stringhe vuote
+
+                return [
                   {
                     stack: [
                       { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
+                      ...(optionTexts.length
+                        ? [{ text: optionTexts.join('\n'), fontSize: 9, color: '#666', margin: [10, 0, 0, 5], lineHeight: 1.2 }]
+                        : []),
                       ...(p.note ? [{
                         text: this.cleanNote(p.note),
                         fontSize: 9,
                         italics: true,
                         color: '#555',
-                        margin: [5, -10, 5, 5],
+                        margin: [5, 0, 5, 5],
                         lineHeight: 1.3
                       }] : [])
                     ]
@@ -437,7 +459,9 @@ export class OrdersComponent {
                   { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' },
                   { text: `€${p.price.toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' },
                   { text: `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
-                ])
+                ];
+              })
+
             ]
           },
           layout: {
@@ -602,22 +626,44 @@ export class OrdersComponent {
               })),
               ...products
                 .filter(p => !p.isSubs)
-                .map(p => [
-                  {
-                    stack: [
-                      { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
-                      ...(p.note ? [{
-                        text: this.cleanNote(p.note),
-                        fontSize: 9,
-                        italics: true,
-                        color: '#555',
-                        margin: [5, -10, 5, 5],
-                        lineHeight: 1.3
-                      }] : [])
-                    ]
-                  },
-                  { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' }
-                ])
+                .map(p => {
+                  const optionTexts = (p.selectedOptions || [])
+                    .flatMap(opt => {
+                      if (Array.isArray(opt)) {
+                        return opt.map(o => {
+                          const sp = o.selectedProduct;
+                          if (!sp) return '';
+                          return `• ${sp.name} (x${sp.qta || 1})`;
+                        });
+                      } else if (opt.selectedProduct) {
+                        const sp = opt.selectedProduct;
+                        return [`• ${sp.name} (x${sp.qta || 1})`];
+                      } else {
+                        return [];
+                      }
+                    })
+                    .filter(Boolean);
+
+                  return [
+                    {
+                      stack: [
+                        { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
+                        ...(optionTexts.length
+                          ? [{ text: optionTexts.join('\n'), fontSize: 9, color: '#666', margin: [10, 0, 0, 5], lineHeight: 1.2 }]
+                          : []),
+                        ...(p.note ? [{
+                          text: this.cleanNote(p.note),
+                          fontSize: 9,
+                          italics: true,
+                          color: '#555',
+                          margin: [5, 0, 5, 5],
+                          lineHeight: 1.3
+                        }] : [])
+                      ]
+                    },
+                    { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' }
+                  ];
+                })
             ]
           },
           layout: {
