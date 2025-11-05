@@ -597,6 +597,7 @@ export class AddOrderComponent {
   }
 
   openConfigurator(c: Product){
+    console.log(JSON.stringify(c));
     if(c.options){
       const dialogRef = this.dialog.open(AddUpdateOptionsToOrderDialogComponent, {
           data: c,

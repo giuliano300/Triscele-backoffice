@@ -31,7 +31,7 @@ import { OrderStateService } from '../../../services/OrderState.service';
 import { OrderState } from '../../../interfaces/order-state';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { UpdateOerderByOperatorComponent } from '../../../update-order-by-operator-dialog/update-order-by-operator-dialog.component';
-import { clause } from '../../../../main';
+import { clause, generateOptionText } from '../../../../main';
 
 declare const pdfMake: any;
 
@@ -411,28 +411,17 @@ export class OperatorOrdersComponent {
             headerRows: 1,
             widths: ['*', 'auto'],
             body: [
-              ['Prodotto', 'Quantità'].map(h => ({
-                text: h, style: 'tableHeader', margin: [5, 5, 5, 5]
-              })),
+              // Header della tabella: "Prodotto" e "Quantità"
+              [
+                { text: 'Prodotto', style: 'tableHeader', margin: [5, 5, 5, 5] },
+                { text: 'Quantità', style: 'tableHeader', margin: [5, 5, 5, 5] }
+              ],
               ...products
-                .filter(p => !p.isSubs)
+                .filter(p => !p.isSubs) // Filtra i prodotti non "subs" (sottoprodotti)
                 .map(p => {
                   const optionTexts = (p.selectedOptions || [])
-                    .flatMap(opt => {
-                      if (Array.isArray(opt)) {
-                        return opt.map(o => {
-                          const sp = o.selectedProduct;
-                          if (!sp) return '';
-                          return `• ${sp.name} (x${sp.qta || 1})`;
-                        });
-                      } else if (opt.selectedProduct) {
-                        const sp = opt.selectedProduct;
-                        return [`• ${sp.name} (x${sp.qta || 1})`];
-                      } else {
-                        return [];
-                      }
-                    })
-                    .filter(Boolean);
+                    .flatMap(opt => generateOptionText(opt)) // Chiamata ricorsiva per gestire le opzioni
+                    .filter(Boolean); // Rimuove stringhe vuote
 
                   return [
                     {

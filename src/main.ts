@@ -24,3 +24,34 @@ bootstrapApplication(AppComponent, {
     provideAuth(() => getAuth())
   ]
 }).catch(err => console.error(err));
+
+
+export function generateOptionText(option: any): string[] {
+  let texts: string[] = [];
+
+  // Se l'opzione è un array, eseguiamo una chiamata ricorsiva
+  if (Array.isArray(option)) {
+    option.forEach(opt => {
+      texts = texts.concat(generateOptionText(opt)); // Ricorsiva
+    });
+  } else {
+    // Se l'opzione ha un prodotto selezionato, lo aggiungiamo
+    if (option.selectedProduct) {
+      const sp = option.selectedProduct;
+      if (sp) {
+        texts.push(`• ${sp.name} (x${sp.qta || 1}) - €${sp.price.toFixed(2)}`);
+      }
+    }
+
+    // Se l'opzione ha delle "children", le gestiamo ricorsivamente
+    if (option.children && Array.isArray(option.children) && option.children.length > 0) {
+      option.children.forEach((child: any) => {
+        // Aggiungiamo un livello di indentazione per le children
+        const childTexts = generateOptionText(child);  // Ricorsiva
+        texts = texts.concat(childTexts.map(text => `  ${text}`)); // Aggiungi l'indentazione
+      });
+    }
+  }
+
+  return texts;
+}

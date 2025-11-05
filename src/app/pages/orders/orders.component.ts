@@ -30,7 +30,7 @@ import { OrderChangeStateComponent } from '../../order-change-state-dialog/order
 import { OrderStateService } from '../../services/OrderState.service';
 import { OrderState } from '../../interfaces/order-state';
 import { Bold } from 'angular-feather/icons';
-import { clause } from '../../../main';
+import { clause, generateOptionText } from '../../../main';
 import { MatTooltip } from "@angular/material/tooltip";
 
 declare const pdfMake: any;
@@ -418,50 +418,35 @@ export class OrdersComponent {
               ['Prodotto', 'Quantità', 'Prezzo', 'Totale'].map(h => ({
                 text: h, style: 'tableHeader', margin: [5, 5, 5, 5]
               })),
-            ...products
-              .filter(p => !p.isSubs)
-              .map(p => {
-                const optionTexts = (p.selectedOptions || [])
-                  .flatMap(opt => {
-                    // Gestione di array di opzioni o singole opzioni
-                    if (Array.isArray(opt)) {
-                      return opt.map(o => {
-                        const sp = o.selectedProduct;
-                        if (!sp) return '';
-                        return `• ${sp.name} (x${sp.qta || 1}) - €${sp.price.toFixed(2)}`;
-                      });
-                    } else if (opt.selectedProduct) {
-                      const sp = opt.selectedProduct;
-                      return [`• ${sp.name} (x${sp.qta || 1}) - €${sp.price.toFixed(2)}`];
-                    } else {
-                      return [];
-                    }
-                  })
-                  .filter(Boolean); // rimuove stringhe vuote
+              ...products
+                .filter(p => !p.isSubs) // Filtra i prodotti non "subs" (sottoprodotti)
+                .map(p => {
+                  const optionTexts = (p.selectedOptions || [])
+                    .flatMap(opt => generateOptionText(opt)) // Chiamata ricorsiva per gestire le opzioni
+                    .filter(Boolean); // Rimuove stringhe vuote
 
-                return [
-                  {
-                    stack: [
-                      { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
-                      ...(optionTexts.length
-                        ? [{ text: optionTexts.join('\n'), fontSize: 9, color: '#666', margin: [10, 0, 0, 5], lineHeight: 1.2 }]
-                        : []),
-                      ...(p.note ? [{
-                        text: this.cleanNote(p.note),
-                        fontSize: 9,
-                        italics: true,
-                        color: '#555',
-                        margin: [5, 0, 5, 5],
-                        lineHeight: 1.3
-                      }] : [])
-                    ]
-                  },
-                  { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' },
-                  { text: `€${p.price.toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' },
-                  { text: `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
-                ];
-              })
-
+                  return [
+                    {
+                      stack: [
+                        { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
+                        ...(optionTexts.length
+                          ? [{ text: optionTexts.join('\n'), fontSize: 9, color: '#666', margin: [10, 0, 0, 5], lineHeight: 1.2 }]
+                          : []),
+                        ...(p.note ? [{
+                          text: this.cleanNote(p.note),
+                          fontSize: 9,
+                          italics: true,
+                          color: '#555',
+                          margin: [5, 0, 5, 5],
+                          lineHeight: 1.3
+                        }] : [])
+                      ]
+                    },
+                    { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' },
+                    { text: `€${p.price.toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' },
+                    { text: `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
+                  ];
+                })
             ]
           },
           layout: {
@@ -505,7 +490,7 @@ export class OrdersComponent {
           ]
         },
 
-        //Clausola 
+        // Clausola 
         {
           text: clause,
           fontSize: 8,
@@ -528,7 +513,7 @@ export class OrdersComponent {
 
     pdfMake.createPdf(docDefinition).open();
   }
-
+  
   DownloadDocOperator(item: Order) {
     const form = item;
     const products = item.orderProducts;
@@ -621,28 +606,17 @@ export class OrdersComponent {
             headerRows: 1,
             widths: ['*', 'auto'],
             body: [
-              ['Prodotto', 'Quantità'].map(h => ({
-                text: h, style: 'tableHeader', margin: [5, 5, 5, 5]
-              })),
+              // Header della tabella: "Prodotto" e "Quantità"
+              [
+                { text: 'Prodotto', style: 'tableHeader', margin: [5, 5, 5, 5] },
+                { text: 'Quantità', style: 'tableHeader', margin: [5, 5, 5, 5] }
+              ],
               ...products
-                .filter(p => !p.isSubs)
+                .filter(p => !p.isSubs) // Filtra i prodotti non "subs" (sottoprodotti)
                 .map(p => {
                   const optionTexts = (p.selectedOptions || [])
-                    .flatMap(opt => {
-                      if (Array.isArray(opt)) {
-                        return opt.map(o => {
-                          const sp = o.selectedProduct;
-                          if (!sp) return '';
-                          return `• ${sp.name} (x${sp.qta || 1})`;
-                        });
-                      } else if (opt.selectedProduct) {
-                        const sp = opt.selectedProduct;
-                        return [`• ${sp.name} (x${sp.qta || 1})`];
-                      } else {
-                        return [];
-                      }
-                    })
-                    .filter(Boolean);
+                    .flatMap(opt => generateOptionText(opt)) // Chiamata ricorsiva per gestire le opzioni
+                    .filter(Boolean); // Rimuove stringhe vuote
 
                   return [
                     {
