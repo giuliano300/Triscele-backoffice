@@ -31,6 +31,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MovementType } from '../../enum/enum';
 import { AddGeneralMovementComponent } from '../../add-general-movement-dialog/add-general-movement-dialog.component';
 import { MatProgressBar } from "@angular/material/progress-bar";
+import { finalize, tap } from 'rxjs';
 
 @Component({
   selector: 'app-products',
@@ -92,6 +93,12 @@ export class ProductsComponent {
 
   firstLoading: boolean = false;
 
+  text: string = "";
+  showStock: boolean = false;
+
+  lowStock: ProductViewModel[] = [];
+
+
   constructor(
     private router: Router,
     private fb: FormBuilder,
@@ -109,6 +116,13 @@ export class ProductsComponent {
     });
   }
 
+  findLowStock(){
+    this.productService.findLowStock().subscribe((data) => {
+      this.lowStock = data;
+      this.checkStockLevels();
+    });
+   }
+
 
   ngOnInit(): void {
     //this.getProducts();
@@ -120,6 +134,8 @@ export class ProductsComponent {
       .subscribe((data: Categories[]) => {
         this.categories = data;
       });
+
+      this.findLowStock();
   }
 
   ngAfterViewInit() {
@@ -187,7 +203,12 @@ export class ProductsComponent {
 
     const query = `?${params.toString()}`;
 
-    this.productService.getProducts(query).subscribe((response: any) => {
+    this.productService.getProducts(query)
+    .pipe(
+      tap(() => this.firstLoading = true),
+      finalize(() => this.firstLoading = false)
+    )
+    .subscribe((response: any) => {
       const data = response.data || [];
       this.totalItems = response.total;
       this.pageSize = response.limit;
@@ -222,6 +243,7 @@ export class ProductsComponent {
           .subscribe((data: boolean) => {
             if (data) {
               this.getProducts();
+              this.findLowStock();
             }
           });
       } else {
@@ -242,6 +264,7 @@ export class ProductsComponent {
           .subscribe((data: any) => {
             if (data) {
               this.getProducts();
+              this.findLowStock();
             }
           });
       } else {
@@ -286,6 +309,7 @@ export class ProductsComponent {
           .subscribe((data: ProductMovements) => {
             if (data) {
               this.getProducts();
+              this.findLowStock();
             }
           });
       } else {
@@ -314,11 +338,36 @@ export class ProductsComponent {
           .subscribe((data: ProductMovements) => {
             if (data) {
               this.getProducts();
+              this.findLowStock();
             }
           });
       } else {
         console.log("Close");
       }
     });
+  }
+
+  checkStockLevels(){
+    const data = this.lowStock;
+    const below = data.filter(e => e.stock! < e.theshold!).length;
+
+    if (below > 0) 
+    {
+      this.showStock = true;
+
+      let txt = "";
+
+      if(below > 0)
+        txt = `${below} prodotti sotto soglia`;
+
+      this.text = `<h2>Attenzione</h2>${txt}`;
+
+    }
+    else
+      this.showStock = false;
+  }
+
+  closeAlert(): void {
+    this.showStock = false;
   }
 }

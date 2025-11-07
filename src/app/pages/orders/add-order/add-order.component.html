@@ -260,7 +260,7 @@
       </div>
       
     <div formArrayName="products">
-      <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
+      <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row compact-row">
         
         <div class="col-sm-1 center" *ngIf="group.get('isSubs')!.value === true"> <span class="sub-element"> <i class="ri-corner-down-right-line"></i> </span></div>
         <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-4' : 'col-sm-2'">
@@ -282,13 +282,12 @@
           </mat-form-field>
         </div>
 
-        <div [ngClass]="group.get('isSubs')!.value === true ? 'col-sm-2' : 'col-sm-2'">
+        <div class="col-sm-2">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10">Prezzo</label>
           <mat-form-field class="w-100">
             <span class="material-symbols-outlined in-mat">
               euro
             </span>
-            <mat-label>Prezzo</mat-label>
             <input matInput formControlName="price" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
@@ -303,20 +302,27 @@
           </mat-form-field>
         </div>
 
-        <div class="col-sm-2" *ngIf="group.get('isSubs')!.value === false">
+        <div class="col-sm-1" *ngIf="group.get('isSubs')!.value === false">
           <label class="label d-block fw-medium mb-10" *ngIf="i === 0">Sconto %</label>
           <mat-form-field class="w-100">
             <i-feather name="percent"></i-feather>
             <input matInput formControlName="discountPercentage" type="number" [readonly]="group.get('isSubs')!.value === true">
           </mat-form-field>
         </div>
+        <div class="col-sm-1" *ngIf="group.get('isSubs')!.value === false">
+          <label class="label d-block fw-medium mb-10" *ngIf="i === 0">Sconto %</label>
+          <mat-form-field class="w-100">
+            <i-feather name="percent"></i-feather>
+            <input matInput formControlName="discountPercentage2" type="number" [readonly]="group.get('isSubs')!.value === true">
+          </mat-form-field>
+        </div>
         <div class="col-sm-1">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10 text-end sub">Configura</label>
-          <span class="config" (click)="openConfigurator(group.value)" *ngIf="group.value.options">
-            <i class="ri-contrast-2-line"></i>
+          <span class="config" (click)="openConfigurator(group.value)" *ngIf="group.value.options" matTooltip="configura il prodotto">
+            <i class="ri-settings-line"></i>
           </span>
           <span class="config-disabled" *ngIf="!group.value.options" matTooltip="il prodotto non contiene opzioni">
-            <i class="ri-contrast-2-line"></i>
+            <i class="ri-settings-6-line"></i>
           </span>
         </div>
 

@@ -521,3 +521,16 @@
         width: 100%;
     }
 }
+
+::ng-deep {
+    .alert-light {
+        h2{
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--danger-text);
+            margin-bottom: 5px;
+        }
+        line-height: 18px;
+        font-size: 13px;
+    }
+}

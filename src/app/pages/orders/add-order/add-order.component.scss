@@ -148,3 +148,22 @@ input[matinput] {
 .no-margin-top{
   margin-top: 0;
 }
+
+/* Riduci lo spazio orizzontale tra colonne Bootstrap */
+.compact-row {
+  --bs-gutter-x: 0.25rem; /* default = 1.5rem → molto più stretto */
+  --bs-gutter-y: 0.25rem; /* riduce anche lo spazio verticale */
+}
+
+/* Riduci padding interno delle colonne */
+.compact-row > [class^="col-"],
+.compact-row > [class*=" col-"] {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Riduci margini dei mat-form-field */
+.compact-row .mat-form-field {
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+}

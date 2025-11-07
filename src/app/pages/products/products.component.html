@@ -67,6 +67,16 @@
         </div>
     </mat-card-content>
 </mat-card>
+<div role="alert" class="alert alert-light d-flex justify-content-between align-items-center ng-star-inserted" *ngIf="showStock">
+
+  <!-- Messaggio -->
+  <div [innerHTML]="text"></div>
+
+  <!-- Pulsante Chiudi -->
+  <button type="button" data-dismiss="alert" aria-label="Close" class="close bg-transparent p-0 border-none" (click)="closeAlert()">
+    <i class="ri-close-line"></i>
+  </button>
+</div>
 <mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
   <mat-card-content>
     <div class="to-do-list-table">
@@ -142,7 +152,7 @@
               <h6 class="mt-0 mb-0">
                 <a (click)="addMovements(element)" [ngClass]="{
                   'pointer': true,
-                  'error': element.stock < element.theshold,
+                  'under_stock': element.stock < element.theshold,
                   'warning': element.stock == element.theshold,
                   'valid': element.stock > element.theshold
                 }">

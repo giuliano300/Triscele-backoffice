@@ -185,12 +185,29 @@ export class AddOrderComponent {
     const updateFromPercentage = () => {
       const price = group.get('price')?.value || 0;
       const quantity = group.get('quantity')?.value || 0;
-      const subtotal = price * quantity;
-      const perc = group.get('discountPercentage')?.value || 0;
+      const perc1 = group.get('discountPercentage')?.value || 0;
+      const perc2 = group.get('discountPercentage2')?.value || 0;
+
+      const selectedOptions = group.get('selectedOptions')?.value || [];
+
+      // calcolo prezzo totale del gruppo includendo selectedOptions ricorsivamente
+      const optionsTotal = this.sumSelectedOptionsPrice(selectedOptions);
+
+      // Totale di riferimento (prezzo × quantità + configurazione)
+      const subtotal = price * quantity + optionsTotal;
 
       if (subtotal > 0) {
-        const euro = (perc / 100) * subtotal;
-        const rounded = Math.round(euro * 100) / 100;
+        // Applica il primo sconto
+        const afterFirstDiscount = subtotal - (perc1 / 100) * subtotal;
+
+        // Applica il secondo sconto sul totale già scontato
+        const afterSecondDiscount = afterFirstDiscount - (perc2 / 100) * afterFirstDiscount;
+
+        // Totale sconto in euro (differenza tra totale iniziale e finale)
+        const totalDiscount = subtotal - afterSecondDiscount;
+
+        const rounded = Math.round(totalDiscount * 100) / 100;
+
         group.get('discount')?.setValue(rounded, { emitEvent: false });
       } else {
         group.get('discount')?.setValue(0, { emitEvent: false });
@@ -214,6 +231,11 @@ export class AddOrderComponent {
     });
 
     group.get('discountPercentage')?.valueChanges.subscribe(() => {
+      updateFromPercentage();
+      updateTotal();
+    });
+
+    group.get('discountPercentage2')?.valueChanges.subscribe(() => {
       updateFromPercentage();
       updateTotal();
     });
@@ -377,6 +399,7 @@ export class AddOrderComponent {
                 price: [product.price],
                 discount: [product.discount || 0],
                 discountPercentage: [product.discountPercentage ||0],
+                discountPercentage2: [product.discountPercentage2 ||0],
                 total: [product.total],
                 isSubs: [product.isSubs],
                 note: [product.note],
@@ -448,6 +471,7 @@ export class AddOrderComponent {
         discount: [0],
         total: [product.price],
         discountPercentage: [0],
+        discountPercentage2: [0],
         isSubs: false,
         parentId: null,
         note: "",
@@ -468,6 +492,7 @@ export class AddOrderComponent {
               discount: [0],
               total: [product.subProducts[i].price * product.subProducts[i].quantity],
               discountPercentage: [0],
+              discountPercentage2: [0],
               isSubs: true,
               parentId: product.id
             });

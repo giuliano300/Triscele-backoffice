@@ -32,6 +32,7 @@ import { OrderState } from '../../interfaces/order-state';
 import { Bold } from 'angular-feather/icons';
 import { clause, generateOptionText } from '../../../main';
 import { MatTooltip } from "@angular/material/tooltip";
+import { finalize, tap } from 'rxjs';
 
 declare const pdfMake: any;
 
@@ -216,8 +217,9 @@ export class OrdersComponent {
   getOrders(customerId?: string, operatorId?: string, status?: string, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
     let sectorId = '';
-    this.firstLoading = true;
 
+    this.firstLoading = true;
+    
     if(this.IsOperatorView)
     {
       const o = JSON.parse(localStorage.getItem("operator") || "{}");
@@ -245,6 +247,10 @@ export class OrdersComponent {
       query = `?${params.toString()}`;
     }
     this.orderService.getOrders(query)
+      .pipe(
+        tap(() => this.firstLoading = true),
+        finalize(() => this.firstLoading = false)
+      )
       .subscribe((response: any) => {
           const data = response.data || [];
           this.totalItems = response.total;
@@ -263,7 +269,6 @@ export class OrdersComponent {
 
           this.dataSource = new MatTableDataSource<Order>(this.orders);
           this.dataSource.sort = this.sort;
-          this.firstLoading = false;
       });
   }
 

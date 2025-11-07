@@ -366,6 +366,19 @@ h5{
     }
 }
 
+.under_stock{
+    background-color: var(--dangerColor)!important;
+    color: #fff;
+    font-size: 12px;
+    opacity: 0.9;
+    padding:6px 8px;
+    border-radius: 20px;
+    &:hover{
+        opacity: 1;
+        color: #fff;
+    }
+}
+
 
 .warning{
     color: var(--warningColor)!important;

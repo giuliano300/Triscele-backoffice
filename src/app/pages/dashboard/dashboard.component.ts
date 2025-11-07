@@ -11,7 +11,7 @@ import { isPlatformBrowser, NgIf } from '@angular/common';
 import { StatsService } from '../../services/stats.service';
 import { ProductService } from '../../services/Product.service';
 import { ProductViewModel } from '../../classess/productViewModel';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { AddMovementComponent } from '../../add-movement-dialog/add-movement-dialog.component';
 import { ProductMovements } from '../../interfaces/productMovements';
 import { ProductMovementsService } from '../../services/Product-movements.service';
@@ -19,7 +19,17 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, MatTooltipModule, NgIf],
+  imports: [
+    MatCardModule, 
+    MatButtonModule, 
+    MatMenuModule, 
+    MatPaginatorModule, 
+    MatTableModule, 
+    MatCheckboxModule, 
+    MatTooltipModule, 
+    NgIf,
+    MatSortModule
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -35,6 +45,7 @@ export class DashboardComponent {
 
     displayedColumns: string[] = [
         'name',
+        'supplier',
         'category',
         'theshold',
         'stock'
