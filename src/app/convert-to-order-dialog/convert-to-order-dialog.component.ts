@@ -76,8 +76,8 @@ export class ConvertToOrderDialogComponent {
   }
 
   ngOnInit(): void {
-    if(!this.data)
-      this.onClose();
+    //if(!this.data)
+      //this.onClose();
 
     this.sectorService.getSectors().subscribe((data: any[]) => {
       this.sectors = data;

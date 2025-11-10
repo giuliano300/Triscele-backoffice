@@ -45,7 +45,7 @@ export class CustomersComponent {
 
   province: string[] = [];
 
-  displayedColumns: string[] = ['businessName', 'vatNumber', 'email', 'mobile', 'province', 'edit', 'delete'];
+  displayedColumns: string[] = ['businessName', 'vatNumber', 'email', 'pwd', 'mobile', 'province', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Customers>(this.customers);
 

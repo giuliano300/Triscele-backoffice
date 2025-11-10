@@ -145,11 +145,25 @@
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="xml">
+            <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
+              XML 
+            </th>
+            <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Genera XML">
+                <div class="action">
+                  &nbsp;&nbsp;
+                  <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="generateXML(element)" matTooltip="scarica xml">
+                    <i class="ri-contract-left-right-line"></i>
+                  </button>
+                </div>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="edit">
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Modifica
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Modifica">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Modifica">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
                           <i class="{{element.action.edit}}"></i>
@@ -160,9 +174,9 @@
 
           <ng-container matColumnDef="downloadCustomer">
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
-                  Copia Cliente
+                  Cop. Cli.
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Copia cliente">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Copia cliente">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" matTooltip="scarica documento" (click)="DownloadDoc(element)">
                           <i class="ri-file-download-line"></i>
@@ -173,9 +187,9 @@
 
           <ng-container matColumnDef="downloadOperator">
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
-                  Copia Op.
+                  Cop. Op.
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Copia operatore">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Copia operatore">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" matTooltip="scarica documento" (click)="DownloadDocOperator(element)">
                           <i class="ri-file-download-line"></i>
@@ -188,7 +202,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Storico
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Storico">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Storico">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" title="storico cambi di stato" (click)="History(element)">
                           <i class="{{element.action.history}}"></i>
@@ -201,7 +215,7 @@
               <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
                   Elimina
               </th>
-              <td mat-cell *matCellDef="let element" class="text-center pr-0" data-label="Elimina">
+              <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Elimina">
                   <div class="action">
                       <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="DeleteItem(element)">
                           <i class="{{element.action.delete}}"></i>

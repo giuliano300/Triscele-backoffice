@@ -30,7 +30,7 @@ import { OrderChangeStateComponent } from '../../order-change-state-dialog/order
 import { OrderStateService } from '../../services/OrderState.service';
 import { OrderState } from '../../interfaces/order-state';
 import { Bold } from 'angular-feather/icons';
-import { clause, generateOptionText } from '../../../main';
+import { calculateFinalPrice, clause, generateOptionText } from '../../../main';
 import { MatTooltip } from "@angular/material/tooltip";
 import { finalize, tap } from 'rxjs';
 
@@ -126,6 +126,7 @@ export class OrdersComponent {
     'totalPrice',
     'paymentMethod',
     'status',
+    'xml',
     'edit',
     'downloadCustomer',
     'downloadOperator',
@@ -261,6 +262,7 @@ export class OrdersComponent {
             ...p,
             action: {
               edit: 'ri-edit-line',
+              xml: 'ri-edit-line',
               download: 'ri-edit-line',
               history: 'ri-search-line',
               delete: 'ri-delete-bin-line'
@@ -449,7 +451,7 @@ export class OrdersComponent {
                     },
                     { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' },
                     { text: `€${p.price.toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' },
-                    { text: `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
+                    { text: `€${calculateFinalPrice(p.price, p.quantity, p.discount, p.selectedOptions).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
                   ];
                 })
             ]
@@ -722,6 +724,170 @@ export class OrdersComponent {
 
   UpdateItem(item: Order) {
     this.router.navigate(["/order/add/" + item._id]);
+  }
+
+  generateXML(item: Order){
+  const xml = this.createXmlFromOrder(item);
+
+  // Creazione e download del file
+  const blob = new Blob([xml], { type: 'application/xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Fattura_${item._id || 'ordine'}.xml`;
+  a.click();
+}
+
+private createXmlFromOrder(order: Order): string {
+    const header = `
+<ns2:FatturaElettronica xmlns:ns2="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
+<FatturaElettronicaHeader>
+  <DatiTrasmissione>
+    <IdTrasmittente>
+      <IdPaese>IT</IdPaese>
+      <IdCodice>08973230967</IdCodice>
+    </IdTrasmittente>
+    <ProgressivoInvio>DVpIF</ProgressivoInvio>
+    <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+    <CodiceDestinatario>A4707H7</CodiceDestinatario>
+    <PECDestinatario>maggiorconsiglio@pec.it</PECDestinatario>
+  </DatiTrasmissione>
+
+  <CedentePrestatore>
+    <DatiAnagrafici>
+      <IdFiscaleIVA>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>02693860815</IdCodice>
+      </IdFiscaleIVA>
+      <Anagrafica>
+        <Denominazione>Triscele Srl</Denominazione>
+      </Anagrafica>
+      <RegimeFiscale>RF01</RegimeFiscale>
+    </DatiAnagrafici>
+    <Sede>
+      <Indirizzo>CONTRADA BOVARELLA SNC</Indirizzo>
+      <CAP>91018</CAP>
+      <Comune>SALEMI TP</Comune>
+      <Nazione>IT</Nazione>
+    </Sede>
+  </CedentePrestatore>
+
+  <CessionarioCommittente>
+    <IdFiscaleIVA>
+        <IdPaese>IT</IdPaese>
+        <IdCodice>${order.customerId.vatNumber}</IdCodice>
+    </IdFiscaleIVA>
+    <DatiAnagrafici>
+      <Anagrafica>
+        <Denominazione>${order.shippingBusinessName}</Denominazione>
+      </Anagrafica>
+    </DatiAnagrafici>
+    <Sede>
+      <Indirizzo>${order.shippingAddress}</Indirizzo>
+      <CAP>${order.shippingZipcode}</CAP>
+      <Comune>${order.shippingCity}</Comune>
+      <Nazione>IT</Nazione>
+    </Sede>
+  </CessionarioCommittente>
+</FatturaElettronicaHeader>
+`;
+
+// Corpo (prodotti)
+const bodyLines = order.orderProducts
+  .map((p, i) => {
+    // Somma opzioni selezionate (se presenti)
+    const optionsTotal = (p.selectedOptions ?? [])
+      .flat()
+      .reduce((sum, opt) => {
+        const price = opt?.selectedProduct?.price ?? 0;
+        const qta = opt?.selectedProduct?.qta ?? 1;
+        return sum + (price * qta);
+      }, 0);
+
+    // Descrizione arricchita
+    const optionDescriptions = (p.selectedOptions ?? [])
+      .flat()
+      .map(opt => {
+        const val = opt?.selectedProduct?.name ?? opt?.value ?? '';
+        return val ? `${opt.name}: ${val}` : '';
+      })
+      .filter(v => !!v);
+
+    const descrizione = this.escapeXml(
+      [p.name].join(' | ')
+    );
+
+    // Totale finale per la riga
+    const totalWithOptions = p.total + optionsTotal;
+
+    return `
+      <DettaglioLinee>
+        <NumeroLinea>${i + 1}</NumeroLinea>
+        <Descrizione>${descrizione}</Descrizione>
+        <Quantita>${p.quantity}</Quantita>
+        <PrezzoUnitario>${totalWithOptions.toFixed(2)}</PrezzoUnitario>
+        <PrezzoTotale>${totalWithOptions.toFixed(2)}</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>`;
+  })
+  .join('');
+
+// Calcolo totale documento (somma dei totali con opzioni)
+const imponibile = order.orderProducts.reduce((a, p) => {
+  const optionsTotal = (p.selectedOptions ?? [])
+    .flat()
+    .reduce((sum, opt) => {
+      const price = opt?.selectedProduct?.price ?? 0;
+      const qta = opt?.selectedProduct?.qta ?? 1;
+      return sum + (price * qta);
+    }, 0);
+  return a + p.total + optionsTotal;
+}, 0);
+
+const iva = imponibile * 0.22;
+const totale = imponibile + iva;
+
+
+    const body = `
+<FatturaElettronicaBody>
+  <DatiGenerali>
+    <DatiGeneraliDocumento>
+      <TipoDocumento>TD01</TipoDocumento>
+      <Divisa>EUR</Divisa>
+      <Data>${order.insertDate}</Data>
+      <Numero>${order._id || 'ORD001'}</Numero>
+      <ImportoTotaleDocumento>${totale.toFixed(2)}</ImportoTotaleDocumento>
+    </DatiGeneraliDocumento>
+  </DatiGenerali>
+
+  <DatiBeniServizi>
+    ${bodyLines}
+    <DatiRiepilogo>
+      <AliquotaIVA>22.00</AliquotaIVA>
+      <ImponibileImporto>${imponibile.toFixed(2)}</ImponibileImporto>
+      <Imposta>${iva.toFixed(2)}</Imposta>
+    </DatiRiepilogo>
+  </DatiBeniServizi>
+
+  <DatiPagamento>
+    <CondizioniPagamento>TP02</CondizioniPagamento>
+    <DettaglioPagamento>
+      <ModalitaPagamento>${order.paymentMethod || 'MP08'}</ModalitaPagamento>
+      <ImportoPagamento>${totale.toFixed(2)}</ImportoPagamento>
+    </DettaglioPagamento>
+  </DatiPagamento>
+</FatturaElettronicaBody>
+</ns2:FatturaElettronica>`;
+
+    return header + body;
+  }
+
+  private escapeXml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&apos;');
   }
 
 }

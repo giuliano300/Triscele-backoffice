@@ -8,7 +8,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
 
 // Definisci l'URL globale dell'API
-export const API_URL = 'https://api-demo.ewtlab.it/';
+export const API_URL = 'http://localhost:3000/';
 export const TOKEN_KEY = 'a-string-secret-at-least-256-bits-long';
 export const exceedsLimit = 3;
 export const maxLenghtUploadFile = 10;
@@ -54,4 +54,34 @@ export function generateOptionText(option: any): string[] {
   }
 
   return texts;
+}
+
+export  function calculateFinalPrice(basePrice: number, quantity: number, discount: number, selectedOptions: any[] = []): number {
+  const optionsPrice = sumSelectedOptionsPrice(selectedOptions);
+  return (basePrice + optionsPrice) * quantity - discount;
+}
+
+export function sumSelectedOptionsPrice(selectedOptions: any[]): number {
+  if(!selectedOptions) return 0;
+  let total = 0;
+  const sum = (options: any[]) => {
+    for (const opt of options) {
+      if (!Array.isArray(opt)) {
+        //console.warn("Attenzione: opt non è un array:", opt);
+        continue; // passa al prossimo elemento
+      }
+
+      for (const o of opt) {
+        if (o.selectedProduct?.price) {
+          total += o.selectedProduct.price * o.selectedProduct.qta;
+        }
+
+        if (o.children && Array.isArray(o.children) && o.children.length > 0) {
+          sum(o.children); // ricorsione
+        }
+      }
+    }
+  };
+  sum(selectedOptions);
+  return total;
 }

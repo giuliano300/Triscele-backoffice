@@ -39,6 +39,8 @@ import { AddUpdateOptionsToOrderDialogComponent } from '../../../add-update-opti
 import { ConfigProductToOrder } from '../../../interfaces/config-product-to-order';
 import { Product } from '../../../interfaces/products';
 import { MatTooltip } from '@angular/material/tooltip';
+import { mapToProduct } from '../../../mapping/mapping';
+import { calculateFinalPrice, sumSelectedOptionsPrice } from '../../../../main';
 
 registerLocaleData(localeIt);
 
@@ -137,10 +139,10 @@ export class AddOrderComponent {
     this.productForm = this.fb.group({
       customerId: ['', Validators.required],
       operatorId: [null as string | null],
-      sectorId: ['', Validators.required],
+      sectorId: [''],
       agentId: [''],
       paymentMethod: ['', Validators.required],
-      status: [OrderStatus.IN_LAVORAZIONE, Validators.required],
+      status: [OrderStatus.IN_LAVORAZIONE],
       insertDate: ['', Validators.required],
       expectedDelivery: ['', Validators.required],
       shippingAddress: ['', Validators.required],
@@ -191,7 +193,7 @@ export class AddOrderComponent {
       const selectedOptions = group.get('selectedOptions')?.value || [];
 
       // calcolo prezzo totale del gruppo includendo selectedOptions ricorsivamente
-      const optionsTotal = this.sumSelectedOptionsPrice(selectedOptions);
+      const optionsTotal = sumSelectedOptionsPrice(selectedOptions);
 
       // Totale di riferimento (prezzo × quantità + configurazione)
       const subtotal = price * quantity + optionsTotal;
@@ -262,7 +264,7 @@ export class AddOrderComponent {
       const selectedOptions = ctrl.get('selectedOptions')?.value || [];
 
       // calcolo prezzo totale del gruppo includendo selectedOptions ricorsivamente
-      const optionsTotal = this.sumSelectedOptionsPrice(selectedOptions);
+      const optionsTotal = sumSelectedOptionsPrice(selectedOptions);
 
       return acc + (price * qty - discount) + optionsTotal;
     }, 0);
@@ -432,7 +434,7 @@ export class AddOrderComponent {
   getFinalPrice(): number {
     let total = 0;
     (this.productsForm.controls as FormGroup[]).forEach((group: FormGroup, i: number) => {
-      this.groupTotals[i] = this.calculateFinalPrice(
+      this.groupTotals[i] = calculateFinalPrice(
         +group.get('price')?.value || 0,
         +group.get('quantity')?.value || 0,
         +group.get('discount')?.value || 0,
@@ -506,6 +508,8 @@ export class AddOrderComponent {
 
       this.syncDiscount(group);
 
+      this.openConfigurator(mapToProduct(product));
+
     }    
     
     this.productCtrl.setValue('');
@@ -575,6 +579,14 @@ export class AddOrderComponent {
     const mmEx = String(dEx.getMonth() + 1).padStart(2, '0');
     const ddEx = String(dEx.getDate()).padStart(2, '0');
 
+    
+  for (const name in this.productForm.controls) {
+    const control = this.productForm.get(name);
+    if (control && control.invalid) {
+      console.log(`${name} is invalid`, control.errors);
+    }
+  }
+
     if (this.productForm.valid) {
       const formData: Order = {
         ...this.productForm.value,
@@ -622,8 +634,8 @@ export class AddOrderComponent {
   }
 
   openConfigurator(c: Product){
-    console.log(JSON.stringify(c));
-    if(c.options){
+    //console.log(JSON.stringify(c));
+    if(c.options.length > 0){
       const dialogRef = this.dialog.open(AddUpdateOptionsToOrderDialogComponent, {
           data: c,
           width: '80vw',
@@ -672,33 +684,4 @@ export class AddOrderComponent {
 
   }
 
-  // Funzione già vista prima
-  calculateFinalPrice(basePrice: number, quantity: number, discount: number, selectedOptions: any[] = []): number {
-    const optionsPrice = this.sumSelectedOptionsPrice(selectedOptions);
-    return (basePrice + optionsPrice) * quantity - discount;
-  }
-
-  sumSelectedOptionsPrice(selectedOptions: any[]): number {
-    let total = 0;
-    const sum = (options: any[]) => {
-      for (const opt of options) {
-        if (!Array.isArray(opt)) {
-          //console.warn("Attenzione: opt non è un array:", opt);
-          continue; // passa al prossimo elemento
-        }
-
-        for (const o of opt) {
-          if (o.selectedProduct?.price) {
-            total += o.selectedProduct.price * o.selectedProduct.qta;
-          }
-
-          if (o.children && Array.isArray(o.children) && o.children.length > 0) {
-            sum(o.children); // ricorsione
-          }
-        }
-      }
-    };
-    sum(selectedOptions);
-    return total;
-  }
 }

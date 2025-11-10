@@ -8,6 +8,7 @@ export interface Customers {
   sdi: string;
   status: number;
   email: string;
+  pwd: string;
   vatNumber: string;
   agentName: string;
   address: string;
