@@ -30,7 +30,7 @@
               <mat-form-field class="w-100">
                 <i-feather name="list"></i-feather>
                 <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-                <mat-select [formControlName]="o.option._id"
+                <mat-select [formControlName]="o.option._id" required="required"
                             [compareWith]="compareProducts"
                             (selectionChange)="setSubOption(o, $event.value)">
                   <mat-option *ngFor="let p of o.option.products" [value]="p">{{ p.name }} (+{{p.price}}€)</mat-option>

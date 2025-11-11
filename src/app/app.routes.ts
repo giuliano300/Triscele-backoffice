@@ -24,6 +24,7 @@ import { RoleGuard } from './authGuard/AuthGuard';
 import { ResetPasswordComponent } from './authentication/reset-password/reset-password.component';
 import { PwdRecoveryComponent } from './authentication/pwd-recovery/pwd-recovery.component';
 import { OptionsComponent } from './pages/products/options/options.component';
+import { CalendarComponent } from './pages/operators/calendar.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -67,6 +68,11 @@ export const routes: Routes = [
                 data: { roles: ['admin', 'operatore'] }
             },
             { path: 'operators', component: OperatorsComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
+                
+            },
+            { path: 'operator/calendar', component: CalendarComponent,
                 canActivate: [RoleGuard],
                 data: { roles: ['admin', 'operatore'] }
                 
