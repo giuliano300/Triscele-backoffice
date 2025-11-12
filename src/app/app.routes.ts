@@ -25,6 +25,10 @@ import { ResetPasswordComponent } from './authentication/reset-password/reset-pa
 import { PwdRecoveryComponent } from './authentication/pwd-recovery/pwd-recovery.component';
 import { OptionsComponent } from './pages/products/options/options.component';
 import { CalendarComponent } from './pages/operators/calendar.component';
+import { PermissionHolidayComponent } from './pages/operators/permission-holiday/permission-holiday.component';
+import { IllnessComponent } from './pages/operators/illness/illness.component';
+import { AddIllnessComponent } from './pages/operators/illness/add/add-illness.component';
+import { AddPermissionHolidayComponent } from './pages/operators/permission-holiday/add/add-permission-holiday.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -74,7 +78,37 @@ export const routes: Routes = [
             },
             { path: 'operator/calendar', component: CalendarComponent,
                 canActivate: [RoleGuard],
-                data: { roles: ['admin', 'operatore'] }
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/permission-holiday', component: PermissionHolidayComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/permission-holiday/add', component: AddPermissionHolidayComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/permission-holiday/add/:id', component: AddPermissionHolidayComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/illness', component: IllnessComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/illness/add', component: AddIllnessComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/illness/add/:id', component: AddIllnessComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
                 
             },
             { path: 'operator/add/:id', component: AddOperatorComponent,

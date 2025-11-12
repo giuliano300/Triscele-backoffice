@@ -1,0 +1,91 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li aria-current="page" class="breadcrumb-item active">{{title}}</li>
+  </ol>
+</nav>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Tipologia</label>
+          <mat-form-field class="w-100">
+            <i-feather name="command"></i-feather>
+            <mat-label>Tipologia</mat-label>
+            <mat-select formControlName="type" (selectionChange)="setAbsenceType($event)">
+              <mat-option *ngFor="let m of type" [value]="m.id">
+                {{ m.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+
+        <div class="col-sm-12" *ngIf="isFerie || isPermesso">
+          <label class="label d-block fw-medium mb-10">{{dateStartName}}</label>
+          <mat-form-field class="w-100">
+            <i-feather name="calendar"></i-feather>
+            <mat-label>{{dateStartName}}</mat-label>
+            <input matInput [matDatepicker]="pickerStart" formControlName="start">
+            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+            <mat-datepicker #pickerStart></mat-datepicker>          
+          </mat-form-field>
+        </div>
+ 
+        <div class="col-sm-12" *ngIf="isFerie">
+          <label class="label d-block fw-medium mb-10">Data fine ferie</label>
+          <mat-form-field class="w-100">
+            <i-feather name="calendar"></i-feather>
+            <mat-label>Data fine ferie</mat-label>
+            <input matInput [matDatepicker]="pickerEnd" formControlName="end">
+            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+            <mat-datepicker #pickerEnd></mat-datepicker>          
+          </mat-form-field>
+        </div>
+ 
+        <div class="col-sm-12" *ngIf="isPermesso">
+          <label class="label d-block fw-medium mb-10">Dalle ore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="clock"></i-feather>
+            <mat-label>dalle ore</mat-label>
+            <input matInput formControlName="startHour" type="time">
+          </mat-form-field>        
+        </div>
+ 
+        <div class="col-sm-12" *ngIf="isPermesso">
+          <label class="label d-block fw-medium mb-10">Alle ore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="clock"></i-feather>
+            <mat-label>alle ore</mat-label>
+            <input matInput formControlName="endHour" type="time">
+          </mat-form-field>        
+        </div>
+ 
+        <div class="col-sm-12" *ngIf="isPermesso">
+          <label class="label d-block fw-medium mb-10">Motivo (almeno 10 caratteri)</label>
+          <mat-form-field class="w-100">
+            <i-feather name="file-text"></i-feather>
+            <mat-label>Motivo</mat-label>
+            <textarea matInput formControlName="reason" style="min-height: 200px;"></textarea>
+          </mat-form-field>
+        </div>
+
+
+        <!-- Pulsanti -->
+        <div class="col-sm-6 mt-10 text-start">
+            <button mat-flat-button class="back" type="submit" (click)="returnBack()">
+                Indietro
+            </button>
+        </div>
+        <div class="col-sm-6 mt-10 text-end">
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+                Salva
+            </button>
+        </div>
+
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <input formControlName="id" type="hidden" value="">
+</form>

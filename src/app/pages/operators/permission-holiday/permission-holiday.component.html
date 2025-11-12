@@ -1,0 +1,118 @@
+<nav aria-label="breadcrumb" class="position-relative">
+    <ol class="breadcrumb">
+        <li aria-current="page" class="breadcrumb-item active">Permessi e assenze</li>
+    </ol>
+</nav>
+<mat-card
+    class="trinta-card to-do-list-card mb-25 bg-white border-none d-block"
+>
+    <mat-card-content>
+        <div class="to-do-list-table">
+            <div class="table-responsive">
+                <table mat-table [dataSource]="dataSource">
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="type">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Tipo
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Stato">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{getType(element)}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="reason">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Motivazione
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Motivazione">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{element.reason}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="startDate">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Inizio
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Inizio">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{getItalianDate(element.startDate)}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="endDate">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Fine
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Fine">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{getItalianDate(element.endDate)}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="accepted">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0 text-center medio">
+                            Stato
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0 medio text-center" data-label="Stato">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0" [style.color]="getAcceptedStatus(element).color">
+                                {{ getAcceptedStatus(element).text }}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="edit">
+                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
+                            Modifica
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Modifica">
+                            <div class="action">
+                                <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
+                                    <i class="{{element.action.edit}}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
+                            Elimina
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Elimina">
+                            <div class="action">
+                                <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto"
+                                 (click)="DeleteItem(element)">
+                                    <i class="{{element.action.delete}}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
+                            Nessuno stato inserito
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+            <mat-paginator [pageSizeOptions]="[20, 50, 100]"></mat-paginator>
+        </div>
+    </mat-card-content>
+</mat-card>

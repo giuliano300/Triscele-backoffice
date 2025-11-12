@@ -233,12 +233,12 @@
                         </mat-expansion-panel-header>
                         <ul class="sidebar-sub-menu">
                             <li class="sidemenu-item">
-                                <a routerLink="/permission-holiday" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                <a routerLink="operator/permission-holiday" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
                                     Vedi tutte
                                 </a>
                             </li>
                             <li class="sidemenu-item">
-                                <a routerLink="/permission-holiday/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                <a routerLink="operator/permission-holiday/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
                                     Aggiungi
                                 </a>
                             </li>
@@ -255,39 +255,24 @@
                         </mat-expansion-panel-header>
                         <ul class="sidebar-sub-menu">
                             <li class="sidemenu-item">
-                                <a routerLink="/illness" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                <a routerLink="operator/illness" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
                                     Vedi tutte
                                 </a>
                             </li>
                             <li class="sidemenu-item">
-                                <a routerLink="/illness/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                <a routerLink="operator/illness/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
                                     Aggiungi
                                 </a>
                             </li>
                         </ul>
                     </mat-expansion-panel>
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isOperator">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <i-feather name="calendar"></i-feather>
-                                <span class="title">
-                                    Calendario presenze
-                                </span>
-                            </mat-panel-title>
-                        </mat-expansion-panel-header>
-                        <ul class="sidebar-sub-menu">
-                            <li class="sidemenu-item">
-                                <a routerLink="/operator/calendar" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Vedi
-                                </a>
-                            </li>
-                            <li class="sidemenu-item">
-                                <a routerLink="/illness/add" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                    Comunica presenza oggi
-                                </a>
-                            </li>
-                        </ul>
-                    </mat-expansion-panel>
+                    
+                    <a routerLink="/operator/calendar" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isOperator">
+                        <i-feather name="calendar"></i-feather>
+                        <span class="title">
+                           Calendario presenze
+                        </span>
+                    </a>                
 
                     <a class="sidebar-menu-link sbs" (click)="logout()" href="#">
                         <i-feather name="Lock"></i-feather>

@@ -1,0 +1,19 @@
+.btn-delete{
+    background-color: var(--dangerColor);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.left-actions {
+  flex: 1;
+}
+
+.right-actions {
+  display: flex;
+  gap: 8px; // spaziatura tra i pulsanti Chiudi e Salva
+}

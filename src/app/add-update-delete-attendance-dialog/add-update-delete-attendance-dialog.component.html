@@ -1,0 +1,43 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup] = "form">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Ora di ingresso</label>
+          <mat-form-field class="w-100">
+            <i-feather name="clock"></i-feather>
+            <mat-label>Ora di ingresso</mat-label>
+            <input matInput formControlName="entryTime" type="time">
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Ora di uscita</label>
+          <mat-form-field class="w-100">
+            <i-feather name="clock"></i-feather>
+            <mat-label>Ora di uscita</mat-label>
+            <input matInput formControlName="exitTime" type="time">
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Note</label>
+          <mat-form-field class="w-100">
+            <i-feather name="file-text"></i-feather>
+            <mat-label>Note</mat-label>
+            <textarea matInput formControlName="notes" style="min-height: 200px;"></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
+<mat-dialog-actions class="dialog-actions">
+  <div class="left-actions">
+    <button mat-flat-button (click)="onDelete()" class="btn btn-delete" *ngIf="isUpdate">Elimina</button>
+  </div>
+
+  <div class="right-actions">
+    <button mat-button (click)="onClose()" class="btn back">Chiudi</button>
+    <button mat-flat-button (click)="onSave()" class="btn" [disabled]="form.invalid">Salva</button>
+  </div>
+</mat-dialog-actions>

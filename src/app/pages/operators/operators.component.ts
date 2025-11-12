@@ -105,7 +105,7 @@ export class OperatorsComponent {
                 login: 'ri-corner-down-right-fill',
                 delete: 'ri-delete-bin-line'
             }
-        }));;
+        }));
         this.dataSource = new MatTableDataSource<Operators>(this.Operators);
         this.dataSource.paginator = this.paginator;
       }
@@ -197,7 +197,7 @@ export class OperatorsComponent {
                     case 'ORDERSMODULE':
                       this.router.navigate(['/operator-orders']);
                       break;
-                    case 'OPERATORSSMODULE':
+                    case 'OPERATORSMODULE':
                       this.router.navigate(['/operators']);
                       break;
                     case 'SUPPLIERSMODULE':

@@ -6,6 +6,9 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 import { FeathericonsModule } from '../../icons/feathericons/feathericons.module';
 import { AuthService } from '../../services/auth.service';
+import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { AttendanceService } from '../../services/Attendance.service';
 
 @Component({
     selector: 'app-sidebar',
@@ -29,7 +32,9 @@ export class SidebarComponent {
     constructor(
         private router: Router,
         private toggleService: ToggleService,
-        private authService: AuthService
+        private dialog: MatDialog,
+        private authService: AuthService,
+        private attendanceService: AttendanceService
     ) {
         this.toggleService.isToggled$.subscribe(isToggled => {
             this.isToggled = isToggled;
@@ -155,6 +160,33 @@ export class SidebarComponent {
         localStorage.removeItem('role');
         this.authService.clearRoles();
         this.router.navigate(['/']);
+    }
+
+    openAttendance(){
+        const isOperator = localStorage.getItem('isOperator') === 'true';
+        if (isOperator) 
+        {
+            const o = JSON.parse(localStorage.getItem('operator') || '{}');
+            const operatorId = o.sub;  
+
+            const dialogRef = this.dialog.open(AddUpdateDeleteAttendanceDialogComponent, {
+                width: '550px',
+                data: {date: new Date}
+            });
+
+            dialogRef.afterClosed().subscribe((result: any) => {
+                if (result) 
+                {
+                    result.operatorId = operatorId;
+                    this.attendanceService.setAttendance(result).subscribe((data:any) =>{
+                    })
+                } 
+                else 
+                {
+                console.log("Close");
+                }
+            });
+        }
     }
 
 }

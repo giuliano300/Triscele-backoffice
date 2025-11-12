@@ -44,3 +44,8 @@ export const ConditionalLogicLabels: Record<keyof typeof ConditionalLogic, strin
   depends: 'Dipende da',
   notDepends: 'Indipendente'
 };
+
+export enum absenceType{
+  ferie = 1, 
+  permesso = 2
+}
