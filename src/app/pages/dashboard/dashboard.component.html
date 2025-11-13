@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col-md-12 col-xxxl-4">
+    <div class="col-md-12 col-xxxl-3">
 
         <mat-card class="trinta-card number-card mb-25 bg-white border-none d-block">
             <mat-card-content>
@@ -18,7 +18,7 @@
             </mat-card-content>
         </mat-card>
     </div>
-    <div class="col-md-12 col-xxxl-4">
+    <div class="col-md-12 col-xxxl-3">
         <mat-card class="trinta-card number-card mb-25 bg-white border-none d-block">
             <mat-card-content>
                 <i class="ri-group-line big-icons"></i>    
@@ -36,7 +36,25 @@
             </mat-card-content>
         </mat-card>
     </div>
-    <div class="col-md-12 col-xxxl-4">
+    <div class="col-md-12 col-xxxl-3">
+        <mat-card class="trinta-card number-card card-alert mb-25 bg-white border-none d-block">
+            <mat-card-content>
+                <i class="ri-arrow-down-double-fill big-icons"></i>    
+                <div class="ctn-numbers">            
+                    <h5 class="mt-0 mb-5 pl-0">
+                        Assenze da confermare
+                    </h5>
+                    <h3 *ngIf="loaded">
+                        {{absence}}
+                    </h3>
+                    <h4 *ngIf="!loaded">
+                        <i class="ri-refresh-line rotate"></i>
+                    </h4>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    <div class="col-md-12 col-xxxl-3">
         <mat-card class="trinta-card number-card card-alert mb-25 bg-white border-none d-block">
             <mat-card-content>
                 <i class="ri-bar-chart-grouped-line big-icons"></i>    

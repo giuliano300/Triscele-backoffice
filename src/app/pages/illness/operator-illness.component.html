@@ -1,8 +1,49 @@
 <nav aria-label="breadcrumb" class="position-relative">
     <ol class="breadcrumb">
-        <li aria-current="page" class="breadcrumb-item active">Permessi e assenze</li>
+        <li aria-current="page" class="breadcrumb-item active">Assenze per malattia</li>
     </ol>
 </nav>
+<mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters">
+    <mat-card-content>
+        <div class="filter-panel">
+            <input type="checkbox" id="toggleFilter" class="toggle-checkbox">
+            <label for="toggleFilter" class="toggle-label">
+                Filtri
+            </label>
+
+            <div class="filter-content">
+              <form [formGroup]="form">
+                  <div class="container">
+                      <div class="row">
+                          <div class="col-lg-4">
+                              <mat-form-field>
+                                  <i-feather name="star"></i-feather>
+                                  <mat-label>Filtra per operatore</mat-label>
+                                  <mat-select formControlName="operatorId">
+                                      <mat-option *ngFor="let option of operators" [value]="option._id">
+                                      {{ option.businessName }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>                        
+                          </div>
+                          <div class="col-lg-1">
+                              <button mat-button class="filter" type="submit" (click)="onSubmit()">
+                                  Filtra
+                              </button>               
+                          </div>
+                          <div class="col-lg-1">
+                              <button mat-button class="remove" type="submit" (click)="remove()">
+                                  Rimuovi
+                              </button>               
+                          </div>
+                      </div>
+                  </div>
+              </form>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>
+
 <mat-card
     class="trinta-card to-do-list-card mb-25 bg-white border-none d-block"
 >
@@ -12,26 +53,26 @@
                 <table mat-table [dataSource]="dataSource">
 
                     <!-- Name Column -->
-                    <ng-container matColumnDef="type">
+                    <ng-container matColumnDef="operatorId">
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
-                            Tipo
+                            Operatore
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Stato">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Operatore">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
-                                    {{getType(element)}}
+                                    {{element.operatorId.businessName}}
                                 </h6>
                             </div>
                         </td>
                     </ng-container>
-                    <ng-container matColumnDef="reason">
+                    <ng-container matColumnDef="protocol">
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
-                            Motivazione
+                            Procollo
                         </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Motivazione">
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Procollo">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
-                                    {{element.reason}}
+                                    {{element.protocol}}
                                 </h6>
                             </div>
                         </td>
@@ -43,7 +84,7 @@
                         <td mat-cell *matCellDef="let element" class="pl-0" data-label="Inizio">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
-                                    {{getItalianDate(element.startDate)}}
+                                    {{getItalianDate(element.start)}}
                                 </h6>
                             </div>
                         </td>
@@ -55,34 +96,8 @@
                         <td mat-cell *matCellDef="let element" class="pl-0" data-label="Fine">
                             <div class="position-relative">
                                 <h6 class="mt-0 mb-0">
-                                    {{getItalianDate(element.endDate)}}
+                                    {{getItalianDate(element.end)}}
                                 </h6>
-                            </div>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="accepted">
-                        <th mat-header-cell *matHeaderCellDef class="pl-0 text-center medio">
-                            Stato
-                        </th>
-                        <td mat-cell *matCellDef="let element" class="pl-0 medio text-center" data-label="Stato">
-                            <div class="position-relative">
-                                <h6 class="mt-0 mb-0" [style.color]="getAcceptedStatus(element).color">
-                                {{ getAcceptedStatus(element).text }}
-                                </h6>
-                            </div>
-                        </td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="edit">
-                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
-                            Modifica
-                        </th>
-                        <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Modifica">
-                            <div class="action">
-                                <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto" (click)="UpdateItem(element)">
-                                    <i class="{{element.action.edit}}"></i>
-                                </button>
                             </div>
                         </td>
                     </ng-container>
@@ -106,7 +121,7 @@
 
                     <tr class="mat-row" *matNoDataRow>
                         <td class="mat-cell text-center no-data" [attr.colspan]="displayedColumns.length">
-                            Nessuna richiesta inserita
+                            Nessuna assenza inserita
                         </td>
                     </tr>
 

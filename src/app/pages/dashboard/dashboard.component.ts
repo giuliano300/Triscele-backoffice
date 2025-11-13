@@ -16,6 +16,7 @@ import { AddMovementComponent } from '../../add-movement-dialog/add-movement-dia
 import { ProductMovements } from '../../interfaces/productMovements';
 import { ProductMovementsService } from '../../services/Product-movements.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -57,6 +58,7 @@ export class DashboardComponent {
       private statsService: StatsService,
       private productService: ProductService,
       private productMovementsService: ProductMovementsService,
+      private permissionHolidayService: PermissionHolidayService,
       @Inject(PLATFORM_ID) private platformId: any) {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
@@ -66,12 +68,20 @@ export class DashboardComponent {
     productsEnd: number = 0;
     ordersByMonth: any[] = [];
     y: number = new Date().getFullYear();
+    absence: number = 0;
 
     loaded: boolean = false;
 
    ngOnInit(): void {
     this.loadStats();
+    this.countPending();
     this.findLowStock();
+   }
+
+   countPending(){
+    this.permissionHolidayService.countPending().subscribe((d: number) =>{
+      this.absence = d;
+    })
    }
 
    findLowStock(){

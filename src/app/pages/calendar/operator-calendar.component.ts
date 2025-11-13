@@ -9,29 +9,33 @@ import 'tippy.js/dist/tippy.css';
 import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
 import { AttendanceService } from '../../services/Attendance.service';
+import { OperatorService } from '../../services/Operator.service';
+import { Operators } from '../../interfaces/operators';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
   imports: [FullCalendarModule, MatCardModule],
-  templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.scss']
+  templateUrl: './operator-calendar.component.html',
+  styleUrls: ['./operator-calendar.component.scss']
 })
-export class CalendarComponent implements OnInit {
+export class OperatorCalendarComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private calendarService: CalendarService, 
     private dialog: MatDialog,
-    private attendanceService: AttendanceService
+    private attendanceService: AttendanceService,
+    private operatorService: OperatorService
   ) {}
 
   showFullName: boolean = false; 
 
-  operatorId: string = '';
+  operatorName: string = '';
 
   @ViewChild('fullCalendar') calendarComponent!: FullCalendarComponent;
   events: any[] = [];
@@ -52,8 +56,6 @@ export class CalendarComponent implements OnInit {
     },
     eventDidMount: (info) => {
       const props: any = info.event.extendedProps;
-
-      //if (!props || info.event.title?.includes('Presenza')) return;
 
       const tooltipContent = `
         <div style="font-size:14px; line-height:1.8; min-width:200px;">
@@ -83,110 +85,24 @@ export class CalendarComponent implements OnInit {
         info.view.calendar.changeView('dayGridMonth');
       }
     },
-    dateClick: (info) => {
-      this.openNewEditDeleteAttendance(info.dateStr);
-    },
-
-    eventClick: (info) => {
-      this.openEditEvent(info.event);
-    }
   };
 
 
   ngOnInit(): void {
-    const isOperator = localStorage.getItem('isOperator') === 'true';
-    if (isOperator) {
-      const o = JSON.parse(localStorage.getItem('operator') || '{}');
-      this.operatorId = o.sub;  
-    }
-    this.loadEvents(this.operatorId);
-  }
+    this.route.paramMap.subscribe(params => {
+       const id = params.get('id');
 
-  openEditEvent(event: any) {
-    //console.log(event._def.extendedProps);
-    const id = event._def.extendedProps.id;
+      if (!id)
+        this.router.navigate(["access-denied"]);
 
-    if(event._def.extendedProps.tipologia == "presenza"){
-      this.openNewEditDeleteAttendance(event._def.extendedProps.date, id);
-      return;
-    }
-        
-    let data = 
-    {
-      title: "Vuoi modificare l'assenza in calendario?", 
-      description: "Se la modifichi verrà rimesso in attesa di validazione.",
-      confirm: "Conferma"
-    };
+      this.operatorService.getOperator(id!)
+        .subscribe((data: Operators) => {
+        this.loadEvents(id!);
+        this.operatorName = data.businessName;
+      });
     
-    if(event._def.extendedProps.tipologia == "malattia")
-    {
-      data.title =  "Vuoi modificare l'assenza per malattia in calendario?"
-      data.description = "La modifica non dovrà essere validata dall'amministrazione.";
-    }
-
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '550px',
-      data: data
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) 
-      {
-        localStorage.setItem("back-calendar", "true");
-        if(event._def.extendedProps.tipologia == "assenza")
-            this.router.navigate(["operator/permission-holiday/add/" + id]);
-        if(event._def.extendedProps.tipologia == "malattia")
-            this.router.navigate(["operator/illness/add/" + id]);
-        
-      } 
-      else 
-      {
-        //console.log("Close");
-      }
-    });
+    })
   }
-
-  openNewEditDeleteAttendance(date: string, id?: string) {
-    const dialogRef = this.dialog.open(AddUpdateDeleteAttendanceDialogComponent, {
-      width: '550px',
-      data: {date: date, id: id}
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) 
-      {
-        //MODIFICA O ELIMINA
-        if(id)
-        {
-          if(result == "delete"){
-            this.attendanceService.delete(id).subscribe((data:any) => {
-              this.loadEvents(this.operatorId);
-            })
-          }
-          else
-          {
-            result._id = id;
-            result.operatorId = this.operatorId;
-            this.attendanceService.updateAttendance(result).subscribe((data:any) =>{
-              this.loadEvents(this.operatorId);
-            })
-          }
-        }
-        else
-        {
-          result.operatorId = this.operatorId;
-          this.attendanceService.setAttendance(result).subscribe((data:any) =>{
-            this.loadEvents(this.operatorId);
-          })
-        }
-      } 
-      else 
-      {
-        console.log("Close");
-      }
-    });
-  }
-
 
   loadEvents(operatorId?: string) {
     this.calendarService.calendar(operatorId).subscribe(events => {
@@ -241,5 +157,9 @@ export class CalendarComponent implements OnInit {
         };
       });
     });
+  }
+
+  back(){
+    this.router.navigate(["operators"]);
   }
 }

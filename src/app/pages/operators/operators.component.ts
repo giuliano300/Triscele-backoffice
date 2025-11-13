@@ -80,6 +80,7 @@ export class OperatorsComponent {
     {
       const i = this.displayedColumns.length - 1;
       this.displayedColumns.splice(i, 0, 'login');
+      this.displayedColumns.splice(i, 0, 'calendar');
     }
 
     this.sectorService.getSectors()
@@ -102,6 +103,7 @@ export class OperatorsComponent {
             action: {
                 edit: 'ri-edit-line',
                 login: 'ri-corner-down-right-fill',
+                calendar: 'ri-calendar-line',
                 delete: 'ri-delete-bin-line'
             }
         }));
@@ -143,6 +145,10 @@ export class OperatorsComponent {
         console.log("Close");
       }
     });
+  }
+
+  GoToCalendar(item: Operators){
+    this.router.navigate(["/calendar/" + item._id]);
   }
 
   UpdateItem(item: Operators){

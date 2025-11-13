@@ -84,6 +84,16 @@
                                     Aggiungi
                                 </a>
                             </li>
+                            <li class="sidemenu-item" *ngIf="isAdmin">
+                                <a routerLink="/absence" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                   Richieste assenze
+                                </a>
+                            </li>
+                            <li class="sidemenu-item" *ngIf="isAdmin">
+                                <a routerLink="/illness" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                    Comunic. malattie
+                                </a>
+                            </li>
                         </ul>
                     </mat-expansion-panel>
 
@@ -255,7 +265,7 @@
                             <mat-panel-title>
                                 <i-feather name="user-x"></i-feather>
                                 <span class="title">
-                                    Comunicazioni malattie
+                                    Comunic. malattie
                                 </span>
                             </mat-panel-title>
                         </mat-expansion-panel-header>

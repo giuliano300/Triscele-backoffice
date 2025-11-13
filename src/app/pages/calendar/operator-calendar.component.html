@@ -1,0 +1,15 @@
+<nav aria-label="breadcrumb" class="position-relative">
+    <ol class="breadcrumb">
+        <li aria-current="page" class="breadcrumb-item active">Calendario presenze di {{operatorName}}</li>
+    </ol>
+    <button class="btn-download btn cancel-button" (click)="back()"><i class="ri-arrow-left-line"></i> Torna indietro</button>
+</nav>
+<div class="row">
+    <div class="col-xxxl-12">
+        <mat-card class="trinta-card full-calendar-card mb-25 bg-white border-none d-block">
+            <mat-card-content>
+                <full-calendar #fullCalendar [options]="calendarOptions"></full-calendar>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
