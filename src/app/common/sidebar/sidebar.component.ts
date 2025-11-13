@@ -6,13 +6,14 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 import { FeathericonsModule } from '../../icons/feathericons/feathericons.module';
 import { AuthService } from '../../services/auth.service';
-import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
-import { AttendanceService } from '../../services/Attendance.service';
+import { MatBadgeModule } from '@angular/material/badge';
+import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
+import { ToastrService } from 'ngx-toastr';
+
 
 @Component({
     selector: 'app-sidebar',
-    imports: [NgScrollbarModule, MatExpansionModule, RouterLinkActive, RouterModule, RouterLink, NgClass, FeathericonsModule, NgIf],
+    imports: [NgScrollbarModule, MatExpansionModule, RouterLinkActive, RouterModule, RouterLink, NgClass, FeathericonsModule, NgIf, MatBadgeModule],
     templateUrl: './sidebar.component.html',
     styleUrl: './sidebar.component.scss'
 })
@@ -29,12 +30,14 @@ export class SidebarComponent {
     isVisibleAdmin: boolean = true;
     isVisibleOperatorOrders: boolean = false;
 
+    count:number = 0;
+
     constructor(
         private router: Router,
         private toggleService: ToggleService,
-        private dialog: MatDialog,
         private authService: AuthService,
-        private attendanceService: AttendanceService
+        private permissionHolidayService: PermissionHolidayService,
+        private toastr: ToastrService
     ) {
         this.toggleService.isToggled$.subscribe(isToggled => {
             this.isToggled = isToggled;
@@ -100,7 +103,20 @@ export class SidebarComponent {
                 this.applyPermissions(permissions);
             });
         });
+
+        this.countPending();
+        // 🔹 Aggiorna il conteggio ogni volta che c’è una modifica
+        this.permissionHolidayService.pendingChanged$.subscribe(() => {
+            this.countPending();
+        });
     }
+
+    countPending(){
+        this.permissionHolidayService.countPending().subscribe((d: number) =>{
+            this.count = d;
+        })
+    }
+
 
     /** Applica la visibilità dei moduli in base ai permessi */
     private applyPermissions(perms: any[]) {

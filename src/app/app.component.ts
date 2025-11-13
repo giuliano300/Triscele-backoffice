@@ -7,6 +7,7 @@ import { FooterComponent } from './common/footer/footer.component';
 import { ToggleService } from './common/header/toggle.service';
 import { filter } from 'rxjs';
 import { Location } from '@angular/common';
+import { SocketService } from './services/socket.service';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +23,7 @@ export class AppComponent {
     public router: Router,  
     public toggleService: ToggleService, 
     private loc: Location,
+    private socketService: SocketService,
     @Inject(PLATFORM_ID) private platformId: Object
 ) {
   this.toggleService.isToggled$.subscribe(isToggled => {

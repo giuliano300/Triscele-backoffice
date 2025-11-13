@@ -98,8 +98,8 @@ export class AbsenceComponent {
     let description = "Approvando la richiesta troverai l'assenza nel calendario operatore."
     let button = "Conferma";
     if(!approve){
-      title = "Vuoi negare la richiesta?";
-      description = "Negando la richiesta verrà annullata.";
+      title = "Vuoi rifiutare la richiesta?";
+      description = "Rifiutando la richiesta verrà annullata.";
     }
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '500px',
@@ -115,6 +115,7 @@ export class AbsenceComponent {
           .subscribe((data: boolean) => {
             if(data){
               this.getpPermissionHoliday();
+              this.permissionHolidayService.notifyPendingChanged();
             }
           });
       } 

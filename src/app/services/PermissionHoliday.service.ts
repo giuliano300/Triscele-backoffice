@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import { API_URL } from '../../main';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { PermissionHoliday } from '../interfaces/permissionHoliday';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PermissionHolidayService {
+    private pendingChangedSource = new BehaviorSubject<void>(undefined);
+    pendingChanged$ = this.pendingChangedSource.asObservable();
 
     private apiUrl = API_URL + "permission-holiday";
     
@@ -43,6 +45,10 @@ export class PermissionHolidayService {
 
     countPending():Observable<number>{
       return this.http.get<number>(this.apiUrl + "/count-pending");
+    }
+
+    notifyPendingChanged() {
+      this.pendingChangedSource.next();
     }
 
 }

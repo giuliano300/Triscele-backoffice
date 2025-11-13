@@ -86,7 +86,7 @@
                             </li>
                             <li class="sidemenu-item" *ngIf="isAdmin">
                                 <a routerLink="/absence" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
-                                   Richieste assenze
+                                   <span matBadgeOverlap="false" [matBadge]="count" [matBadgeHidden]="count == 0" matBadgePosition="after">Richieste assenze</span>
                                 </a>
                             </li>
                             <li class="sidemenu-item" *ngIf="isAdmin">
