@@ -37,4 +37,8 @@ export class AttendanceService {
       return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
     }
 
+    getTodayAttendance(operatorId: string):Observable<Attendance>{
+      return this.http.get<Attendance>(this.apiUrl + "/today/" + operatorId);
+    }
+
 }

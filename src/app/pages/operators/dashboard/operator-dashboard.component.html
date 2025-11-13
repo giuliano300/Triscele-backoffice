@@ -1,0 +1,97 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li aria-current="page" class="breadcrumb-item active">Presenza di oggi</li>
+    </ol>
+</nav>
+<div class="row">
+    <div class="col-xxxl-12">
+        <mat-card class="trinta-card balance-overview-card mb-25 bg-white border-none d-block" style="min-height: 75vh;">
+            <mat-card-content>
+                <div class="dashboard-container" [@fadeIn]>
+                    <!-- ✅ Nessuna presenza odierna -->
+                    <div *ngIf="!attendance; else showActive" class="presence-entry" [@fadeInUp]>
+                        <div class="entry-form">
+                            <h2 class="text-center">Conferma presenza</h2>
+                            <div class="col-sm-12">
+                                <label class="label d-block fw-medium mb-10 text-start">Orario di entrata</label>
+                                <mat-form-field class="w-100">
+                                    <i-feather name="clock"></i-feather>
+                                    <mat-label>Orario di entrata</mat-label>
+                                    <input matInput [value]="entryTime" readonly>
+                                </mat-form-field>        
+                            </div>
+
+                            <div class="col-sm-12">
+                                <label class="label d-block fw-medium mb-10 text-start">Note</label>
+                                <mat-form-field class="w-100">
+                                    <i-feather name="file-text"></i-feather>
+                                    <mat-label>Note</mat-label>
+                                    <textarea matInput matInput [(ngModel)]="notes" style="min-height: 80px;"></textarea>
+                                </mat-form-field>
+                            </div>
+
+                            <button mat-flat-button color="primary" class="btn-confirm" (click)="confirmEntry()">
+                            <mat-icon>login</mat-icon> Conferma Presenza
+                            </button>
+                        </div>
+                    </div>
+
+                    <ng-template #showActive>
+                        <div class="active-attendance" [@fadeInUp] *ngIf="!attendance?.exitTime">
+                            <h2 class="text-center">Chiudi presenza giornaliera</h2>
+                            <div class="timer-card pulse">
+                                <span class="timer-label">Tempo lavorato</span>
+                                <h1 class="timer">{{ liveTimer }}</h1>
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="label d-block fw-medium mb-10 text-start">Note</label>
+                                <mat-form-field class="w-100">
+                                    <i-feather name="file-text"></i-feather>
+                                    <mat-label>Note</mat-label>
+                                    <textarea matInput matInput [(ngModel)]="notes" style="min-height: 80px;"></textarea>
+                                </mat-form-field>
+                            </div>
+
+                            <button mat-flat-button color="warn" class="btn-exit" (click)="confirmExit()">
+                                <mat-icon>logout</mat-icon> Chiudi Presenza Giornaliera
+                            </button>
+                        </div>
+                    </ng-template>
+                    <div div class="active-attendance summary" *ngIf="attendance?.exitTime" [@fadeIn]>
+                        <div class="summary-card">
+                            <div class="summary-header">
+                                <i-feather name="check-circle" class="summary-icon"></i-feather>
+                                <h2>Riepilogo giornata</h2>
+                            </div>
+
+                            <div class="summary-content">
+                                <div class="summary-row">
+                                    <span class="label">Entrata</span>
+                                    <span class="value">{{ attendance?.entryTime }}</span>
+                                </div>
+
+                                <div class="summary-row">
+                                    <span class="label">Uscita</span>
+                                    <span class="value">{{ attendance?.exitTime }}</span>
+                                </div>
+
+                                <div class="summary-row total">
+                                    <span class="label">Totale ore lavorate</span>
+                                    <span class="value">
+                                    {{ calculateWorkedTime(attendance!.entryTime, attendance!.exitTime!) }}
+                                    </span>
+                                </div>
+
+                                <div class="summary-row notes" *ngIf="attendance?.notes">
+                                    <span class="label">Note</span>
+                                    <p class="note-text">{{ attendance?.notes }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>

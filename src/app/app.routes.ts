@@ -29,6 +29,7 @@ import { PermissionHolidayComponent } from './pages/operators/permission-holiday
 import { IllnessComponent } from './pages/operators/illness/illness.component';
 import { AddIllnessComponent } from './pages/operators/illness/add/add-illness.component';
 import { AddPermissionHolidayComponent } from './pages/operators/permission-holiday/add/add-permission-holiday.component';
+import { OperatorDashboardComponent } from './pages/operators/dashboard/operator-dashboard.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -77,6 +78,11 @@ export const routes: Routes = [
                 
             },
             { path: 'operator/calendar', component: CalendarComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/dashboard', component: OperatorDashboardComponent,
                 canActivate: [RoleGuard],
                 data: { roles: ['operatore'] }
                 

@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Categories } from '../interfaces/categories';
 import { MatCardContent, MatCard } from "@angular/material/card";
 import { MatFormField, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
 import { FeathericonsModule } from "../icons/feathericons/feathericons.module";
@@ -28,7 +27,8 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
     MatIconModule,
     MatLabel, 
     CommonModule,
-   ReactiveFormsModule]
+    ReactiveFormsModule
+  ]
 })
 export class AddUpdateDeleteAttendanceDialogComponent {
   

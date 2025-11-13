@@ -23,10 +23,16 @@
         <div class="sidebar-inner">
             <div class="sidebar-menu">
                 <mat-accordion>
-                    <span class="sub-title text-body sbs" *ngIf="isVisibleDashboard">
+                    <span class="sub-title text-body sbs">
                         MAIN
                     </span>
                     <a routerLink="/dashboard" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleDashboard">
+                        <i-feather name="activity"></i-feather>
+                        <span class="title">
+                            Dashboard
+                        </span>
+                    </a>
+                    <a routerLink="operator/dashboard" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isOperator">
                         <i-feather name="activity"></i-feather>
                         <span class="title">
                             Dashboard

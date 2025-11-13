@@ -11,7 +11,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 import { AuthService } from '../../services/auth.service';
-import { Permission } from '../../interfaces/permissions';
 import { CommonModule } from '@angular/common';
 import { Login } from '../../interfaces/Login';
 import { FeathericonsModule } from '../../icons/feathericons/feathericons.module';
@@ -175,38 +174,18 @@ export class OperatorsComponent {
             if(login)
             {
               const l = JSON.parse(localStorage.getItem("permissions") || "[]");
-                  if(!l)
-                  {
-                    localStorage.removeItem('authToken');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('isLogin');
-                    localStorage.removeItem('isAdmin');
-                    localStorage.removeItem('isOperator');
-                    this.authService.clearRoles();
-                    this.router.navigate(['/']);
-                  }
+              if(!l)
+              {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                localStorage.removeItem('isLogin');
+                localStorage.removeItem('isAdmin');
+                localStorage.removeItem('isOperator');
+                this.authService.clearRoles();
+                this.router.navigate(['/']);
+              }
               
-                  const p: Permission = l[0];
-                  switch(p.permissionName.toUpperCase()){
-                    case 'CUSTOMERSMODULE':
-                      this.router.navigate(['/customers']);
-                      break;
-                    case 'PRODUCTSMODULE':
-                      this.router.navigate(['/products']);
-                      break;
-                    case 'ORDERSMODULE':
-                      this.router.navigate(['/operator-orders']);
-                      break;
-                    case 'OPERATORSMODULE':
-                      this.router.navigate(['/operators']);
-                      break;
-                    case 'SUPPLIERSMODULE':
-                      this.router.navigate(['/suppliers']);
-                      break;
-                    default:
-                      this.router.navigate(['/dashboard']);
-                      break;
-                  }
+              this.router.navigate(['/operator/dashboard']);
             }
           }
         })

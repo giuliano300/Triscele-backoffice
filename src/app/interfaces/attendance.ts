@@ -1,5 +1,5 @@
 export interface Attendance {
-    _id: string;    
+    _id?: string;    
     operatorId: string;
     date: Date;
     entryTime: string;

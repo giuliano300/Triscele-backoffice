@@ -86,27 +86,7 @@ export class SignInComponent {
                                     this.router.navigate(['/']);
                                 }
                             
-                                const p: Permission = l[0];
-                                switch(p.permissionName.toUpperCase()){
-                                    case 'CUSTOMERSMODULE':
-                                    this.router.navigate(['/customers']);
-                                    break;
-                                    case 'PRODUCTSMODULE':
-                                    this.router.navigate(['/products']);
-                                    break;
-                                    case 'ORDERSMODULE':
-                                    this.router.navigate(['/operator-orders']);
-                                    break;
-                                    case 'OPERATORSSMODULE':
-                                    this.router.navigate(['/operators']);
-                                    break;
-                                    case 'SUPPLIERSMODULE':
-                                    this.router.navigate(['/suppliers']);
-                                    break;
-                                    default:
-                                    this.router.navigate(['/dashboard']);
-                                    break;
-                                }
+                                this.router.navigate(['/operator/dashboard']);
                             }
                         }
                     })

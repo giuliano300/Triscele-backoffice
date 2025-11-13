@@ -162,31 +162,4 @@ export class SidebarComponent {
         this.router.navigate(['/']);
     }
 
-    openAttendance(){
-        const isOperator = localStorage.getItem('isOperator') === 'true';
-        if (isOperator) 
-        {
-            const o = JSON.parse(localStorage.getItem('operator') || '{}');
-            const operatorId = o.sub;  
-
-            const dialogRef = this.dialog.open(AddUpdateDeleteAttendanceDialogComponent, {
-                width: '550px',
-                data: {date: new Date}
-            });
-
-            dialogRef.afterClosed().subscribe((result: any) => {
-                if (result) 
-                {
-                    result.operatorId = operatorId;
-                    this.attendanceService.setAttendance(result).subscribe((data:any) =>{
-                    })
-                } 
-                else 
-                {
-                console.log("Close");
-                }
-            });
-        }
-    }
-
 }
