@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
 import { MatBadgeModule } from '@angular/material/badge';
 import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
 import { ToastrService } from 'ngx-toastr';
+import { SocketService } from '../../services/socket.service';
 
 
 @Component({
@@ -37,7 +38,7 @@ export class SidebarComponent {
         private toggleService: ToggleService,
         private authService: AuthService,
         private permissionHolidayService: PermissionHolidayService,
-        private toastr: ToastrService
+        private socketService: SocketService
     ) {
         this.toggleService.isToggled$.subscribe(isToggled => {
             this.isToggled = isToggled;
@@ -109,11 +110,17 @@ export class SidebarComponent {
         this.permissionHolidayService.pendingChanged$.subscribe(() => {
             this.countPending();
         });
+
+        this.socketService.absenceCounter$.subscribe(value => {
+            this.count = value;
+        });
+
     }
 
     countPending(){
         this.permissionHolidayService.countPending().subscribe((d: number) =>{
             this.count = d;
+            this.socketService.setInitialCounter(d);
         })
     }
 

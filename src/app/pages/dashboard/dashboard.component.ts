@@ -17,6 +17,7 @@ import { ProductMovements } from '../../interfaces/productMovements';
 import { ProductMovementsService } from '../../services/Product-movements.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -59,6 +60,7 @@ export class DashboardComponent {
       private productService: ProductService,
       private productMovementsService: ProductMovementsService,
       private permissionHolidayService: PermissionHolidayService,
+      private socketService: SocketService,
       @Inject(PLATFORM_ID) private platformId: any) {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
@@ -76,6 +78,9 @@ export class DashboardComponent {
     this.loadStats();
     this.countPending();
     this.findLowStock();
+    this.socketService.absenceCounter$.subscribe(value => {
+        this.absence = value;
+    });
    }
 
    countPending(){

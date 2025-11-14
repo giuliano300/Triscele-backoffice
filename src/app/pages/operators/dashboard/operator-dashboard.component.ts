@@ -47,7 +47,7 @@ export class OperatorDashboardComponent {
   isBrowser = false;
   operatorId = '';
   attendance?: Attendance;
-  liveTimer: string = '00:00:00';
+  liveTimer: string = '';
   notes: string = '';
   entryTime: string = '';
   private timerInterval: any;
@@ -113,17 +113,28 @@ export class OperatorDashboardComponent {
   // ✅ Timer live
   startTimer(entryTime: string) {
     const [h, m, s] = entryTime.split(':').map(Number);
+
     const start = new Date();
     start.setHours(h, m, s);
+
     clearInterval(this.timerInterval);
 
-    this.timerInterval = setInterval(() => {
-      const diff = new Date().getTime() - start.getTime();
+    const update = () => {
+      const now = Date.now();
+      const diff = now - start.getTime();
+
       const hours = Math.floor(diff / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
+
       this.liveTimer = `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
-    }, 1000);
+    };
+
+    // Aggiorna subito all'avvio
+    update();
+
+    // Aggiorna ogni secondo
+    this.timerInterval = setInterval(update, 1000);
   }
 
   calculateWorkedTime(entry: string, exit: string): string {
