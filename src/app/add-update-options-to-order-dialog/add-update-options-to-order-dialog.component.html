@@ -41,7 +41,7 @@
             <!--quantità select-->
             <mat-form-field class="w-80" *ngSwitchCase="OptionType.select">
               <i-feather name="layers"></i-feather>
-              <mat-label>Quantità</mat-label>
+              <mat-label>{{ o.selectedUnit || "Quantità" }}</mat-label>
               <input matInput type="number" [formControlName]="'qta_' + o.option._id">
             </mat-form-field>
           </div>

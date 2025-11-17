@@ -113,6 +113,7 @@ export class AddUpdateProductsOptionsDialogComponent {
           _id: [product._id],
           name: [product.name],
           price: [product.price || 0],
+          stock_type :  [product.stock_type || undefined],
         });
 
         this.productsForm.push(group);    
@@ -181,7 +182,8 @@ export class AddUpdateProductsOptionsDialogComponent {
       const group = this.fb.group({
         _id: [product.id],
         name: [product.name],
-        price: [product.price]
+        price: [product.price],
+        stock_type:[product.stock_type]
       });
 
       this.productsForm.push(group);

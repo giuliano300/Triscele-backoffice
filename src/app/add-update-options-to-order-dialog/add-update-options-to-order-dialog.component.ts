@@ -48,6 +48,23 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   OptionType = OptionType;
   form: FormGroup;
 
+  stockTypes = [
+    { value: 'pezzi', label: 'Pezzi' },
+    { value: 'm', label: 'Metri' },
+    { value: 'l', label: 'Litri' },
+    { value: 'kg', label: 'KG' },
+    { value: 'ha', label: 'Ettari' },
+    { value: 'sq km', label: 'km²' },
+    { value: 'sq m', label: 'm²' },
+    { value: 'sq cm', label: 'cm²' },
+    { value: 'sq mm', label: 'mm²' },
+    { value: 'acs', label: 'Acri' },
+    { value: 'sq. mi.', label: 'mi²' },
+    { value: 'sq. yd.', label: 'yd²' },
+    { value: 'sq. ft.', label: 'ft²' },
+    { value: 'sq. in.', label: 'in²' },
+  ];
+
 
   constructor(
     public dialogRef: MatDialogRef<AddUpdateOptionsToOrderDialogComponent>,
@@ -72,6 +89,11 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     this.form = this.createFormGroupForOptions(this.masterOptions, p.selectedOptions);
   }
 
+  getStockTypeLabel(value: string): string {
+    const item = this.stockTypes.find(x => x.value === value);
+    return item ? item.label : value;
+  }
+
   // --- CREA FORM RICORSIVO ---
   createFormGroupForOptions(options: any[], selectedOptions?: any[]): FormGroup {
     const group: any = {};
@@ -89,6 +111,9 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
           const selectedId = selected.selectedProduct?._id || selected.value?._id;
           const matched = optionNode.option.products.find((p: any) => p._id === selectedId);
           initialValue = matched || null;
+          
+          optionNode.selectedUnit = this.getStockTypeLabel(selected.selectedProduct.stock_type) || 'Quantità';
+
 
           // POPOLA I CHILDREN ALL'INIZIALIZZAZIONE
           const children = this.data.options.filter(opt =>
@@ -137,6 +162,8 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     if (!optionNode || !selectedProduct) return;
 
     optionNode.selectedProduct = selectedProduct;
+
+    optionNode.selectedUnit = this.getStockTypeLabel(selectedProduct.stock_type) || 'Quantità';
 
     // Trova figli validi
     const children = this.data.options.filter(opt =>
