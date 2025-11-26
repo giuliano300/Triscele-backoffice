@@ -34,11 +34,13 @@ export class CategoryService {
     }
   
     setCategory(c: Categories):Observable<Categories>{
+      c.source = "WEB";
       return this.http.post<Categories>(this.apiUrl, c);
     }
 
     updateCategory(c: Categories):Observable<boolean>{
-      return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
+      c.source = "WEB";
+     return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
     }
 
 }

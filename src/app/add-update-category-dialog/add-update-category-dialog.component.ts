@@ -29,7 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class AddUpdateCategoryDialogComponent {
   
-  title: string = "Aggiungi categoria ee";
+  title: string = "Aggiungi categoria";
 
   categoryForm: FormGroup;
 

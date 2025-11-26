@@ -43,6 +43,7 @@ export class CategoriesComponent {
     .subscribe((data: Categories[]) => {
       if (!data || data.length === 0) {
         console.log('Nessun dato disponibile');
+        this.dataSource.data = [];
       } 
       else 
       {
