@@ -143,7 +143,9 @@
           <mat-form-field class="w-100">
             <i-feather name="user-check"></i-feather>
             <mat-label>Agente</mat-label>
-            <input matInput formControlName="agentName" type="text">
+            <mat-select formControlName="agentName" placeholder="Seleziona un agente">
+              <mat-option *ngFor="let a of agents" [value]="a.name">{{a.name}}</mat-option>
+            </mat-select>  
           </mat-form-field>
         </div>
 

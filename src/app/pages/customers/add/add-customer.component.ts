@@ -18,6 +18,8 @@ import { Customers } from '../../../interfaces/customers';
 import { CustomerService } from '../../../services/Customer.service';
 import { UtilsService } from '../../../services/utils.service';
 import { partitaIvaValidator } from '../../../validators/vat.validator';
+import { AgentService } from '../../../services/Agent.service';
+import { Agents } from '../../../interfaces/agents';
 
 registerLocaleData(localeIt);
 
@@ -67,6 +69,7 @@ export class AddCustomerComponent {
   title: string = "Aggiungi Cliente";
 
   customers: Customers[] = [];
+  agents: Agents[] = [];
 
   disciplinaryForm: FormGroup;
 
@@ -80,7 +83,8 @@ export class AddCustomerComponent {
       private fb: FormBuilder,
       private route: ActivatedRoute,
       private adapter: DateAdapter<any>,
-      private utilsService: UtilsService
+      private utilsService: UtilsService,
+      private agentService: AgentService
   ) 
   {
     this.adapter.setLocale('it-IT');
@@ -112,6 +116,10 @@ export class AddCustomerComponent {
     const token = localStorage.getItem('authToken');
     if (!token) 
       this.router.navigate(['/']);
+
+    this.agentService.getAgents().subscribe((data: Agents[]) => {
+      this.agents = data;
+    });
 
     this.route.paramMap.subscribe(params => {
       this.id = params.get('id');

@@ -8,7 +8,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
 
 // Definisci l'URL globale dell'API
-export const API_URL = 'https://api-demo.ewtlab.it/';
+export const API_URL = 'https://backend.plumadev.com/';
 export const TOKEN_KEY = 'a-string-secret-at-least-256-bits-long';
 export const exceedsLimit = 3;
 export const maxLenghtUploadFile = 10;
