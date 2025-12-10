@@ -87,10 +87,8 @@ export class AddSupplierComponent {
     this.disciplinaryForm = this.fb.group({
       businessName: ['', Validators.required],
       vatNumber: ['', [Validators.required, partitaIvaValidator]],
-      birthDate: [''],
       mobile: [''],
       sdi: [''],
-      status: [null, Validators.required],
       email: ['', Validators.required],
       address: [''],
       zipCode: [''],
@@ -120,10 +118,8 @@ export class AddSupplierComponent {
           .subscribe((data: Supplier) => {
             this.disciplinaryForm.patchValue({
               businessName: data.businessName,
-              birthDate: data.birthDate,
               mobile: data.mobile,
               sdi: data.sdi,
-              status: Number(data.status),
               email: data.email,
               vatNumber: data.vatNumber,
               address: data.address,
@@ -151,6 +147,7 @@ export class AddSupplierComponent {
       };
 
       const w: Supplier = formData;
+      w.status = 1;
 
       if(this.id)
       {

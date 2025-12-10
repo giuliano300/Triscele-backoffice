@@ -21,7 +21,7 @@ export class SuppliersComponent {
 
   Suppliers: Supplier[] = [];
 
-  displayedColumns: string[] = ['businessName', 'vatNumber', 'email', 'mobile', 'status', 'edit', 'delete'];
+  displayedColumns: string[] = ['businessName', 'vatNumber', 'email', 'mobile', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Supplier>(this.Suppliers);
 
@@ -42,6 +42,7 @@ export class SuppliersComponent {
     .subscribe((data: Supplier[]) => {
       if (!data || data.length === 0) {
         console.log('Nessun dato disponibile');
+        this.dataSource.data = [];
       } 
       else 
       {
