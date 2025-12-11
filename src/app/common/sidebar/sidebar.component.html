@@ -84,6 +84,11 @@
                                     Aggiungi
                                 </a>
                             </li>
+                            <li class="sidemenu-item">
+                                <a routerLink="/operators/mini-calendar" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
+                                    Scheda presenze 
+                                </a>
+                            </li>
                             <li class="sidemenu-item" *ngIf="isAdmin">
                                 <a routerLink="/absence" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="sidemenu-link">
                                    <span matBadgeOverlap="false" [matBadge]="count" [matBadgeHidden]="count == 0" matBadgePosition="after">Richieste assenze</span>

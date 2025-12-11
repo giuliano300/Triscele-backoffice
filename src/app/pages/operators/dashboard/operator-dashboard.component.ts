@@ -51,6 +51,8 @@ export class OperatorDashboardComponent {
   notes: string = '';
   entryTime: string = '';
   private timerInterval: any;
+  pauseTimer: string = '';
+  private pauseInterval: any;
 
   constructor(
     private attendanceService: AttendanceService,
@@ -97,6 +99,57 @@ export class OperatorDashboardComponent {
     });
   }
 
+  startLunch() {
+    if (!this.attendance) return;
+
+    const lunchStart = this.getTime();
+    this.attendance.lunchStart = lunchStart;
+
+    this.attendanceService.updateAttendance(this.attendance).subscribe(a => {
+      //this.attendance = a;
+      this.startPauseTimer(lunchStart);
+      clearInterval(this.timerInterval); // ferma timer lavoro
+    });
+  }
+
+  endLunch() {
+    if (!this.attendance) return;
+
+    const lunchEnd = this.getTime();
+    this.attendance.lunchEnd = lunchEnd;
+
+    this.attendanceService.updateAttendance(this.attendance).subscribe(a => {
+      //this.attendance = a;
+
+      clearInterval(this.pauseInterval);
+      this.startTimer(this.attendance!.entryTime); // riparte timer lavoro
+    });
+  }
+
+  startPauseTimer(startTime: string) {
+    const [h, m, s] = startTime.split(':').map(Number);
+
+    const start = new Date();
+    start.setHours(h, m, s);
+
+    clearInterval(this.pauseInterval);
+
+    const update = () => {
+      const now = Date.now();
+      const diff = now - start.getTime();
+
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+
+      this.pauseTimer = `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+    };
+
+    update();
+    this.pauseInterval = setInterval(update, 1000);
+  }
+
+
   // ✅ Conferma l'uscita
   confirmExit() {
     if (!this.attendance) return;
@@ -112,16 +165,35 @@ export class OperatorDashboardComponent {
 
   // ✅ Timer live
   startTimer(entryTime: string) {
-    const [h, m, s] = entryTime.split(':').map(Number);
-
+    const [eh, em, es] = entryTime.split(':').map(Number);
     const start = new Date();
-    start.setHours(h, m, s);
+    start.setHours(eh, em, es);
 
     clearInterval(this.timerInterval);
 
     const update = () => {
       const now = Date.now();
-      const diff = now - start.getTime();
+      let diff = now - start.getTime();
+
+      // ⭐ Sottrai la pausa se presente
+      if (this.attendance?.lunchStart) {
+        const [lh, lm, ls] = this.attendance.lunchStart.split(':').map(Number);
+        const lunchStartDate = new Date();
+        lunchStartDate.setHours(lh, lm, ls);
+
+        let lunchEndDate: Date;
+        if (this.attendance.lunchEnd) {
+          const [lhEnd, lmEnd, lsEnd] = this.attendance.lunchEnd.split(':').map(Number);
+          lunchEndDate = new Date();
+          lunchEndDate.setHours(lhEnd, lmEnd, lsEnd);
+        } else {
+          // Pausa in corso → fino ad ora
+          lunchEndDate = new Date();
+        }
+
+        const lunchDiff = lunchEndDate.getTime() - lunchStartDate.getTime();
+        diff -= lunchDiff;
+      }
 
       const hours = Math.floor(diff / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
@@ -130,25 +202,8 @@ export class OperatorDashboardComponent {
       this.liveTimer = `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
     };
 
-    // Aggiorna subito all'avvio
     update();
-
-    // Aggiorna ogni secondo
     this.timerInterval = setInterval(update, 1000);
-  }
-
-  calculateWorkedTime(entry: string, exit: string): string {
-    const [eh, em, es] = entry.split(':').map(Number);
-    const [xh, xm, xs] = exit.split(':').map(Number);
-    const start = new Date();
-    const end = new Date();
-    start.setHours(eh, em, es, 0);
-    end.setHours(xh, xm, xs, 0);
-    const diff = end.getTime() - start.getTime();
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
   }
 
   private pad(n: number): string {
@@ -162,5 +217,57 @@ export class OperatorDashboardComponent {
 
   updateTime() {
     this.entryTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  calculateBreakDuration(start: string, end: string): string {
+    const s = this.toSeconds(start);
+    const e = this.toSeconds(end);
+    const diff = e - s;
+    return this.formatSeconds(diff);
+  }
+
+  calculateWorkedTime(
+    entry: string,
+    exit: string,
+    lunchStart?: string,
+    lunchEnd?: string
+  ): string {
+
+  const start = this.toSeconds(entry);
+    const end = this.toSeconds(exit);
+
+    let workedSeconds = end - start;
+
+    if (lunchStart && lunchEnd) {
+      const breakStart = this.toSeconds(lunchStart);
+      const breakEnd = this.toSeconds(lunchEnd);
+      workedSeconds -= (breakEnd - breakStart);
+    }
+
+    return this.formatSeconds(workedSeconds);
+  }
+
+  private toMinutes(time: string): number {
+    const [h, m, s] = time.split(':').map(Number);
+    return h * 60 + m + (s ? s / 60 : 0);
+  }
+
+  private formatMinutes(total: number): string {
+    const hours = Math.floor(total / 60);
+    const minutes = Math.floor(total % 60);
+    return `${hours}h ${minutes}m`;
+  }
+
+  private toSeconds(time: string): number {
+    const [h, m, s] = time.split(':').map(Number);
+    return h * 3600 + m * 60 + s;
+  }
+
+  private formatSeconds(total: number): string {
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+
+    return `${h}h ${m}m ${s}s`;
   }
 }

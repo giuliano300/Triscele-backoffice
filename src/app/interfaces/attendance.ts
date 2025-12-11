@@ -4,5 +4,7 @@ export interface Attendance {
     date: Date;
     entryTime: string;
     exitTime?: string;
+    lunchStart?: string;
+    lunchEnd?: string;
     notes?: string;
 }

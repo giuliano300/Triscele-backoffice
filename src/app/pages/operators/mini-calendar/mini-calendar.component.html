@@ -1,0 +1,92 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li aria-current="page" class="breadcrumb-item active">Scheda presenze</li>
+    </ol>
+</nav>
+<div class="row">
+    <div class="col-xxxl-12">
+        <mat-card class="trinta-card mb-15 bg-white border-none d-block months">
+            <mat-card-content>
+                <div class="calendar-header d-flex align-items-center justify-content-between">
+
+                    <div class="d-flex align-items-center moth">
+                        <button mat-icon-button class="nav-btn" (click)="previousMonth()" aria-label="Mese precedente">
+                            <mat-icon>chevron_left</mat-icon>
+                        </button>
+
+                        <h4 class="month-title mb-0">
+                            {{ currentMonthName | titlecase }} {{ currentYear }}
+                        </h4>
+
+                        <button mat-icon-button class="nav-btn" (click)="nextMonth()" aria-label="Mese successivo">
+                            <mat-icon>chevron_right</mat-icon>
+                        </button>
+                    </div>
+
+                    <button mat-button class="export-btn" type="button" (click)="generateExcel()">
+                        Download file
+                    </button>
+
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xxxl-12">
+        <mat-card class="trinta-card mb-25 bg-white border-none d-block">
+            <mat-card-content>
+                <div class="mini-calendar-container">
+                <table class="table table-bordered mini-calendar">
+                    <thead>
+                    <tr>
+                        <th>Operatore</th>
+                        <th *ngFor="let day of monthDays">{{ day }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let op of operators">
+                        <td class="operator-cell">{{ op.fullName }}</td>
+                        <td *ngFor="let day of monthDays">
+                            <ng-container *ngIf="isWeekendOrHoliday(day)">
+                                <div 
+                                class="event-cell non-working"
+                                [matTooltip]="'Giorno non lavorativo'"
+                                matTooltipPosition="above"
+                                >
+                                </div>
+                            </ng-container>
+
+                            <ng-container *ngIf="!isWeekendOrHoliday(day) && getEventForDay(op.events, day) as ev">
+                                <div 
+                                class="event-cell"
+                                [ngClass]="{
+                                    'presence': ev.tipologia === 'presenza',
+                                    'late': ev.tipologia === 'presenza' && isLate(ev.startHour),
+                                    'long-break': ev.tipologia === 'presenza' && isLongLunch(ev.startHour, ev.endHour),
+                                    'absence': ev.tipologia === 'assenza' && ev.title !== 'ferie',
+                                    'illness': ev.tipologia === 'malattia'
+                                }"
+                                [matTooltip]="getTooltip(ev)"
+                                matTooltipPosition="above"
+                                >
+                                <ng-container [ngSwitch]="ev.tipologia">
+                                    <ng-container *ngSwitchCase="'presenza'">
+                                    {{ formatHourMinute(ev.startHour) || '-' }}<br>{{ formatHourMinute(ev.endHour) || '-' }}
+                                    </ng-container>
+                                    <ng-container *ngSwitchCase="'malattia'">M</ng-container>
+                                    <ng-container *ngSwitchCase="'assenza'">
+                                    {{ ev.title === 'Ferie' ? 'F' : 'P' }}
+                                    </ng-container>
+                                </ng-container>
+                                </div>
+                            </ng-container>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>    

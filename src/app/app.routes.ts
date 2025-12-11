@@ -33,6 +33,7 @@ import { OperatorDashboardComponent } from './pages/operators/dashboard/operator
 import { OperatorCalendarComponent } from './pages/calendar/operator-calendar.component';
 import { OperatorIllnessComponent } from './pages/illness/operator-illness.component';
 import { AbsenceComponent } from './pages/absence/absence.component';
+import { MiniCalendarComponent } from './pages/operators/mini-calendar/mini-calendar.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -93,6 +94,11 @@ export const routes: Routes = [
             { path: 'operators', component: OperatorsComponent,
                 canActivate: [RoleGuard],
                 data: { roles: ['admin', 'operatore'] }
+                
+            },
+            { path: 'operators/mini-calendar', component: MiniCalendarComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin'] }
                 
             },
             { path: 'operator/calendar', component: CalendarComponent,

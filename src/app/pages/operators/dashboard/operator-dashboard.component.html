@@ -37,12 +37,47 @@
                     </div>
 
                     <ng-template #showActive>
+                        <!-- Presenza attiva - nessuna uscita -->
                         <div class="active-attendance" [@fadeInUp] *ngIf="!attendance?.exitTime">
-                            <h2 class="text-center">Chiudi presenza giornaliera</h2>
+
+                            <!-- ⭐️ ENTRATA FATTA, MA NON IN PAUSA -->
+                            <div *ngIf="!attendance?.lunchStart" class="text-center">
+                            <h2>Giornata attiva</h2>
+
                             <div class="timer-card pulse">
                                 <span class="timer-label">Tempo lavorato</span>
                                 <h1 class="timer">{{ liveTimer }}</h1>
                             </div>
+
+                            <button mat-flat-button color="accent" class="btn-lunch" (click)="startLunch()">
+                                <mat-icon>restaurant</mat-icon> Avvia Pausa Pranzo
+                            </button>
+
+                        </div>
+
+                        <!-- ⭐️ IN PAUSA PRANZO -->
+                        <div *ngIf="attendance?.lunchStart && !attendance?.lunchEnd" class="text-center">
+                            <h2>Pausa Pranzo in corso</h2>
+
+                            <div class="timer-card pulse" style="background:#ffe7b8;">
+                                <span class="timer-label">Durata pausa</span>
+                                <h1 class="timer">{{ pauseTimer }}</h1>
+                            </div>
+
+                            <button mat-flat-button color="primary" class="btn-lunch" (click)="endLunch()">
+                                <mat-icon>check</mat-icon> Termina Pausa Pranzo
+                            </button>
+                        </div>
+
+                        <!-- ⭐️ Pausa chiusa → torna timer lavoro -->
+                        <div *ngIf="attendance?.lunchEnd" class="text-center">
+                            <h2>Giornata attiva</h2>
+
+                            <div class="timer-card pulse">
+                                <span class="timer-label">Tempo lavorato</span>
+                                <h1 class="timer">{{ liveTimer }}</h1>
+                            </div>
+                            
                             <div class="col-sm-12">
                                 <label class="label d-block fw-medium mb-10 text-start">Note</label>
                                 <mat-form-field class="w-100">
@@ -56,8 +91,10 @@
                                 <mat-icon>logout</mat-icon> Chiudi Presenza Giornaliera
                             </button>
                         </div>
+
+                    </div>
                     </ng-template>
-                    <div div class="active-attendance summary" *ngIf="attendance?.exitTime" [@fadeIn]>
+                    <div class="active-attendance summary" *ngIf="attendance?.exitTime" [@fadeIn]>
                         <div class="summary-card">
                             <div class="summary-header">
                                 <i-feather name="check-circle" class="summary-icon"></i-feather>
@@ -65,27 +102,55 @@
                             </div>
 
                             <div class="summary-content">
+
+                                <!-- ENTRATA -->
                                 <div class="summary-row">
                                     <span class="label">Entrata</span>
                                     <span class="value">{{ attendance?.entryTime }}</span>
                                 </div>
 
+                                <!-- INIZIO PAUSA -->
+                                <div class="summary-row" *ngIf="attendance?.lunchStart">
+                                    <span class="label">Inizio pausa pranzo</span>
+                                    <span class="value">{{ attendance?.lunchStart }}</span>
+                                </div>
+
+                                <!-- FINE PAUSA -->
+                                <div class="summary-row" *ngIf="attendance?.lunchEnd">
+                                    <span class="label">Fine pausa pranzo</span>
+                                    <span class="value">{{ attendance?.lunchEnd }}</span>
+                                </div>
+
+
+                                <!-- USCITA -->
                                 <div class="summary-row">
                                     <span class="label">Uscita</span>
                                     <span class="value">{{ attendance?.exitTime }}</span>
                                 </div>
 
-                                <div class="summary-row total">
-                                    <span class="label">Totale ore lavorate</span>
+
+                                <!-- DURATA PAUSA -->
+                                <div class="summary-row total" *ngIf="attendance?.lunchStart && attendance?.lunchEnd">
+                                    <span class="label">Durata pausa</span>
                                     <span class="value">
-                                    {{ calculateWorkedTime(attendance!.entryTime, attendance!.exitTime!) }}
+                                        {{ calculateBreakDuration(attendance!.lunchStart!, attendance!.lunchEnd!) }}
                                     </span>
                                 </div>
 
+                                <!-- TOTALE ORE LAVORATE -->
+                                <div class="summary-row total">
+                                    <span class="label">Totale ore lavorate</span>
+                                    <span class="value">
+                                        {{ calculateWorkedTime(attendance!.entryTime, attendance!.exitTime!, attendance?.lunchStart, attendance?.lunchEnd) }}
+                                    </span>
+                                </div>
+
+                                <!-- NOTE -->
                                 <div class="summary-row notes" *ngIf="attendance?.notes">
                                     <span class="label">Note</span>
                                     <p class="note-text">{{ attendance?.notes }}</p>
                                 </div>
+
                             </div>
                         </div>
                     </div>
