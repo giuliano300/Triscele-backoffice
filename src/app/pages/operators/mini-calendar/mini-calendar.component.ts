@@ -97,12 +97,93 @@ export class MiniCalendarComponent implements OnInit {
     return Array.from(map.values());
   }
 
-  // Restituisce evento per giorno
-  getEventForDay(events: MiniCalendarEvent[], day: number): MiniCalendarEvent | undefined {
-    const dayStr = String(day).padStart(2, '0');
-    const monthStr = String(this.currentMonth + 1).padStart(2, '0');
-    const dateStr = `${this.currentYear}-${monthStr}-${dayStr}`;
-    return events.find(e => e.date === dateStr || (e.startDate && e.endDate && dateStr >= e.startDate && dateStr <= e.endDate));
+  // Restituisce eventi per giorno
+  getEventsForDay(events: MiniCalendarEvent[], day: number): MiniCalendarEvent[] {
+    const dateStr = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    return events.filter(e =>
+      e.date === dateStr ||
+      (e.startDate && e.endDate && dateStr >= e.startDate && dateStr <= e.endDate)
+    );
+  }
+
+  getCellClasses(events: MiniCalendarEvent[]) {
+    return {
+      presence: events.some(e => e.tipologia === 'presenza'),
+      illness: events.some(e => e.tipologia === 'malattia'),
+      absence: events.some(e => e.tipologia === 'assenza')
+    };
+  }
+
+  getPresence(events: MiniCalendarEvent[]) {
+    return events.find(e => e.tipologia === 'presenza');
+  }
+
+  hasPermission(events: MiniCalendarEvent[]) {
+    return events.some(e => e.tipologia === 'assenza' && e.title !== 'Ferie');
+  }
+
+  hasVacation(events: MiniCalendarEvent[]) {
+    return events.some(e => e.tipologia === 'assenza' && e.title === 'Ferie');
+  }
+
+  hasIllness(events: MiniCalendarEvent[]) {
+    return events.some(e => e.tipologia === 'malattia');
+  }
+
+  getTooltipForDay(events: MiniCalendarEvent[], day: number): string {
+    // 1) Se è giorno non lavorativo -> tooltip fisso
+    if (this.isWeekendOrHoliday(day)) {
+      return 'Giorno non lavorativo';
+    }
+
+    // 2) Recupera tutti gli eventi del giorno
+    const dayEvents = this.getEventsForDay(events, day) || [];
+    if (!dayEvents.length) return ''; // niente tooltip
+
+    // 3) Mappa ogni evento in una stringa descrittiva
+    const parts: string[] = dayEvents.map(ev => {
+      const tipo = ev.tipologia;
+      let desc = '';
+
+      if (tipo === 'presenza') {
+        const start = this.formatHourMinute(ev.startHour) ?? '';
+        const end = this.formatHourMinute(ev.endHour) ?? '';
+        desc = `Presenza${start || end ? ` (${start} - ${end})` : ''}`;
+      } else if (tipo === 'assenza') {
+        // distinguo ferie / permesso
+        if ((ev.title ?? '').toLowerCase() === 'ferie' || (ev.title ?? '').toLowerCase() === 'f') {
+          desc = `Ferie`;
+        } else {
+          // permesso può avere orari parziali
+          const start = this.formatHourMinute(ev.startHour) ?? '';
+          const end = this.formatHourMinute(ev.endHour) ?? '';
+          desc = `Permesso${start || end ? ` (${start} - ${end})` : ''}`;
+        }
+      } else if (tipo === 'malattia') {
+        desc = `Malattia`;
+        // se ci sono orari, mostriamoli (opzionale)
+        if (ev.startHour || ev.endHour) {
+          const start = this.formatHourMinute(ev.startHour) ?? '';
+          const end = this.formatHourMinute(ev.endHour) ?? '';
+          if (start || end) desc += ` (${start} - ${end})`;
+        }
+      } else {
+        // fallback: titolo ed eventuali orari
+        desc = ev.title ?? 'Evento';
+        const start = this.formatHourMinute(ev.startHour) ?? '';
+        const end = this.formatHourMinute(ev.endHour) ?? '';
+        if (start || end) desc += ` (${start} - ${end})`;
+      }
+
+      // aggiungi note se presenti
+      if (ev.notes) desc += `: ${ev.notes}`;
+
+      return desc;
+    });
+
+    // 4) Unisci e ritorna
+    return parts.join(' | ');
   }
 
   // Controlli ritardo e pausa

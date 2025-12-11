@@ -18,7 +18,7 @@ export class ExcelService {
 
         operators.forEach(op => {
         const row: any[] = [];
-        row.push(op.name + ' ' + op.lastName);
+        row.push(op.fullName);
 
         monthDays.forEach(day => {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
