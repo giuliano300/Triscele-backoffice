@@ -65,8 +65,9 @@ export class OperatorCalendarComponent implements OnInit {
       return !(d.getDay() === 0 || d.getDay() === 6 || this.holidays.includes(info.startStr));
     },
     eventDidMount: (info) => {
-      const props: any = info.event.extendedProps;
-      //if (!props || info.event.title?.includes('Presenza')) return;
+      const infos: any = info.event.extendedProps;
+
+      const props = infos.originalEvent;
 
       const tooltipContent = `
         <div style="font-size:14px; line-height:1.8; min-width:200px;">
