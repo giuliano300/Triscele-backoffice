@@ -64,21 +64,20 @@ export class OperatorCalendarComponent implements OnInit {
       const d = new Date(info.startStr);
       return !(d.getDay() === 0 || d.getDay() === 6 || this.holidays.includes(info.startStr));
     },
-
-    // Tooltip
     eventDidMount: (info) => {
-      const props: any = info.event.extendedProps['originalEvent'];
+      const props: any = info.event.extendedProps;
+      //if (!props || info.event.title?.includes('Presenza')) return;
 
       const tooltipContent = `
-        <div style="font-size:14px; line-height:1.8; min-width:220px;">
-          ${props.fullName ? `<div><strong>Nome:</strong> ${props.fullName}</div>` : ''}
-          ${props.type ? `<div><strong>Tipo:</strong> ${props.type}</div>` : ''}
-          ${props.reason ? `<div><strong>Motivo:</strong> ${props.reason}</div>` : ''}
-          ${props.originalStart ? `<div><strong>Inizio:</strong> ${props.originalStart}</div>` : ''}
-          ${props.originalEnd ? `<div><strong>Fine:</strong> ${props.originalEnd}</div>` : ''}
-          ${props.dataPermesso ? `<div><strong>Data:</strong> ${props.dataPermesso}</div>` : ''}
-          ${props.startHour ? `<div><strong>Dalle ore:</strong> ${props.startHour}</div>` : ''}
-          ${props.endHour ? `<div><strong>Alle ore:</strong> ${props.endHour}</div>` : ''}
+        <div style="font-size:14px; line-height:1.8; min-width:200px;">
+          ${props.fullName ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>Nome:</strong><span>${props.fullName}</span></div>` : ''}
+          ${props.type ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>Tipo:</strong><span>${props.type}</span></div>` : ''}
+          ${props.reason ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>Motivo:</strong><span>${props.reason}</span></div>` : ''}
+          ${props.start ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>Inizio:</strong><span>${props.start}</span></div>` : ''}
+          ${props.end ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>Fine:</strong><span>${props.end}</span></div>` : ''}
+          ${props.dataPermesso ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>Data:</strong><span>${props.dataPermesso}</span></div>` : ''}
+          ${props.startHour ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><strong>Dalle ore:</strong><span>${props.startHour}</span></div>` : ''}
+          ${props.endHour ? `<div style="display:flex; justify-content:space-between;"><strong>Alle ore:</strong><span>${props.endHour}</span></div>` : ''}
         </div>
       `;
 
@@ -89,22 +88,8 @@ export class OperatorCalendarComponent implements OnInit {
         theme: 'custom-tooltip'
       });
     },
-    dayCellDidMount: (arg: any) => {
-      const dateStr = arg.date.toISOString().split('T')[0];
-      const day = arg.date.getDay();
-
-      const isSunday = day === 0;
-      const isSaturday = day === 6;
-      const isHoliday = this.holidays.includes(dateStr);
-
-      if (isSunday || isSaturday || isHoliday) {
-        arg.el.style.backgroundColor = '#fcfcfcff';
-        arg.el.style.pointerEvents = 'none';      // rendere non cliccabile
-        arg.el.style.opacity = '0.95';
-      }
-    },
     datesSet: (info) => {
-      const year = info.start.getFullYear();
+      const year = info.view.currentStart.getFullYear();
       this.holidays = this.utils.getItalianHolidays(year);
 
       if (window.innerWidth < 768 && info.view.type !== 'dayGridDay') {
@@ -114,6 +99,25 @@ export class OperatorCalendarComponent implements OnInit {
         info.view.calendar.changeView('dayGridMonth');
       }
     },
+    dayCellDidMount: (arg: any) => {
+        const y = arg.date.getFullYear();
+        const m = String(arg.date.getMonth() + 1).padStart(2, '0');
+        const d = String(arg.date.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${d}`;
+
+        this.holidays = this.utils.getItalianHolidays(y);
+  
+        const day = arg.date.getDay();
+        const isSunday = day === 0;
+        const isSaturday = day === 6;
+        const isHoliday = this.holidays.includes(dateStr);
+
+        if (isSunday || isSaturday || isHoliday) {
+          arg.el.style.backgroundColor = this.utils.getDisabledColor();
+          arg.el.style.pointerEvents = 'none';
+          arg.el.style.opacity = '0.95';
+        }
+    }
   };
 
   // -----------------------
@@ -156,7 +160,7 @@ export class OperatorCalendarComponent implements OnInit {
 
     for (const e of this.events) {
 
-      const isPresence = e.title?.includes('Presenza');
+      //const isPresence = e.title?.includes('Presenza');
       const isPermission = e.title?.includes('Permesso');
 
       const originalStartDate = new Date(e.start);

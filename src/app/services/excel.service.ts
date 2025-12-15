@@ -10,57 +10,73 @@ export class ExcelService {
      }
 
     exportMiniCalendar(operators: any[], monthDays: number[], month: number, year: number) {
-        const rows: any[] = [];
-        this.holidays = this.utils.getItalianHolidays(year);
+    const rows: any[] = [];
+    this.holidays = this.utils.getItalianHolidays(year);
 
-        const header = ['Operatore', ...monthDays.map(day => `${day}/${month + 1}`)];
-        rows.push(header);
+    const header = ['Operatore', ...monthDays.map(day => `${day}/${month + 1}`)];
+    rows.push(header);
 
-        operators.forEach(op => {
+    operators.forEach(op => {
         const row: any[] = [];
         row.push(op.fullName);
 
         monthDays.forEach(day => {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-        // 🔥 1) Se festivo → cella vuota SEMPRE
+        // 🔥 1) Festivo o weekend → cella vuota
         if (this.isHolidayOrWeekend(dateStr)) {
             row.push('');
             return;
         }
 
-        const ev = op.events.find((e: any) =>
+        // 🔎 Tutti gli eventi del giorno
+        const events = op.events.filter((e: any) =>
             (e.date === dateStr) ||
             (e.startDate && e.endDate && dateStr >= e.startDate && dateStr <= e.endDate)
         );
 
-        if (!ev) {
+        if (!events.length) {
             row.push('');
             return;
         }
 
-        // 🔹 PRESENZA (senza secondi)
-        if (ev.tipologia === 'presenza') {
-            const start = ev.startHour ? ev.startHour.slice(0, 5) : '';
-            const end = ev.endHour ? ev.endHour.slice(0, 5) : '';
-            row.push(`${start} - ${end}`.trim());
-            return;
-        }
+        const presenza = events.find((e: any) => e.tipologia === 'presenza');
+        const assenza  = events.find((e: any) => e.tipologia === 'assenza');
+        const malattia = events.find((e: any) => e.tipologia === 'malattia');
 
-        // 🔹 MALATTIA
-        if (ev.tipologia === 'malattia') {
+        // 🔴 MALATTIA ha priorità assoluta
+        if (malattia) {
             row.push('M');
             return;
         }
 
-        // 🔹 ASSENZA (ferie o permesso)
-        if (ev.tipologia === 'assenza') {
-            if (ev.title === 'Ferie') row.push('F');
-            else row.push('P');
+        // 🏖️ FERIE (minuscolo!)
+        if (assenza && assenza.title === 'ferie') {
+            row.push('F');
             return;
         }
 
-        row.push('');
+        let cell = '';
+
+        // 🟢 PRESENZA
+        if (presenza) {
+            const pStart = presenza.startHour?.slice(0, 5) ?? '';
+            const pEnd   = presenza.endHour?.slice(0, 5) ?? '';
+            cell = `${pStart} - ${pEnd}`.trim();
+        }
+
+        // 🟡 PERMESSO (assenza NON ferie)
+        if (assenza) {
+            const aStart = assenza.startHour?.slice(0, 5) ?? '';
+            const aEnd   = assenza.endHour?.slice(0, 5) ?? '';
+            const permesso = `P ${aStart} - ${aEnd}`.trim();
+
+            cell = cell
+            ? `${cell} (${permesso})`
+            : permesso;
+        }
+
+        row.push(cell);
         });
 
         rows.push(row);

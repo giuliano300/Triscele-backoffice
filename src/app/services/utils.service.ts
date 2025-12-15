@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -111,5 +110,9 @@ export class UtilsService {
       holidays.push(lunedi.toISOString().split('T')[0]);
 
       return holidays;
+    }
+
+    getDisabledColor(){
+      return "#fdfdfdff";
     }
 }

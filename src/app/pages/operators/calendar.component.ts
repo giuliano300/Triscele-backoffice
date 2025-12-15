@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { MatCardModule } from '@angular/material/card';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { CalendarOptions } from '@fullcalendar/core';
+import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import { CalendarService } from '../../services/Calendar.service';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
 import { AttendanceService } from '../../services/Attendance.service';
+import { UtilsService } from '../../services/utils.service';
 
 @Component({
   selector: 'app-calendar',
@@ -26,7 +27,8 @@ export class CalendarComponent implements OnInit {
     private router: Router,
     private calendarService: CalendarService, 
     private dialog: MatDialog,
-    private attendanceService: AttendanceService
+    private attendanceService: AttendanceService,
+    private utils: UtilsService
   ) {}
 
   showFullName: boolean = false; 
@@ -35,6 +37,7 @@ export class CalendarComponent implements OnInit {
 
   @ViewChild('fullCalendar') calendarComponent!: FullCalendarComponent;
   events: any[] = [];
+  holidays: string[] = [];
   
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
@@ -51,8 +54,10 @@ export class CalendarComponent implements OnInit {
       list: 'Lista'
     },
     eventDidMount: (info) => {
-      const props: any = info.event.extendedProps;
+      const infos: any = info.event.extendedProps;
 
+      const props = infos.originalEvent;
+      //alert(info);
       //if (!props || info.event.title?.includes('Presenza')) return;
 
       const tooltipContent = `
@@ -76,11 +81,33 @@ export class CalendarComponent implements OnInit {
       });
     },
     datesSet: (info) => {
-      if (window.innerWidth < 768 && info.view.type !== 'dayGridDay') {
+    const year = info.view.currentStart.getFullYear();
+    this.holidays = this.utils.getItalianHolidays(year);
+
+    if (window.innerWidth < 768 && info.view.type !== 'dayGridDay') {
         info.view.calendar.changeView('dayGridDay');
       }
       if (window.innerWidth >= 768 && info.view.type !== 'dayGridMonth') {
         info.view.calendar.changeView('dayGridMonth');
+      }
+    },
+    dayCellDidMount: (arg: any) => {
+      const y = arg.date.getFullYear();
+      const m = String(arg.date.getMonth() + 1).padStart(2, '0');
+      const d = String(arg.date.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
+
+      this.holidays = this.utils.getItalianHolidays(y);
+
+      const day = arg.date.getDay();
+      const isSunday = day === 0;
+      const isSaturday = day === 6;
+      const isHoliday = this.holidays.includes(dateStr);
+
+      if (isSunday || isSaturday || isHoliday) {
+        arg.el.style.backgroundColor = this.utils.getDisabledColor();
+        arg.el.style.pointerEvents = 'none';
+        arg.el.style.opacity = '0.95';
       }
     },
     dateClick: (info) => {
@@ -100,6 +127,7 @@ export class CalendarComponent implements OnInit {
       this.operatorId = o.sub;  
     }
     this.loadEvents(this.operatorId);
+    this.applyEventsToCalendar();
   }
 
   openEditEvent(event: any) {
@@ -191,55 +219,76 @@ export class CalendarComponent implements OnInit {
   loadEvents(operatorId?: string) {
     this.calendarService.calendar(operatorId).subscribe(events => {
       this.events = events;
-      this.calendarOptions.events = events.map((e: any) => {
-        const isPresence = e.title.includes('Presenza');
-        const isPermission = e.title.includes('Permesso');
-        const isAllDay = true; 
-
-        const start = new Date(e.start);
-        let end = new Date(e.end);
-
-        if (isAllDay && end) {
-          end = new Date(end);
-          end.setDate(end.getDate() + 1);
-        }
-
-        let extendedProps: any = {};
-
-        if (!isPresence) {
-          extendedProps = {
-            fullName: e.fullName,
-            reason: e.reason,
-            type: e.type,
-            start: !isPermission ? start.toLocaleDateString('it-IT') : undefined,
-            end: !isPermission ? end.toLocaleDateString('it-IT') : undefined,
-            dataPermesso: isPermission ? start.toLocaleDateString('it-IT') : undefined,
-            startHour: isPermission ? e.startHour : undefined,
-            endHour: isPermission ? e.endHour : undefined,
-            id: e.id,
-            tipologia: e.tipologia,
-            date: start
-          };
-        }
-        else
-          extendedProps = {
-            fullName: e.fullName,
-            startHour: e.startHour,
-            endHour: e.endHour,
-            id: e.id,
-            tipologia: e.tipologia,
-            date: start
-          }
-
-        return {
-          color: e.color ?? '#90CAF9',
-          title: this.showFullName ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}` : e.title,
-          start,
-          end,
-          allDay: isAllDay,
-          extendedProps
-        };
-      });
+      this.applyEventsToCalendar();
     });
   }
+
+  applyEventsToCalendar() {
+
+    const splitEvents: EventInput[] = [];
+
+    for (const e of this.events) {
+
+      //const isPresence = e.title?.includes('Presenza');
+      const isPermission = e.title?.includes('Permesso');
+
+      const originalStartDate = new Date(e.start);
+      const originalEndDate = e.end ? new Date(e.end) : new Date(e.start);
+
+      const originalStartStr = originalStartDate.toLocaleDateString('it-IT');
+      const originalEndStr = originalEndDate.toLocaleDateString('it-IT');
+
+      let loop = new Date(originalStartDate);
+
+      while (loop <= originalEndDate) {
+
+        const dateStr = loop.toISOString().split('T')[0];
+        const day = loop.getDay();
+
+        const isHoliday = this.holidays.includes(dateStr);
+        const isSaturday = day === 6;
+        const isSunday = day === 0;
+
+        if (isSaturday || isSunday || isHoliday) {
+          loop.setDate(loop.getDate() + 1);
+          continue;
+        }
+
+        const dayStart = new Date(loop);
+        const dayEnd = new Date(loop);
+        dayEnd.setDate(dayEnd.getDate() + 1);
+
+        splitEvents.push({
+          title: this.showFullName ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}` : e.title,
+          start: dayStart,
+          end: dayEnd,
+          allDay: true,
+          color: e.color ?? '#90CAF9',
+
+          extendedProps: {
+            originalEvent: {
+              fullName: e.fullName,
+              reason: e.reason,
+              type: e.type,
+              originalStart: originalStartStr,
+              originalEnd: originalEndStr,
+              dataPermesso: isPermission ? originalStartStr : undefined,
+              startHour: e.startHour,
+              endHour: e.endHour,
+              id: e.id,
+              tipologia: e.tipologia
+            }
+          }
+        });
+
+        loop.setDate(loop.getDate() + 1);
+      }
+    }
+
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      events: splitEvents
+    };
+  }
+
 }
