@@ -13,7 +13,7 @@
       <p><i-feather name="Clock"></i-feather> Orario: {{ entryTime }}</p>
       <textarea [(ngModel)]="notes" placeholder="Note"></textarea>
       <button mat-raised-button color="primary" (click)="confirmEntry()">
-        <i-feather name="LogIn"></i-feather> Conferma Entrata
+       Conferma Entrata
       </button>
     </div>
   </mat-card>
@@ -48,13 +48,56 @@
 
   <!-- ===== RIEPILOGO ===== -->
   <mat-card class="card-summary" *ngIf="attendance?.exitTime" @fadeIn>
-    <h2>Riepilogo Giornata</h2>
-    <p><strong>Entrata:</strong> {{ attendance?.entryTime }}</p>
-    <p *ngFor="let b of attendance?.breaks">
-      <strong>Pausa:</strong> {{ b.start }} - {{ b.end || 'In corso' }}
-    </p>
-    <p><strong>Uscita:</strong> {{ attendance?.exitTime }}</p>
-    <p><strong>Totale lavorato:</strong> {{ liveTimer }}</p>
+    <div class="summary-card">
+      <div class="summary-header">
+          <i-feather name="check-circle" class="summary-icon"></i-feather>
+          <h2>Riepilogo giornata</h2>
+      </div>
+
+      <div class="summary-content">
+
+          <!-- ENTRATA -->
+          <div class="summary-row">
+              <span class="label">Entrata</span>
+              <span class="value">{{ attendance!.entryTime }}</span>
+          </div>
+
+          <!-- PAUSE -->
+          <div class="summary-row" *ngFor="let b of attendance!.breaks">
+              <span class="label">Pausa</span>
+              <span class="value"> {{ b.start }} - {{ b.end || 'In corso' }}</span>
+          </div>
+
+          <!-- USCITA -->
+          <div class="summary-row">
+              <span class="label">Uscita</span>
+              <span class="value">{{ attendance!.exitTime }}</span>
+          </div>
+
+          <!-- DURATA PAUSE -->
+          <div class="summary-row total">
+              <span class="label">Durata pause</span>
+              <span class="value">
+                  {{ calculateTotalBreakDuration() }}
+              </span>
+          </div>
+
+          <!-- TOTALE ORE LAVORATE -->
+          <div class="summary-row total">
+              <span class="label">Totale ore lavorate</span>
+              <span class="value">
+                  {{ calculateWorkedTime() }}
+              </span>
+          </div>
+
+          <!-- NOTE -->
+          <div class="summary-row notes" *ngIf="attendance?.notes">
+              <span class="label">Note</span>
+              <p class="note-text">{{ attendance?.notes }}</p>
+          </div>
+
+      </div>
+    </div>
   </mat-card>
 
 </div>

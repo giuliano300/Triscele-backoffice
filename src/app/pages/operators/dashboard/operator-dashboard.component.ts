@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AttendanceService } from '../../../services/Attendance.service';
 import { Attendance, Break } from '../../../interfaces/attendance';
-import { FeatherModule } from 'angular-feather';
 import { FeathericonsModule } from '../../../icons/feathericons/feathericons.module';
 
 @Component({
@@ -203,4 +202,47 @@ export class OperatorDashboardComponent {
     const s = total % 60;
     return `${h}h ${m}m ${s}s`;
   }
+
+  // Calcola la durata totale di tutte le pause
+  calculateTotalBreakDuration(): string {
+    if (!this.attendance?.breaks?.length) return '0h 0m 0s';
+
+    let totalSeconds = 0;
+    this.attendance.breaks.forEach(b => {
+      const start = this.toDate(b.start).getTime();
+      const end = b.end ? this.toDate(b.end).getTime() : Date.now();
+      totalSeconds += Math.floor((end - start) / 1000);
+    });
+
+    return this.formatSeconds(totalSeconds);
+  }
+
+  // Calcola il tempo totale lavorato sottraendo tutte le pause
+  calculateWorkedTime(): string {
+    if (!this.attendance?.entryTime || !this.attendance?.exitTime) return '0h 0m 0s';
+
+    const entry = this.toDate(this.attendance.entryTime).getTime();
+    const exit = this.toDate(this.attendance.exitTime).getTime();
+    let workedSeconds = Math.floor((exit - entry) / 1000);
+
+    // Sottrae tutte le pause
+    if (this.attendance.breaks?.length) {
+      this.attendance.breaks.forEach(b => {
+        const start = this.toDate(b.start).getTime();
+        const end = b.end ? this.toDate(b.end).getTime() : Date.now();
+        workedSeconds -= Math.floor((end - start) / 1000);
+      });
+    }
+
+    return this.formatSeconds(workedSeconds);
+  }
+
+  // --- Helpers ---
+  private toDate(timeStr: string): Date {
+    const [h, m, s] = timeStr.split(':').map(Number);
+    const d = new Date();
+    d.setHours(h, m, s, 0);
+    return d;
+  }
+
 }
