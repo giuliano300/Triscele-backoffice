@@ -14,8 +14,8 @@ import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/User.service';
 import { JwtPayloads } from '../../interfaces/JwtPayloads';
 import { OperatorService } from '../../services/Operator.service';
-import { Permission } from '../../interfaces/permissions';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { Notifications } from '../../interfaces/notifications';
 
 @Component({
     selector: 'app-sign-in',
@@ -108,7 +108,9 @@ export class SignInComponent {
                     localStorage.setItem('user', JSON.stringify(this.user!));
                     localStorage.removeItem('operator');
                     localStorage.removeItem('permissions');
-                    document.location.href = '/dashboard';
+
+                    this.router.navigate(['/dashboard']);
+
                 }
             });
                         

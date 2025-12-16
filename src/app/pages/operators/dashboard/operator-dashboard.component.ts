@@ -1,5 +1,5 @@
 import { Component, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser, NgIf } from '@angular/common';
+import { isPlatformBrowser, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,8 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { AttendanceService } from '../../../services/Attendance.service';
-import { Attendance } from '../../../interfaces/attendance';
-import { FeatherModule } from "angular-feather";
+import { Attendance, Break } from '../../../interfaces/attendance';
+import { FeatherModule } from 'angular-feather';
 import { FeathericonsModule } from '../../../icons/feathericons/feathericons.module';
 
 @Component({
@@ -17,13 +17,13 @@ import { FeathericonsModule } from '../../../icons/feathericons/feathericons.mod
   standalone: true,
   imports: [
     NgIf,
+    NgFor,
     FormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    FeatherModule,
     FeathericonsModule
   ],
   templateUrl: './operator-dashboard.component.html',
@@ -47,12 +47,12 @@ export class OperatorDashboardComponent {
   isBrowser = false;
   operatorId = '';
   attendance?: Attendance;
-  liveTimer: string = '';
+  liveTimer: string = '00h 00m 00s';
+  breakTimer: string = '00h 00m 00s';
   notes: string = '';
   entryTime: string = '';
   private timerInterval: any;
-  pauseTimer: string = '';
-  private pauseInterval: any;
+  private breakInterval: any;
 
   constructor(
     private attendanceService: AttendanceService,
@@ -62,108 +62,73 @@ export class OperatorDashboardComponent {
   }
 
   ngOnInit(): void {
-    if (this.isBrowser) {
-      const o = JSON.parse(localStorage.getItem('operator') || '{}');
-      this.operatorId = o?.sub ?? '';
-      this.todayAttendance();
-      this.updateTime();
-      setInterval(() => this.updateTime(), 60000);
-    }
+    if (!this.isBrowser) return;
+
+    const o = JSON.parse(localStorage.getItem('operator') || '{}');
+    this.operatorId = o?.sub ?? '';
+    this.todayAttendance();
+    this.updateTime();
+    setInterval(() => this.updateTime(), 60000);
   }
 
-  // ✅ Recupera la presenza di oggi
   todayAttendance() {
     this.attendanceService.getTodayAttendance(this.operatorId).subscribe({
       next: (data) => {
         this.attendance = data;
-        if (data?.entryTime && !data.exitTime) {
-          this.startTimer(data.entryTime);
-        }
+        if (data?.entryTime && !data.exitTime) this.startTimer(data.entryTime);
+        const activeBreak = this.getActiveBreak();
+        if (activeBreak) this.startBreakTimer(activeBreak.start);
       },
       error: () => (this.attendance = undefined),
     });
   }
 
-  // ✅ Conferma l'ingresso
   confirmEntry() {
     const dto = {
       operatorId: this.operatorId,
       date: new Date(),
       entryTime: this.getTime(),
       notes: this.notes,
+      breaks: []
     };
-
     this.attendanceService.setAttendance(dto).subscribe((a) => {
       this.attendance = a;
       this.startTimer(dto.entryTime);
     });
   }
 
-  startLunch() {
+  startBreak() {
     if (!this.attendance) return;
+    const newBreak: Break = { start: this.getTime(), end: undefined };
+    this.attendance.breaks.push(newBreak);
 
-    const lunchStart = this.getTime();
-    this.attendance.lunchStart = lunchStart;
-
-    this.attendanceService.updateAttendance(this.attendance).subscribe(a => {
-      //this.attendance = a;
-      this.startPauseTimer(lunchStart);
-      clearInterval(this.timerInterval); // ferma timer lavoro
-    });
-  }
-
-  endLunch() {
-    if (!this.attendance) return;
-
-    const lunchEnd = this.getTime();
-    this.attendance.lunchEnd = lunchEnd;
-
-    this.attendanceService.updateAttendance(this.attendance).subscribe(a => {
-      //this.attendance = a;
-
-      clearInterval(this.pauseInterval);
-      this.startTimer(this.attendance!.entryTime); // riparte timer lavoro
-    });
-  }
-
-  startPauseTimer(startTime: string) {
-    const [h, m, s] = startTime.split(':').map(Number);
-
-    const start = new Date();
-    start.setHours(h, m, s);
-
-    clearInterval(this.pauseInterval);
-
-    const update = () => {
-      const now = Date.now();
-      const diff = now - start.getTime();
-
-      const hours = Math.floor(diff / 3600000);
-      const minutes = Math.floor((diff % 3600000) / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-
-      this.pauseTimer = `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
-    };
-
-    update();
-    this.pauseInterval = setInterval(update, 1000);
-  }
-
-
-  // ✅ Conferma l'uscita
-  confirmExit() {
-    if (!this.attendance) return;
-    const exitTime = this.getTime();
-    this.attendance.exitTime = exitTime;
-    this.attendance.notes = this.notes;
-
-    this.attendanceService.updateAttendance(this.attendance).subscribe((a) => {
+    this.attendanceService.updateAttendance(this.attendance).subscribe(() => {
+      this.startBreakTimer(newBreak.start);
       clearInterval(this.timerInterval);
-      //this.attendance = a;
     });
   }
 
-  // ✅ Timer live
+  endBreak() {
+    if (!this.attendance) return;
+    const activeBreak = this.getActiveBreak();
+    if (!activeBreak) return;
+
+    activeBreak.end = this.getTime();
+
+    this.attendanceService.updateAttendance(this.attendance).subscribe(() => {
+      clearInterval(this.breakInterval);
+      this.startTimer(this.attendance!.entryTime);
+    });
+  }
+
+  hasActiveBreak(): boolean {
+    return !!this.attendance?.breaks.find(b => !b.end);
+  }
+
+  getActiveBreak(): Break | undefined {
+    return this.attendance?.breaks.find(b => !b.end);
+  }
+
   startTimer(entryTime: string) {
     const [eh, em, es] = entryTime.split(':').map(Number);
     const start = new Date();
@@ -172,102 +137,70 @@ export class OperatorDashboardComponent {
     clearInterval(this.timerInterval);
 
     const update = () => {
-      const now = Date.now();
-      let diff = now - start.getTime();
+      let diff = Date.now() - start.getTime();
 
-      // ⭐ Sottrai la pausa se presente
-      if (this.attendance?.lunchStart) {
-        const [lh, lm, ls] = this.attendance.lunchStart.split(':').map(Number);
-        const lunchStartDate = new Date();
-        lunchStartDate.setHours(lh, lm, ls);
-
-        let lunchEndDate: Date;
-        if (this.attendance.lunchEnd) {
-          const [lhEnd, lmEnd, lsEnd] = this.attendance.lunchEnd.split(':').map(Number);
-          lunchEndDate = new Date();
-          lunchEndDate.setHours(lhEnd, lmEnd, lsEnd);
-        } else {
-          // Pausa in corso → fino ad ora
-          lunchEndDate = new Date();
-        }
-
-        const lunchDiff = lunchEndDate.getTime() - lunchStartDate.getTime();
-        diff -= lunchDiff;
+      if (this.attendance?.breaks.length) {
+        this.attendance.breaks.forEach(b => {
+          if (b.end) {
+            const [sh, sm, ss] = b.start.split(':').map(Number);
+            const [eh, em, es] = b.end.split(':').map(Number);
+            const s = new Date(); s.setHours(sh, sm, ss);
+            const e = new Date(); e.setHours(eh, em, es);
+            diff -= (e.getTime() - s.getTime());
+          } else {
+            const [sh, sm, ss] = b.start.split(':').map(Number);
+            const s = new Date(); s.setHours(sh, sm, ss);
+            diff -= (Date.now() - s.getTime());
+          }
+        });
       }
 
-      const hours = Math.floor(diff / 3600000);
-      const minutes = Math.floor((diff % 3600000) / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-
-      this.liveTimer = `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+      this.liveTimer = this.formatSeconds(Math.floor(diff / 1000));
     };
 
     update();
     this.timerInterval = setInterval(update, 1000);
   }
 
-  private pad(n: number): string {
-    return n < 10 ? '0' + n : n.toString();
+  startBreakTimer(startTime: string) {
+    const [h, m, s] = startTime.split(':').map(Number);
+    const start = new Date(); start.setHours(h, m, s);
+    clearInterval(this.breakInterval);
+
+    const update = () => {
+      const diff = Date.now() - start.getTime();
+      this.breakTimer = this.formatSeconds(Math.floor(diff / 1000));
+    };
+
+    update();
+    this.breakInterval = setInterval(update, 1000);
   }
 
+  confirmExit() {
+    if (!this.attendance) return;
+    this.attendance.exitTime = this.getTime();
+    this.attendance.notes = this.notes;
+
+    this.attendanceService.updateAttendance(this.attendance).subscribe(() => {
+      clearInterval(this.timerInterval);
+      clearInterval(this.breakInterval);
+    });
+  }
+
+  private pad(n: number): string { return n < 10 ? '0' + n : n.toString(); }
   private getTime(): string {
     const d = new Date();
     return `${this.pad(d.getHours())}:${this.pad(d.getMinutes())}:${this.pad(d.getSeconds())}`;
   }
 
-  updateTime() {
+  private updateTime() {
     this.entryTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  calculateBreakDuration(start: string, end: string): string {
-    const s = this.toSeconds(start);
-    const e = this.toSeconds(end);
-    const diff = e - s;
-    return this.formatSeconds(diff);
-  }
-
-  calculateWorkedTime(
-    entry: string,
-    exit: string,
-    lunchStart?: string,
-    lunchEnd?: string
-  ): string {
-
-  const start = this.toSeconds(entry);
-    const end = this.toSeconds(exit);
-
-    let workedSeconds = end - start;
-
-    if (lunchStart && lunchEnd) {
-      const breakStart = this.toSeconds(lunchStart);
-      const breakEnd = this.toSeconds(lunchEnd);
-      workedSeconds -= (breakEnd - breakStart);
-    }
-
-    return this.formatSeconds(workedSeconds);
-  }
-
-  private toMinutes(time: string): number {
-    const [h, m, s] = time.split(':').map(Number);
-    return h * 60 + m + (s ? s / 60 : 0);
-  }
-
-  private formatMinutes(total: number): string {
-    const hours = Math.floor(total / 60);
-    const minutes = Math.floor(total % 60);
-    return `${hours}h ${minutes}m`;
-  }
-
-  private toSeconds(time: string): number {
-    const [h, m, s] = time.split(':').map(Number);
-    return h * 3600 + m * 60 + s;
   }
 
   private formatSeconds(total: number): string {
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
     const s = total % 60;
-
     return `${h}h ${m}m ${s}s`;
   }
 }

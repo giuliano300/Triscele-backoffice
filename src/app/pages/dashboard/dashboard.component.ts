@@ -18,6 +18,8 @@ import { ProductMovementsService } from '../../services/Product-movements.servic
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
 import { SocketService } from '../../services/socket.service';
+import { NotificationsService } from '../../services/Notifications.service';
+import { Notifications } from '../../interfaces/notifications';
 
 @Component({
   selector: 'app-dashboard',
@@ -61,6 +63,7 @@ export class DashboardComponent {
       private productMovementsService: ProductMovementsService,
       private permissionHolidayService: PermissionHolidayService,
       private socketService: SocketService,
+      private notificationsService: NotificationsService,
       @Inject(PLATFORM_ID) private platformId: any) {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
@@ -73,6 +76,8 @@ export class DashboardComponent {
     absence: number = 0;
 
     loaded: boolean = false;
+    notifications: Notifications[] = [];
+
 
    ngOnInit(): void {
     this.loadStats();
@@ -81,6 +86,36 @@ export class DashboardComponent {
     this.socketService.absenceCounter$.subscribe(value => {
         this.absence = value;
     });
+    this.notificationsService.getAdminNotRead().subscribe((data: Notifications[]) => {
+        this.notifications = data;
+        console.log(this.notifications);
+        this.socketService.setInitialCounter(data.length);
+      
+        data.forEach(notification => {
+          let type:'info' | 'error' = 'info';
+          let message = '';
+          let title = '';
+          if(notification.event == "sendNewQuotation")
+          {
+              message = `Il cliente ${notification.payload.p} ha inserito un nuovo peventivo`;
+              title = 'Nuovo preventivo';
+          }
+          if(notification.event == "newAbsence")
+          {
+              message = `${notification.payload.operatorName} ha inserito una nuova richiesta di assenza`;
+              title = 'Nuova richiesta';
+          }
+          
+          if(notification.event == "confirmAbsence")
+          {
+              message = this.socketService.buildMessage(notification.payload.p);
+              title = notification.payload.p.accepted ? 'Richiesta accettata' : 'Richiesta rifiutata';
+              type = notification.payload.p.accepted ? 'info' : 'error';
+          }
+          
+          this.socketService.notify(message, title, type, notification._id);
+        });
+      });
    }
 
    countPending(){

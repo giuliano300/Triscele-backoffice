@@ -1,162 +1,60 @@
 <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li aria-current="page" class="breadcrumb-item active">Presenza di oggi</li>
-    </ol>
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page">Presenza di oggi</li>
+  </ol>
 </nav>
-<div class="row">
-    <div class="col-xxxl-12">
-        <mat-card class="trinta-card balance-overview-card mb-25 bg-white border-none d-block" style="min-height: 75vh;">
-            <mat-card-content>
-                <div class="dashboard-container" [@fadeIn]>
-                    <!-- ✅ Nessuna presenza odierna -->
-                    <div *ngIf="!attendance; else showActive" class="presence-entry" [@fadeInUp]>
-                        <div class="entry-form">
-                            <h2 class="text-center">Conferma presenza</h2>
-                            <div class="col-sm-12">
-                                <label class="label d-block fw-medium mb-10 text-start">Orario di entrata</label>
-                                <mat-form-field class="w-100">
-                                    <i-feather name="clock"></i-feather>
-                                    <mat-label>Orario di entrata</mat-label>
-                                    <input matInput [value]="entryTime" readonly>
-                                </mat-form-field>        
-                            </div>
 
-                            <div class="col-sm-12">
-                                <label class="label d-block fw-medium mb-10 text-start">Note</label>
-                                <mat-form-field class="w-100">
-                                    <i-feather name="file-text"></i-feather>
-                                    <mat-label>Note</mat-label>
-                                    <textarea matInput matInput [(ngModel)]="notes" style="min-height: 80px;"></textarea>
-                                </mat-form-field>
-                            </div>
+<div class="dashboard-grid">
 
-                            <button mat-flat-button color="primary" class="btn-confirm" (click)="confirmEntry()">
-                            <mat-icon>login</mat-icon> Conferma Presenza
-                            </button>
-                        </div>
-                    </div>
-
-                    <ng-template #showActive>
-                        <!-- Presenza attiva - nessuna uscita -->
-                        <div class="active-attendance" [@fadeInUp] *ngIf="!attendance?.exitTime">
-
-                            <!-- ⭐️ ENTRATA FATTA, MA NON IN PAUSA -->
-                            <div *ngIf="!attendance?.lunchStart" class="text-center">
-                            <h2>Giornata attiva</h2>
-
-                            <div class="timer-card pulse">
-                                <span class="timer-label">Tempo lavorato</span>
-                                <h1 class="timer">{{ liveTimer }}</h1>
-                            </div>
-
-                            <button mat-flat-button color="accent" class="btn-lunch" (click)="startLunch()">
-                                <mat-icon>restaurant</mat-icon> Avvia Pausa Pranzo
-                            </button>
-
-                        </div>
-
-                        <!-- ⭐️ IN PAUSA PRANZO -->
-                        <div *ngIf="attendance?.lunchStart && !attendance?.lunchEnd" class="text-center">
-                            <h2>Pausa Pranzo in corso</h2>
-
-                            <div class="timer-card pulse" style="background:#ffe7b8;">
-                                <span class="timer-label">Durata pausa</span>
-                                <h1 class="timer">{{ pauseTimer }}</h1>
-                            </div>
-
-                            <button mat-flat-button color="primary" class="btn-lunch" (click)="endLunch()">
-                                <mat-icon>check</mat-icon> Termina Pausa Pranzo
-                            </button>
-                        </div>
-
-                        <!-- ⭐️ Pausa chiusa → torna timer lavoro -->
-                        <div *ngIf="attendance?.lunchEnd" class="text-center">
-                            <h2>Giornata attiva</h2>
-
-                            <div class="timer-card pulse">
-                                <span class="timer-label">Tempo lavorato</span>
-                                <h1 class="timer">{{ liveTimer }}</h1>
-                            </div>
-                            
-                            <div class="col-sm-12">
-                                <label class="label d-block fw-medium mb-10 text-start">Note</label>
-                                <mat-form-field class="w-100">
-                                    <i-feather name="file-text"></i-feather>
-                                    <mat-label>Note</mat-label>
-                                    <textarea matInput matInput [(ngModel)]="notes" style="min-height: 80px;"></textarea>
-                                </mat-form-field>
-                            </div>
-
-                            <button mat-flat-button color="warn" class="btn-exit" (click)="confirmExit()">
-                                <mat-icon>logout</mat-icon> Chiudi Presenza Giornaliera
-                            </button>
-                        </div>
-
-                    </div>
-                    </ng-template>
-                    <div class="active-attendance summary" *ngIf="attendance?.exitTime" [@fadeIn]>
-                        <div class="summary-card">
-                            <div class="summary-header">
-                                <i-feather name="check-circle" class="summary-icon"></i-feather>
-                                <h2>Riepilogo giornata</h2>
-                            </div>
-
-                            <div class="summary-content">
-
-                                <!-- ENTRATA -->
-                                <div class="summary-row">
-                                    <span class="label">Entrata</span>
-                                    <span class="value">{{ attendance?.entryTime }}</span>
-                                </div>
-
-                                <!-- INIZIO PAUSA -->
-                                <div class="summary-row" *ngIf="attendance?.lunchStart">
-                                    <span class="label">Inizio pausa pranzo</span>
-                                    <span class="value">{{ attendance?.lunchStart }}</span>
-                                </div>
-
-                                <!-- FINE PAUSA -->
-                                <div class="summary-row" *ngIf="attendance?.lunchEnd">
-                                    <span class="label">Fine pausa pranzo</span>
-                                    <span class="value">{{ attendance?.lunchEnd }}</span>
-                                </div>
-
-
-                                <!-- USCITA -->
-                                <div class="summary-row">
-                                    <span class="label">Uscita</span>
-                                    <span class="value">{{ attendance?.exitTime }}</span>
-                                </div>
-
-
-                                <!-- DURATA PAUSA -->
-                                <div class="summary-row total" *ngIf="attendance?.lunchStart && attendance?.lunchEnd">
-                                    <span class="label">Durata pausa</span>
-                                    <span class="value">
-                                        {{ calculateBreakDuration(attendance!.lunchStart!, attendance!.lunchEnd!) }}
-                                    </span>
-                                </div>
-
-                                <!-- TOTALE ORE LAVORATE -->
-                                <div class="summary-row total">
-                                    <span class="label">Totale ore lavorate</span>
-                                    <span class="value">
-                                        {{ calculateWorkedTime(attendance!.entryTime, attendance!.exitTime!, attendance?.lunchStart, attendance?.lunchEnd) }}
-                                    </span>
-                                </div>
-
-                                <!-- NOTE -->
-                                <div class="summary-row notes" *ngIf="attendance?.notes">
-                                    <span class="label">Note</span>
-                                    <p class="note-text">{{ attendance?.notes }}</p>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </mat-card-content>
-        </mat-card>
+  <!-- ===== PRIMA DELL'ENTRATA ===== -->
+  <mat-card class="card-entry" *ngIf="!attendance" @fadeIn>
+    <h2>Conferma Presenza</h2>
+    <div class="card-body">
+      <p><i-feather name="Clock"></i-feather> Orario: {{ entryTime }}</p>
+      <textarea [(ngModel)]="notes" placeholder="Note"></textarea>
+      <button mat-raised-button color="primary" (click)="confirmEntry()">
+        <i-feather name="LogIn"></i-feather> Conferma Entrata
+      </button>
     </div>
+  </mat-card>
+
+  <!-- ===== GIORNATA ATTIVA ===== -->
+  <ng-container *ngIf="attendance && !attendance.exitTime">
+    <mat-card class="card-timer" @fadeIn>
+      <h2>Tempo Lavorato</h2>
+      <h1>{{ liveTimer }}</h1>
+    </mat-card>
+
+    <mat-card class="card-break" *ngIf="!hasActiveBreak()" @fadeIn>
+      <button mat-raised-button color="accent" (click)="startBreak()">
+        <i-feather name="Coffee"></i-feather> Inizia Pausa
+      </button>
+    </mat-card>
+
+    <mat-card class="card-break" *ngIf="hasActiveBreak()" @fadeIn>
+      <h3>Pausa in corso</h3>
+      <h1>{{ breakTimer }}</h1>
+      <button mat-raised-button color="primary" (click)="endBreak()">
+        <i-feather name="Coffee"></i-feather> Termina Pausa
+      </button>
+    </mat-card>
+
+    <mat-card class="card-exit" @fadeIn>
+      <button mat-raised-button color="warn" (click)="confirmExit()">
+        <i-feather name="LogOut"></i-feather> Chiudi Giornata
+      </button>
+    </mat-card>
+  </ng-container>
+
+  <!-- ===== RIEPILOGO ===== -->
+  <mat-card class="card-summary" *ngIf="attendance?.exitTime" @fadeIn>
+    <h2>Riepilogo Giornata</h2>
+    <p><strong>Entrata:</strong> {{ attendance?.entryTime }}</p>
+    <p *ngFor="let b of attendance?.breaks">
+      <strong>Pausa:</strong> {{ b.start }} - {{ b.end || 'In corso' }}
+    </p>
+    <p><strong>Uscita:</strong> {{ attendance?.exitTime }}</p>
+    <p><strong>Totale lavorato:</strong> {{ liveTimer }}</p>
+  </mat-card>
+
 </div>

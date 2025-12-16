@@ -1,10 +1,14 @@
+export interface Break {
+  start: string;
+  end?: string;
+}
+
 export interface Attendance {
     _id?: string;    
     operatorId: string;
     date: Date;
     entryTime: string;
     exitTime?: string;
-    lunchStart?: string;
-    lunchEnd?: string;
+    breaks: Break[];
     notes?: string;
 }

@@ -5,6 +5,7 @@ import { API_URL } from '../../main';
 import { PermissionHoliday } from '../interfaces/permissionHoliday';
 import { absenceType } from '../enum/enum';
 import { BehaviorSubject } from 'rxjs';
+import { NotificationsService } from './Notifications.service';
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
@@ -13,7 +14,7 @@ export class SocketService {
   private _absenceCounter = new BehaviorSubject<number>(0);
   public absenceCounter$ = this._absenceCounter.asObservable();
 
-  constructor(private toastr: ToastrService, private zone: NgZone) {
+  constructor(private toastr: ToastrService, private zone: NgZone, private notificationService: NotificationsService) {
     this.socket = io(API_URL);
     this.listenForAbsenceRequests();
   }
@@ -53,7 +54,7 @@ export class SocketService {
     }
   }
 
-  private buildMessage(p: PermissionHoliday): string {
+  public buildMessage(p: PermissionHoliday): string {
     const typeLabel = p.type === absenceType.ferie ? 'ferie' : 'permesso';
     const details = this.getAbsenceDetails(p);
 
@@ -65,7 +66,7 @@ export class SocketService {
   // -------------------------------------------------------------
   // 🔹 UTILITY: toastr configurato
   // -------------------------------------------------------------
-  private notify(message: string, title: string, type: 'info' | 'error') {
+  public notify(message: string, title: string, type: 'info' | 'error', notificationId?: string) {
     const options = {
       timeOut: 0,
       extendedTimeOut: 0,
@@ -73,9 +74,16 @@ export class SocketService {
       tapToDismiss: false
     };
 
-    type === 'info'
+    const toast = type === 'info'
       ? this.toastr.info(message, title, options)
       : this.toastr.error(message, title, options);
+
+      toast.onHidden.subscribe(() => {
+        if (notificationId) {
+          this.notificationService.markAsRead(notificationId).subscribe({
+          });
+        }
+      });
   }
 
   // -------------------------------------------------------------
@@ -84,7 +92,7 @@ export class SocketService {
   private listenForAbsenceRequests() {
 
     // 🚨 NUOVO PREVENTIVO → notifica SOLO admin
-    this.socket.on('sendNewQuotation', (data: { p: string }) => {
+    this.socket.on('sendNewQuotation', (data: { p: string, notificationId: string }) => {
       if (this.isAdmin() && !this.isOperator()) {
         this.zone.run(() => {
           
@@ -93,14 +101,15 @@ export class SocketService {
           this.notify(
             `Il cliente ${data.p} ha inserito un nuovo peventivo`,
             'Nuovo preventivo',
-            'info'
+            'info',
+            data.notificationId
           );
         });
       }
     });
 
     // 🚨 NUOVA RICHIESTA → notifica SOLO admin
-    this.socket.on('newAbsence', (data: { operatorName: string }) => {
+    this.socket.on('newAbsence', (data: { operatorName: string, notificationId: string  }) => {
       if (this.isAdmin() && !this.isOperator()) {
         this.zone.run(() => {
           
@@ -109,14 +118,15 @@ export class SocketService {
           this.notify(
             `${data.operatorName} ha inserito una nuova richiesta di assenza`,
             'Nuova richiesta',
-            'info'
+            'info',
+            data.notificationId
           );
         });
       }
     });
 
     // 🚨 RICHIESTA CONFERMATA O RIFIUTATA → notifica SOLO operatori
-    this.socket.on('confirmAbsence', (data: { p: PermissionHoliday }) => {
+    this.socket.on('confirmAbsence', (data: { p: PermissionHoliday, notificationId: string }) => {
       if (this.isOperator() && !this.isAdmin()) {
         const o = JSON.parse(localStorage.getItem('operator') || '{}');
         const operatorId = o.sub;  
@@ -125,7 +135,7 @@ export class SocketService {
             const message = this.buildMessage(data.p);
             const title = data.p.accepted ? 'Richiesta accettata' : 'Richiesta rifiutata';
 
-            this.notify(message, title, data.p.accepted ? 'info' : 'error');
+            this.notify(message, title, data.p.accepted ? 'info' : 'error', data.notificationId);
           });
         }
       }
