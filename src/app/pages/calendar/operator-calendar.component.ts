@@ -13,6 +13,8 @@ import { AttendanceService } from '../../services/Attendance.service';
 import { OperatorService } from '../../services/Operator.service';
 import { Operators } from '../../interfaces/operators';
 import { UtilsService } from '../../services/utils.service';
+import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
+import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-calendar',
@@ -101,23 +103,26 @@ export class OperatorCalendarComponent implements OnInit {
       }
     },
     dayCellDidMount: (arg: any) => {
-        const y = arg.date.getFullYear();
-        const m = String(arg.date.getMonth() + 1).padStart(2, '0');
-        const d = String(arg.date.getDate()).padStart(2, '0');
-        const dateStr = `${y}-${m}-${d}`;
+      const y = arg.date.getFullYear();
+      const m = String(arg.date.getMonth() + 1).padStart(2, '0');
+      const d = String(arg.date.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
 
-        this.holidays = this.utils.getItalianHolidays(y);
-  
-        const day = arg.date.getDay();
-        const isSunday = day === 0;
-        const isSaturday = day === 6;
-        const isHoliday = this.holidays.includes(dateStr);
+      this.holidays = this.utils.getItalianHolidays(y);
 
-        if (isSunday || isSaturday || isHoliday) {
-          arg.el.style.backgroundColor = this.utils.getDisabledColor();
-          arg.el.style.pointerEvents = 'none';
-          arg.el.style.opacity = '0.95';
-        }
+      const day = arg.date.getDay();
+      const isSunday = day === 0;
+      const isSaturday = day === 6;
+      const isHoliday = this.holidays.includes(dateStr);
+
+      if (isSunday || isSaturday || isHoliday) {
+        arg.el.style.backgroundColor = this.utils.getDisabledColor();
+        arg.el.style.pointerEvents = 'none';
+        arg.el.style.opacity = '0.95';
+      }
+    },
+    eventClick: (info) => {
+      this.openEditEvent(info.event);
     }
   };
 
@@ -161,26 +166,35 @@ export class OperatorCalendarComponent implements OnInit {
 
     for (const e of this.events) {
 
-      //const isPresence = e.title?.includes('Presenza');
       const isPermission = e.title?.includes('Permesso');
 
-      const originalStartDate = new Date(e.start);
-      const originalEndDate = e.end ? new Date(e.end) : new Date(e.start);
+      const startDate = new Date(e.start);
+      const endDate = e.end ? new Date(e.end) : new Date(e.start);
 
-      const originalStartStr = originalStartDate.toLocaleDateString('it-IT');
-      const originalEndStr = originalEndDate.toLocaleDateString('it-IT');
+      // Normalizza ore (evita problemi timezone)
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
 
-      let loop = new Date(originalStartDate);
+      const originalStartStr = startDate.toLocaleDateString('it-IT');
+      const originalEndStr = endDate.toLocaleDateString('it-IT');
 
-      while (loop <= originalEndDate) {
+      let loop = new Date(startDate);
 
-        const dateStr = loop.toISOString().split('T')[0];
+      while (loop <= endDate) {
+
+        const y = loop.getFullYear();
+        const m = String(loop.getMonth() + 1).padStart(2, '0');
+        const d = String(loop.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${d}`;
+
+        this.holidays = this.utils.getItalianHolidays(y);
+
         const day = loop.getDay();
-
-        const isHoliday = this.holidays.includes(dateStr);
         const isSaturday = day === 6;
         const isSunday = day === 0;
+        const isHoliday = this.holidays.includes(dateStr);
 
+        // ⛔ Salta completamente weekend e festivi
         if (isSaturday || isSunday || isHoliday) {
           loop.setDate(loop.getDate() + 1);
           continue;
@@ -191,7 +205,10 @@ export class OperatorCalendarComponent implements OnInit {
         dayEnd.setDate(dayEnd.getDate() + 1);
 
         splitEvents.push({
-          title: this.showFullName ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}` : e.title,
+          title: this.showFullName
+            ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}`
+            : e.title,
+
           start: dayStart,
           end: dayEnd,
           allDay: true,
@@ -199,16 +216,16 @@ export class OperatorCalendarComponent implements OnInit {
 
           extendedProps: {
             originalEvent: {
+              id: e.id,
               fullName: e.fullName,
               reason: e.reason,
               type: e.type,
+              tipologia: e.tipologia,
               originalStart: originalStartStr,
               originalEnd: originalEndStr,
               dataPermesso: isPermission ? originalStartStr : undefined,
               startHour: e.startHour,
-              endHour: e.endHour,
-              id: e.id,
-              tipologia: e.tipologia
+              endHour: e.endHour
             }
           }
         });
@@ -217,11 +234,62 @@ export class OperatorCalendarComponent implements OnInit {
       }
     }
 
-    this.calendarOptions = {
-      ...this.calendarOptions,
-      events: splitEvents
-    };
+  // 🔥 assegna SOLO alla fine
+  this.calendarOptions = {
+    ...this.calendarOptions,
+    events: splitEvents
+  };
+}
+
+  openEditEvent(event: any) {
+    //console.log(event._def.extendedProps);
+    const id = event._def.extendedProps.originalEvent.id;
+
+    if(event._def.extendedProps.originalEvent.tipologia == "presenza"){
+      this.openNewEditDeleteAttendance(id);
+      return;
+    }
   }
+
+
+  openNewEditDeleteAttendance(id?: string) {
+
+    const a = this.attendanceService.getAttendance(id!).subscribe((data: any) =>{
+      const dialogRef = this.dialog.open(AddUpdateDeleteAttendanceDialogComponent, {
+        width: '550px',
+        data: {date: data.date, id: id}
+      });
+
+      dialogRef.afterClosed().subscribe((result: any) => {
+        if (result) 
+        {
+          //MODIFICA O ELIMINA
+          if(id)
+          {
+            if(result == "delete"){
+              this.attendanceService.delete(id).subscribe((data:any) => {
+                this.loadEvents();
+              })
+            }
+            else
+            {
+              result._id = id;
+              result.operatorId = data.operatorId._id;
+              this.attendanceService.updateAttendance(result).subscribe((data:any) =>{
+                this.loadEvents();
+              })
+            }
+          }
+        } 
+        else 
+        {
+          console.log("Close");
+        }
+      });
+    })
+
+  }
+
 
   back() {
     this.router.navigate(["operators"]);

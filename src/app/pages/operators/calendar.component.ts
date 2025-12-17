@@ -132,10 +132,10 @@ export class CalendarComponent implements OnInit {
 
   openEditEvent(event: any) {
     //console.log(event._def.extendedProps);
-    const id = event._def.extendedProps.id;
+    const id = event._def.extendedProps.originalEvent.id;
 
-    if(event._def.extendedProps.tipologia == "presenza"){
-      this.openNewEditDeleteAttendance(event._def.extendedProps.date, id);
+    if(event._def.extendedProps.originalEvent.tipologia == "presenza"){
+      //this.openNewEditDeleteAttendance(event._def.extendedProps.date, id);
       return;
     }
         
@@ -146,7 +146,7 @@ export class CalendarComponent implements OnInit {
       confirm: "Conferma"
     };
     
-    if(event._def.extendedProps.tipologia == "malattia")
+    if(event._def.extendedProps.originalEvent.tipologia == "malattia")
     {
       data.title =  "Vuoi modificare l'assenza per malattia in calendario?"
       data.description = "La modifica non dovrà essere validata dall'amministrazione.";
@@ -161,9 +161,9 @@ export class CalendarComponent implements OnInit {
       if (result) 
       {
         localStorage.setItem("back-calendar", "true");
-        if(event._def.extendedProps.tipologia == "assenza")
+        if(event._def.extendedProps.originalEvent.tipologia == "assenza")
             this.router.navigate(["operator/permission-holiday/add/" + id]);
-        if(event._def.extendedProps.tipologia == "malattia")
+        if(event._def.extendedProps.originalEvent.tipologia == "malattia")
             this.router.navigate(["operator/illness/add/" + id]);
         
       } 
@@ -241,8 +241,13 @@ export class CalendarComponent implements OnInit {
       let loop = new Date(originalStartDate);
 
       while (loop <= originalEndDate) {
+        const y = loop.getFullYear();
+        const m = String(loop.getMonth() + 1).padStart(2, '0');
+        const d = String(loop.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${d}`;
 
-        const dateStr = loop.toISOString().split('T')[0];
+        this.holidays = this.utils.getItalianHolidays(y);
+
         const day = loop.getDay();
 
         const isHoliday = this.holidays.includes(dateStr);

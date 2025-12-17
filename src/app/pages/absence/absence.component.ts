@@ -19,6 +19,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { OperatorService } from '../../services/Operator.service';
 import { Operators } from '../../interfaces/operators';
 import { MatTooltip, MatTooltipModule } from "@angular/material/tooltip";
+import { AlertDialogComponent } from '../../alert-dialog/alert-dialog.component';
 
 @Component({
   selector: 'app-absence',
@@ -108,14 +109,27 @@ export class AbsenceComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        item.accepted = approve;
-        item.operatorId! = item.operatorId = ((item.operatorId as unknown) as Operators)?._id ?? '';
-        console.log(JSON.stringify(item));
-        this.permissionHolidayService.updatePermissionHoliday(item)
-          .subscribe((data: boolean) => {
+        const payload = {
+          ...item, // CLONE
+          accepted: approve,
+          operatorId: ((item.operatorId as unknown) as Operators)?._id ?? ''
+        };
+
+        this.permissionHolidayService.approveOrNotPermissionHoliday(payload)
+          .subscribe((data: any) => {
             if(data){
-              this.getpPermissionHoliday();
-              this.permissionHolidayService.notifyPendingChanged();
+              if(data.success)
+              {
+                this.getpPermissionHoliday();
+                this.permissionHolidayService.notifyPendingChanged();
+              }
+              else
+              {
+                this.dialog.open(AlertDialogComponent, {
+                   width: '500px',
+                   data:{title: 'Errore nel salvataggio', message: data.msg}
+                })
+              }
             }
           });
       } 

@@ -113,6 +113,6 @@ export class UtilsService {
     }
 
     getDisabledColor(){
-      return "#fdfdfdff";
+      return "#f7f7f7ff";
     }
 }

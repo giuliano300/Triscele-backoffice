@@ -43,6 +43,10 @@ export class PermissionHolidayService {
       return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
     }
 
+    approveOrNotPermissionHoliday(c: PermissionHoliday):Observable<any>{
+      return this.http.put<any>(this.apiUrl + "/approveOrNotPermissionHoliday/" + c._id, c);
+    }
+
     countPending():Observable<number>{
       return this.http.get<number>(this.apiUrl + "/count-pending");
     }

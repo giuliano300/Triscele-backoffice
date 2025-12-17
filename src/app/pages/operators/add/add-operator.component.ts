@@ -18,14 +18,11 @@ import { Operators } from '../../../interfaces/operators';
 import { OperatorService } from '../../../services/Operator.service';
 import { UtilsService } from '../../../services/utils.service';
 import { MatStepperModule } from '@angular/material/stepper';
-import { codiceFiscaleValidator } from '../../../validators/fiscalCode.validator';
 import { Permission } from '../../../interfaces/permissions';
 import { PermissionService } from '../../../services/Permission.service';
 import { MatCheckbox } from "@angular/material/checkbox";
 import { Sectors } from '../../../interfaces/sectors';
 import { SectorService } from '../../../services/Sector.service';
-import { data } from 'jquery';
-
 registerLocaleData(localeIt);
 
 export const MY_DATE_FORMATS = {
@@ -104,7 +101,13 @@ export class AddOperatorComponent {
           birthDate: [''],
           mobile: [''],
           status: [null, Validators.required],
-          sectorId: [null, Validators.required]
+          sectorId: [null, Validators.required],
+          startTime: ['', Validators.required],
+          endTime: ['', Validators.required],
+          numberOfHolidays: [null, Validators.required],
+          numberOfPermissions: [null, Validators.required],
+          remainingNumberOfHolidays: [null, Validators.required],
+          remainingNumberOfPermissions: [null, Validators.required]
         }),
         accessData: this.fb.group({
           email: ['', [Validators.required, Validators.email]],
@@ -148,7 +151,13 @@ export class AddOperatorComponent {
               lastName: data.lastName,
               mobile: data.mobile,
               status: Number(data.status),
-              sectorId: data.sectorId
+              sectorId: data.sectorId,
+              startTime: data.startTime,
+              endTime: data.endTime,
+              numberOfHolidays: data.numberOfHolidays,
+              numberOfPermissions: data.numberOfPermissions,
+              remainingNumberOfHolidays: data.remainingNumberOfHolidays,
+              remainingNumberOfPermissions: data.remainingNumberOfPermissions
             },
             accessData: {
               email: data.email,
@@ -212,7 +221,13 @@ export class AddOperatorComponent {
         province: formData.addressData.province,
         city: formData.addressData.city,
         address: formData.addressData.address,
-        sectorId: formData.personalData.sectorId
+        sectorId: formData.personalData.sectorId,
+        startTime: formData.personalData.startTime,
+        endTime: formData.personalData.endTime,
+        numberOfHolidays: formData.personalData.numberOfHolidays,
+        numberOfPermissions: formData.personalData.numberOfPermissions,
+        remainingNumberOfHolidays: formData.personalData.remainingNumberOfHolidays,
+        remainingNumberOfPermissions: formData.personalData.remainingNumberOfPermissions
       };
 
       if(this.id)

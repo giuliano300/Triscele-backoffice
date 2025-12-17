@@ -17,4 +17,10 @@ export interface Operators {
   city: string;
   pwd: string;
   sectorId: string;
+  startTime: string;
+  endTime: string;
+  numberOfHolidays: number;
+  numberOfPermissions: number;
+  remainingNumberOfHolidays?: number;
+  remainingNumberOfPermissions?: number;
 }
