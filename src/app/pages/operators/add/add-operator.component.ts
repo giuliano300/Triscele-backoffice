@@ -23,6 +23,7 @@ import { PermissionService } from '../../../services/Permission.service';
 import { MatCheckbox } from "@angular/material/checkbox";
 import { Sectors } from '../../../interfaces/sectors';
 import { SectorService } from '../../../services/Sector.service';
+import { LoginType } from '../../../enum/enum';
 registerLocaleData(localeIt);
 
 export const MY_DATE_FORMATS = {
@@ -82,6 +83,8 @@ export class AddOperatorComponent {
 
   sectors: Sectors[] = [];
 
+  loginTypeEnum = LoginType;
+
   constructor(
       private router: Router,
       private OperatorService: OperatorService,
@@ -96,6 +99,7 @@ export class AddOperatorComponent {
     this.adapter.setLocale('it-IT');
     this.disciplinaryForm = this.fb.group({
         personalData: this.fb.group({
+          loginType: [null, Validators.required],
           name: [''],
           lastName: [''],
           birthDate: [''],
@@ -147,6 +151,7 @@ export class AddOperatorComponent {
           // patch dei dati principali
           this.disciplinaryForm.patchValue({
             personalData: {
+              loginType: data.loginType,
               name: data.name,
               lastName: data.lastName,
               mobile: data.mobile,
@@ -206,6 +211,7 @@ export class AddOperatorComponent {
       };
 
       let w: Operators = {
+        loginType: formData.personalData.loginType,
         _id: this.id ?? undefined,
         businessName: formData.personalData.businessName,
         name: formData.personalData.name,

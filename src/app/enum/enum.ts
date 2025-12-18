@@ -49,3 +49,8 @@ export enum absenceType{
   ferie = 1, 
   permesso = 2
 }
+
+export enum LoginType {
+  homeWork = 'Home work',
+  onSite = 'In sede',
+}

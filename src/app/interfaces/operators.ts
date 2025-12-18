@@ -1,6 +1,8 @@
+import { LoginType } from "../enum/enum";
 import { Permission } from "./permissions";
 
 export interface Operators {
+  loginType: LoginType;  
   _id?: string;  
   businessName: string;
   name: string;

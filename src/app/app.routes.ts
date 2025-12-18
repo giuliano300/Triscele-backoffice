@@ -34,6 +34,8 @@ import { OperatorCalendarComponent } from './pages/calendar/operator-calendar.co
 import { OperatorIllnessComponent } from './pages/illness/operator-illness.component';
 import { AbsenceComponent } from './pages/absence/absence.component';
 import { MiniCalendarComponent } from './pages/operators/mini-calendar/mini-calendar.component';
+import { AllowedIpComponent } from './pages/allowed-ip/allowed-ip.component';
+import { DashboardNotVisibleComponent } from './pages/dashboard-not-visible/dashboard-not-visible.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -156,6 +158,14 @@ export const routes: Routes = [
             { path: 'categories', component: CategoriesComponent,
                 canActivate: [RoleGuard],
                 data: { roles: ['admin', 'operatore'] }
+            },
+            { path: 'dashboard-not-visible', component: DashboardNotVisibleComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'operatore' }
+            },
+            { path: 'allowed-ip', component: AllowedIpComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
             },
             { path: 'sectors', component: SectorsComponent,
                 canActivate: [RoleGuard],

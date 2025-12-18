@@ -48,6 +48,8 @@ export class SignInComponent {
     // Password Hide
     hide = true;
 
+    errorMessage: string = "Username o password errati.";
+
     // Form
     authForm: FormGroup;
     onSubmit() {
@@ -63,8 +65,10 @@ export class SignInComponent {
                 if(data == null)
                 {
                     this.operatorService.loginOperator(login).subscribe((data: any) => {
-                        if(data == null)
-                         this.isError = true;
+                        if(data.success == false){
+                            this.errorMessage = data.message
+                            this.isError = true;
+                        }
                         else
                         {
                             const o = this.authService.decodeToken(data)!

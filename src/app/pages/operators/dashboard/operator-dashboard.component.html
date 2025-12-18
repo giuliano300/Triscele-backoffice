@@ -69,7 +69,22 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <div class="active-form disabled-form" *ngIf="!hasActiveBreak()" @fadeIn>
+                <div class="active-form" *ngIf="!hasActiveBreak()" @fadeIn>
+                  <!-- Lista pause già fatte -->
+                  <div class="breaks-list">
+                    <h2>Pause effettuate</h2>
+
+                    <div class="break-item" *ngFor="let b of attendance.breaks; let i = index">
+                      <span class="break-index">#{{ i + 1 }}</span>
+                      <span class="break-time">
+                        {{ b.start}} – {{ b.end ? b.end : 'in corso' }}
+                      </span>
+                    </div>
+
+                    <div class="break-item center" *ngIf="attendance.breaks!.length == 0">
+                        <span>Nessuna pausa ancora effettuata</span>
+                    </div>
+                  </div>
                   <button mat-raised-button class="btn-confirm start-pause" (click)="startBreak()">
                     Inizia Pausa
                   </button>

@@ -14,6 +14,23 @@
                 </ng-template>
                 <div class="row g-3 mt-20" [formGroupName]="'personalData'"> 
 
+                  <!-- Tipo lavoro -->
+                  <div class="col-sm-12">
+                    <label class="label d-block fw-medium mb-10">Tipo lavoro</label>
+                    <mat-form-field class="w-100">
+                      <i-feather name="check"></i-feather>
+                      <mat-label>Tipo lavoro</mat-label>
+                      <mat-select formControlName="loginType">
+                        <mat-option [value]="loginTypeEnum.homeWork">
+                          Home Work
+                        </mat-option>
+                        <mat-option [value]="loginTypeEnum.onSite">
+                          In sede
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
                   <!-- Nome e Cognome -->
                   <div class="col-sm-6">
                     <label class="label d-block fw-medium mb-10">Nome</label>

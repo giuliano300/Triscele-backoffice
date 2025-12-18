@@ -1,0 +1,21 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup] = "categoryForm">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Inserisci l'ip consentito</label>
+          <mat-form-field class="w-100">
+            <i-feather name="check"></i-feather>
+            <mat-label>Inserisci l'ip consentito</mat-label>
+            <input matInput formControlName="ip" type="text">
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()" class="btn back">Chiudi</button>
+  <button mat-flat-button (click)="onSave()" class="btn" [disabled]="categoryForm.invalid">Salva</button>
+</mat-dialog-actions>

@@ -10,6 +10,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
 import { ToastrService } from 'ngx-toastr';
 import { SocketService } from '../../services/socket.service';
+import { interval, Subscription } from 'rxjs';
 
 
 @Component({
@@ -43,8 +44,8 @@ export class SidebarComponent {
         this.toggleService.isToggled$.subscribe(isToggled => {
             this.isToggled = isToggled;
         });
-
    }
+
     // Toggle Service
     isToggled = false;
     toggle() {

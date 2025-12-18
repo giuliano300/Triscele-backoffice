@@ -48,7 +48,7 @@
                             La password deve contenere almeno 4 caratteri.
                         </div>
                         <div class="error text-danger mt-10" *ngIf="isError">
-                            Username o password errati.
+                            {{errorMessage}}
                         </div>
                     </div>
                     <button mat-button type="submit" [disabled]="authForm.invalid" class="mb-15">

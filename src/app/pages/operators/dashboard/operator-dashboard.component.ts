@@ -10,6 +10,9 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { AttendanceService } from '../../../services/Attendance.service';
 import { Attendance, Break } from '../../../interfaces/attendance';
 import { FeathericonsModule } from '../../../icons/feathericons/feathericons.module';
+import { AuthService } from '../../../services/auth.service';
+import { interval, Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-operator-dashboard',
@@ -54,11 +57,15 @@ export class OperatorDashboardComponent {
   private breakInterval: any;
 
   constructor(
+    private router: Router,
     private attendanceService: AttendanceService,
+    private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: any
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
+
+   private subscription: Subscription = new Subscription();
 
   ngOnInit(): void {
     if (!this.isBrowser) return;
@@ -68,6 +75,25 @@ export class OperatorDashboardComponent {
     this.todayAttendance();
     this.updateTime();
     setInterval(() => this.updateTime(), 60000);
+
+    const isOperator = localStorage.getItem('isOperator') === 'true';
+    if (isOperator) {
+        const o = JSON.parse(localStorage.getItem('operator') || '{}');
+        const operatorId = o.sub;  
+        this.authService.ping(operatorId).subscribe((data) =>{
+            //console.log(data);
+            if(!data)
+                this.router.navigate(['/dashboard-not-visible']);
+        });
+
+        this.subscription = interval(5000).subscribe(() => { // ogni 5s
+            this.authService.ping(operatorId).subscribe((data) =>{
+                if(!data)
+                    this.router.navigate(['/dashboard-not-visible']);
+            });
+        });        
+    }
+
   }
 
   todayAttendance() {

@@ -240,7 +240,14 @@
                         </span>
                     </a>                
 
-                    <span class="sub-title text-body sbs" *ngIf="isOperator">
+                    <a routerLink="/allowed-ip" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                        <i-feather name="check"></i-feather>
+                        <span class="title">
+                            Ip consentiti
+                        </span>
+                    </a>         
+
+                   <span class="sub-title text-body sbs" *ngIf="isOperator">
                         PRESENZE
                     </span>
                     <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isOperator">

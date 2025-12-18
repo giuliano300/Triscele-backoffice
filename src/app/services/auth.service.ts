@@ -87,4 +87,8 @@ export class AuthService {
     return this.http.post<any>(API_URL + "users/changePasswordRequest", value);
   }
 
+  ping(operatorId: string): Observable<boolean> {
+    return this.http.post<boolean>(API_URL + `auth/ping?operatorId=${operatorId}`, {});
+  }
+
 }
