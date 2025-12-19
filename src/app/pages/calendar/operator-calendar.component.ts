@@ -14,7 +14,6 @@ import { OperatorService } from '../../services/Operator.service';
 import { Operators } from '../../interfaces/operators';
 import { UtilsService } from '../../services/utils.service';
 import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
-import { ConfirmDialogComponent } from '../../confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-calendar',
@@ -93,7 +92,9 @@ export class OperatorCalendarComponent implements OnInit {
     },
     datesSet: (info) => {
       const year = info.view.currentStart.getFullYear();
-      this.holidays = this.utils.getItalianHolidays(year);
+      this.utils.getItalianHolidays(year).subscribe(holidays => {
+        this.holidays = holidays;
+      });
 
       if (window.innerWidth < 768 && info.view.type !== 'dayGridDay') {
         info.view.calendar.changeView('dayGridDay');
@@ -108,18 +109,22 @@ export class OperatorCalendarComponent implements OnInit {
       const d = String(arg.date.getDate()).padStart(2, '0');
       const dateStr = `${y}-${m}-${d}`;
 
-      this.holidays = this.utils.getItalianHolidays(y);
+      this.utils.getItalianHolidays(y).subscribe(holidays => {
+        this.holidays = holidays;
 
-      const day = arg.date.getDay();
-      const isSunday = day === 0;
-      const isSaturday = day === 6;
-      const isHoliday = this.holidays.includes(dateStr);
+        const day = arg.date.getDay();
+        const isSunday = day === 0;
+        const isSaturday = day === 6;
+        const isHoliday = this.holidays.includes(dateStr);
 
-      if (isSunday || isSaturday || isHoliday) {
-        arg.el.style.backgroundColor = this.utils.getDisabledColor();
-        arg.el.style.pointerEvents = 'none';
-        arg.el.style.opacity = '0.95';
-      }
+        if (isSunday || isSaturday || isHoliday) {
+          arg.el.style.backgroundColor = this.utils.getDisabledColor();
+          arg.el.style.pointerEvents = 'none';
+          arg.el.style.opacity = '0.95';
+        }
+
+      });
+
     },
     eventClick: (info) => {
       this.openEditEvent(info.event);
@@ -132,7 +137,9 @@ export class OperatorCalendarComponent implements OnInit {
 
   ngOnInit(): void {
     const year = new Date().getFullYear();
-    this.holidays = this.utils.getItalianHolidays(year);
+    this.utils.getItalianHolidays(year).subscribe(holidays => {
+        this.holidays = holidays;
+      });
 
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
@@ -160,79 +167,93 @@ export class OperatorCalendarComponent implements OnInit {
   // SPLIT EVENTI + TOOLTIP COMPLETO
   // -----------------------
 
-  applyEventsToCalendar() {
+async applyEventsToCalendar() {
 
-    const splitEvents: EventInput[] = [];
+  const splitEvents: EventInput[] = [];
 
-    for (const e of this.events) {
+  if (!this.events || this.events.length === 0) return;
 
-      const isPermission = e.title?.includes('Permesso');
+  // 🔹 1. anni coinvolti
+  const years = new Set<number>();
+  for (const e of this.events) {
+    years.add(new Date(e.start).getFullYear());
+    if (e.end) years.add(new Date(e.end).getFullYear());
+  }
 
-      const startDate = new Date(e.start);
-      const endDate = e.end ? new Date(e.end) : new Date(e.start);
+  // 🔹 2. carica festività per anno (cache)
+  const holidayMap = new Map<number, string[]>();
 
-      // Normalizza ore (evita problemi timezone)
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
+  for (const y of years) {
+    const holidays = await this.utils.getItalianHolidays(y).toPromise();
+    holidayMap.set(y, holidays!);
+  }
 
-      const originalStartStr = startDate.toLocaleDateString('it-IT');
-      const originalEndStr = endDate.toLocaleDateString('it-IT');
+  // 🔹 3. split eventi
+  for (const e of this.events) {
 
-      let loop = new Date(startDate);
+    const isPermission = e.title?.includes('Permesso');
 
-      while (loop <= endDate) {
+    const startDate = new Date(e.start);
+    const endDate = e.end ? new Date(e.end) : new Date(e.start);
 
-        const y = loop.getFullYear();
-        const m = String(loop.getMonth() + 1).padStart(2, '0');
-        const d = String(loop.getDate()).padStart(2, '0');
-        const dateStr = `${y}-${m}-${d}`;
+    startDate.setHours(0,0,0,0);
+    endDate.setHours(0,0,0,0);
 
-        this.holidays = this.utils.getItalianHolidays(y);
+    const originalStartStr = startDate.toLocaleDateString('it-IT');
+    const originalEndStr = endDate.toLocaleDateString('it-IT');
 
-        const day = loop.getDay();
-        const isSaturday = day === 6;
-        const isSunday = day === 0;
-        const isHoliday = this.holidays.includes(dateStr);
+    let loop = new Date(startDate);
 
-        // ⛔ Salta completamente weekend e festivi
-        if (isSaturday || isSunday || isHoliday) {
-          loop.setDate(loop.getDate() + 1);
-          continue;
-        }
+    while (loop <= endDate) {
 
-        const dayStart = new Date(loop);
-        const dayEnd = new Date(loop);
-        dayEnd.setDate(dayEnd.getDate() + 1);
+      const y = loop.getFullYear();
+      const m = String(loop.getMonth() + 1).padStart(2, '0');
+      const d = String(loop.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
 
-        splitEvents.push({
-          title: this.showFullName
-            ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}`
-            : e.title,
+      const day = loop.getDay();
+      const isSaturday = day === 6;
+      const isSunday = day === 0;
+      const isHoliday = holidayMap.get(y)?.includes(dateStr);
 
-          start: dayStart,
-          end: dayEnd,
-          allDay: true,
-          color: e.color ?? '#90CAF9',
-
-          extendedProps: {
-            originalEvent: {
-              id: e.id,
-              fullName: e.fullName,
-              reason: e.reason,
-              type: e.type,
-              tipologia: e.tipologia,
-              originalStart: originalStartStr,
-              originalEnd: originalEndStr,
-              dataPermesso: isPermission ? originalStartStr : undefined,
-              startHour: e.startHour,
-              endHour: e.endHour
-            }
-          }
-        });
-
+      if (isSaturday || isSunday || isHoliday) {
         loop.setDate(loop.getDate() + 1);
+        continue;
       }
+
+      const dayStart = new Date(loop);
+      const dayEnd = new Date(loop);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+
+      splitEvents.push({
+        title: this.showFullName
+          ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}`
+          : e.title,
+
+        start: dayStart,
+        end: dayEnd,
+        allDay: true,
+        color: e.color ?? '#90CAF9',
+
+        extendedProps: {
+          originalEvent: {
+            id: e.id,
+            fullName: e.fullName,
+            reason: e.reason,
+            type: e.type,
+            tipologia: e.tipologia,
+            originalStart: originalStartStr,
+            originalEnd: originalEndStr,
+            dataPermesso: isPermission ? originalStartStr : undefined,
+            startHour: e.startHour,
+            endHour: e.endHour
+          }
+        }
+      });
+
+      loop.setDate(loop.getDate() + 1);
     }
+  }
 
   // 🔥 assegna SOLO alla fine
   this.calendarOptions = {

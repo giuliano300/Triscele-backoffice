@@ -36,6 +36,7 @@ import { AbsenceComponent } from './pages/absence/absence.component';
 import { MiniCalendarComponent } from './pages/operators/mini-calendar/mini-calendar.component';
 import { AllowedIpComponent } from './pages/allowed-ip/allowed-ip.component';
 import { DashboardNotVisibleComponent } from './pages/dashboard-not-visible/dashboard-not-visible.component';
+import { CustomHolodaysComponent } from './pages/custom-holodays/custom-holodays.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -164,6 +165,10 @@ export const routes: Routes = [
                 data: { role: 'operatore' }
             },
             { path: 'allowed-ip', component: AllowedIpComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'custom-holodays', component: CustomHolodaysComponent,
                 canActivate: [RoleGuard],
                 data: { role: 'admin' }
             },

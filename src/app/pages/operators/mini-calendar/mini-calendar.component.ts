@@ -12,6 +12,7 @@ import { ExcelService } from '../../../services/excel.service';
 interface OperatorMonth {
   operatorId: string;
   fullName: string;
+  startTime?: string;
   events: MiniCalendarEvent[];
 }
 
@@ -39,7 +40,9 @@ export class MiniCalendarComponent implements OnInit {
   ngOnInit(): void {
     this.generateMonthDays();
     this.loadCalendar();
-    this.holidays = this.utils.getItalianHolidays(this.currentYear!);
+    this.utils.getItalianHolidays(this.currentYear!).subscribe(holidays => {
+      this.holidays = holidays;
+    });
   }
 
   generateExcel() {
@@ -82,6 +85,7 @@ export class MiniCalendarComponent implements OnInit {
 
   // Raggruppa eventi per operatore
   private groupByOperator(events: MiniCalendarEvent[]): OperatorMonth[] {
+    console.log(events);
     const map = new Map<string, OperatorMonth>();
     events.forEach(ev => {
       const key = ev.fullName;
@@ -89,6 +93,7 @@ export class MiniCalendarComponent implements OnInit {
         map.set(key, {
           operatorId: ev.id,
           fullName: ev.fullName,
+          startTime: ev.operatorStartTime,
           events: []
         });
       }
@@ -187,16 +192,48 @@ export class MiniCalendarComponent implements OnInit {
   }
 
   // Controlli ritardo e pausa
-  isLate(entryTime?: string): boolean {
-    if (!entryTime) return false;
-    const [h, m] = entryTime.split(':').map(Number);
-    return h > 9 || (h === 9 && m > 0); // ritardo dopo le 09:00
+  isLate(
+    entryTime?: string,
+    operatorStartTime?: string,
+    operatorEndTime?: string,
+    exitTime?: string
+  ): boolean {
+
+    if (!entryTime || !operatorStartTime) return false;
+
+    // ingresso
+    const [eh, em] = entryTime.split(':').map(Number);
+    const [sh, sm] = operatorStartTime.split(':').map(Number);
+
+    const entryMinutes = eh * 60 + em;
+    const startMinutes = sh * 60 + sm;
+
+    // ritardo ingresso
+    if (entryMinutes > startMinutes) {
+      return true;
+    }
+
+    // uscita anticipata (se forniti)
+    if (exitTime && operatorEndTime) {
+      const [xh, xm] = exitTime.split(':').map(Number);
+      const [eh2, em2] = operatorEndTime.split(':').map(Number);
+
+      const exitMinutes = xh * 60 + xm;
+      const endMinutes = eh2 * 60 + em2;
+
+      if (exitMinutes < endMinutes) {
+        return true;
+      }
+    }
+
+    return false;
   }
+
 
   isLongLunch(start?: string, end?: string): boolean {
     if (!start || !end) return false;
     const diff = this.toSeconds(end) - this.toSeconds(start);
-    return diff > 3600; // pausa > 1h
+    return diff > 3600; // pausa > 1.30h
   }
 
   private toSeconds(time: string): number {
@@ -214,7 +251,9 @@ export class MiniCalendarComponent implements OnInit {
     }
     this.generateMonthDays();
     this.loadCalendar();
-    this.holidays = this.utils.getItalianHolidays(this.currentYear!);
+    this.utils.getItalianHolidays(this.currentYear!).subscribe(holidays => {
+      this.holidays = holidays;
+    });
   }
 
   nextMonth() {
@@ -226,7 +265,9 @@ export class MiniCalendarComponent implements OnInit {
     }
     this.generateMonthDays();
     this.loadCalendar();
-    this.holidays = this.utils.getItalianHolidays(this.currentYear!);
+    this.utils.getItalianHolidays(this.currentYear!).subscribe(holidays => {
+      this.holidays = holidays;
+    });
   }
 
   // Formatta ore:minuti

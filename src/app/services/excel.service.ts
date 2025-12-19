@@ -11,7 +11,10 @@ export class ExcelService {
 
     exportMiniCalendar(operators: any[], monthDays: number[], month: number, year: number) {
     const rows: any[] = [];
-    this.holidays = this.utils.getItalianHolidays(year);
+    this.utils.getItalianHolidays(year).subscribe(holidays => {
+      this.holidays = holidays;
+    });
+
 
     const header = ['Operatore', ...monthDays.map(day => `${day}/${month + 1}`)];
     rows.push(header);

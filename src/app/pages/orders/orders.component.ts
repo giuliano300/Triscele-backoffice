@@ -29,7 +29,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { OrderChangeStateComponent } from '../../order-change-state-dialog/order-change-state-dialog.component';
 import { OrderStateService } from '../../services/OrderState.service';
 import { OrderState } from '../../interfaces/order-state';
-import { Bold } from 'angular-feather/icons';
 import { calculateFinalPrice, clause, generateOptionText } from '../../../main';
 import { MatTooltip } from "@angular/material/tooltip";
 import { finalize, tap } from 'rxjs';

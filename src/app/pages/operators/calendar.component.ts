@@ -82,7 +82,9 @@ export class CalendarComponent implements OnInit {
     },
     datesSet: (info) => {
     const year = info.view.currentStart.getFullYear();
-    this.holidays = this.utils.getItalianHolidays(year);
+    this.utils.getItalianHolidays(year).subscribe(holidays => {
+      this.holidays = holidays;
+    });
 
     if (window.innerWidth < 768 && info.view.type !== 'dayGridDay') {
         info.view.calendar.changeView('dayGridDay');
@@ -97,21 +99,24 @@ export class CalendarComponent implements OnInit {
       const d = String(arg.date.getDate()).padStart(2, '0');
       const dateStr = `${y}-${m}-${d}`;
 
-      this.holidays = this.utils.getItalianHolidays(y);
+      this.utils.getItalianHolidays(y).subscribe(holidays => {
+        this.holidays = holidays;
 
-      const day = arg.date.getDay();
-      const isSunday = day === 0;
-      const isSaturday = day === 6;
-      const isHoliday = this.holidays.includes(dateStr);
+        const day = arg.date.getDay();
+        const isSunday = day === 0;
+        const isSaturday = day === 6;
+        const isHoliday = this.holidays.includes(dateStr);
 
-      if (isSunday || isSaturday || isHoliday) {
-        arg.el.style.backgroundColor = this.utils.getDisabledColor();
-        arg.el.style.pointerEvents = 'none';
-        arg.el.style.opacity = '0.95';
-      }
+        if (isSunday || isSaturday || isHoliday) {
+          arg.el.style.backgroundColor = this.utils.getDisabledColor();
+          arg.el.style.pointerEvents = 'none';
+          arg.el.style.opacity = '0.95';
+        }
+      });
+
     },
     dateClick: (info) => {
-      this.openNewEditDeleteAttendance(info.dateStr);
+      //this.openNewEditDeleteAttendance(info.dateStr);
     },
 
     eventClick: (info) => {
@@ -223,17 +228,33 @@ export class CalendarComponent implements OnInit {
     });
   }
 
-  applyEventsToCalendar() {
+  async applyEventsToCalendar() {
 
     const splitEvents: EventInput[] = [];
+    if (!this.events || this.events.length === 0) return;
+
+    // 🔹 cache festività per anno
+    const holidayCache = new Map<number, string[]>();
+
+    const getHolidaysForYear = async (year: number): Promise<string[]> => {
+      if (!holidayCache.has(year)) {
+        const holidays = await this.utils.getItalianHolidays(year).toPromise();
+        holidayCache.set(year, holidays!);
+      }
+      return holidayCache.get(year)!;
+    };
 
     for (const e of this.events) {
 
-      //const isPresence = e.title?.includes('Presenza');
       const isPermission = e.title?.includes('Permesso');
 
       const originalStartDate = new Date(e.start);
-      const originalEndDate = e.end ? new Date(e.end) : new Date(e.start);
+      const originalEndDate = e.end
+        ? new Date(e.end)
+        : new Date(e.start);
+
+      originalStartDate.setHours(0,0,0,0);
+      originalEndDate.setHours(0,0,0,0);
 
       const originalStartStr = originalStartDate.toLocaleDateString('it-IT');
       const originalEndStr = originalEndDate.toLocaleDateString('it-IT');
@@ -241,18 +262,19 @@ export class CalendarComponent implements OnInit {
       let loop = new Date(originalStartDate);
 
       while (loop <= originalEndDate) {
+
         const y = loop.getFullYear();
         const m = String(loop.getMonth() + 1).padStart(2, '0');
         const d = String(loop.getDate()).padStart(2, '0');
         const dateStr = `${y}-${m}-${d}`;
 
-        this.holidays = this.utils.getItalianHolidays(y);
+        // ✅ festività GARANTITE
+        const holidays = await getHolidaysForYear(y);
 
         const day = loop.getDay();
-
-        const isHoliday = this.holidays.includes(dateStr);
         const isSaturday = day === 6;
         const isSunday = day === 0;
+        const isHoliday = holidays.includes(dateStr);
 
         if (isSaturday || isSunday || isHoliday) {
           loop.setDate(loop.getDate() + 1);
@@ -264,7 +286,10 @@ export class CalendarComponent implements OnInit {
         dayEnd.setDate(dayEnd.getDate() + 1);
 
         splitEvents.push({
-          title: this.showFullName ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}` : e.title,
+          title: this.showFullName
+            ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}`
+            : e.title,
+
           start: dayStart,
           end: dayEnd,
           allDay: true,
@@ -272,16 +297,16 @@ export class CalendarComponent implements OnInit {
 
           extendedProps: {
             originalEvent: {
+              id: e.id,
               fullName: e.fullName,
               reason: e.reason,
               type: e.type,
+              tipologia: e.tipologia,
               originalStart: originalStartStr,
               originalEnd: originalEndStr,
               dataPermesso: isPermission ? originalStartStr : undefined,
               startHour: e.startHour,
-              endHour: e.endHour,
-              id: e.id,
-              tipologia: e.tipologia
+              endHour: e.endHour
             }
           }
         });
@@ -290,6 +315,7 @@ export class CalendarComponent implements OnInit {
       }
     }
 
+    // 🔥 assegna UNA SOLA VOLTA
     this.calendarOptions = {
       ...this.calendarOptions,
       events: splitEvents

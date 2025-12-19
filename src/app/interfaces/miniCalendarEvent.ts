@@ -3,6 +3,8 @@ export interface MiniCalendarEvent {
   id: string;
   title: string;
   fullName: string;
+  operatorStartTime: string;
+  operatorEndTime: string;
   date?: string; // YYYY-MM-DD, per presenze giornaliere
   startDate?: string; // YYYY-MM-DD, per assenze e malattie
   endDate?: string;   // YYYY-MM-DD, per assenze e malattie

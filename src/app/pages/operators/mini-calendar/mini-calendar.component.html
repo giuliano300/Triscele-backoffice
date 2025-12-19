@@ -52,7 +52,7 @@
                                 <!-- Weekend o festivo -->
                                 <ng-container *ngIf="isWeekendOrHoliday(day); else workingDay">
                                     <div 
-                                        class="event-cell non-working"
+                                        class="event-cell not-working"
                                         matTooltip="Giorno non lavorativo"
                                         matTooltipPosition="above">
                                     </div>
@@ -70,8 +70,12 @@
                                         >
                                             <!-- Presenza -->
                                             <ng-container *ngIf="getPresence(events) as pres">
-                                                {{ formatHourMinute(pres.startHour) || '-' }}<br>
-                                                {{ formatHourMinute(pres.endHour) || '-' }}
+                                                <span
+                                                    [class.late]="isLate(pres.startHour, pres.operatorStartTime, pres.operatorEndTime!)"
+                                                >
+                                                    {{ formatHourMinute(pres.startHour) || '-' }}<br>
+                                                    {{ formatHourMinute(pres.endHour) || '-' }}
+                                                </span>
                                             </ng-container>
 
                                             <!-- Permesso -->

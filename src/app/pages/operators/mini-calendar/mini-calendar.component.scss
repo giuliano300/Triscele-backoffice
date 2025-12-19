@@ -92,6 +92,7 @@
 }
 
 .event-cell {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -106,7 +107,7 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 
     &.late {
-      background-color: #FF6B6B;
+      background-color: #FF6B6B!important;
     }
 
     &.holiday {
@@ -114,8 +115,8 @@
       color: black;
     }
 
-    &.non-working {
-      background-color: #fafafa;
+    &.not-working {
+      background-color: #ff000010;
       color: transparent;
       cursor: default;
     }
@@ -152,4 +153,10 @@
         opacity: 1;
         cursor: pointer;
     }
+}
+
+.late {
+  background-color: #FF6B6B!important;
+  padding: 7px 12px;
+  position: absolute;
 }
