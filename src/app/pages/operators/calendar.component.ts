@@ -34,6 +34,7 @@ export class CalendarComponent implements OnInit {
 
   showFullName: boolean = false; 
   showCalendar: boolean = false;
+  currentYear: number =  new Date().getFullYear();
 
   operatorId: string = '';
 
@@ -93,7 +94,7 @@ export class CalendarComponent implements OnInit {
         info.view.calendar.changeView('dayGridMonth');
       }
     },
-    dayCellDidMount: (arg: any) => {
+    dayCellDidMount: async (arg: any) => {
       const y = arg.date.getFullYear();
       const m = String(arg.date.getMonth() + 1).padStart(2, '0');
       const d = String(arg.date.getDate()).padStart(2, '0');
@@ -102,6 +103,12 @@ export class CalendarComponent implements OnInit {
       const day = arg.date.getDay();
       const isSunday = day === 0;
       const isSaturday = day === 6;
+      
+      if(this.currentYear != y){
+        this.holidays = await this.utils.getItalianHolidays(y).toPromise();
+        this.currentYear = y;
+      }
+
       const isHoliday = this.holidays!.includes(dateStr);
 
       if (isSunday || isSaturday || isHoliday) {
