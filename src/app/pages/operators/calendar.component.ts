@@ -13,11 +13,12 @@ import { Router } from '@angular/router';
 import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
 import { AttendanceService } from '../../services/Attendance.service';
 import { UtilsService } from '../../services/utils.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [FullCalendarModule, MatCardModule],
+  imports: [FullCalendarModule, MatCardModule, NgIf],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
@@ -32,12 +33,13 @@ export class CalendarComponent implements OnInit {
   ) {}
 
   showFullName: boolean = false; 
+  showCalendar: boolean = false;
 
   operatorId: string = '';
 
   @ViewChild('fullCalendar') calendarComponent!: FullCalendarComponent;
   events: any[] = [];
-  holidays: string[] = [];
+  holidays: string[] | undefined = [];
   
   calendarOptions: CalendarOptions = {
     initialView: 'dayGridMonth',
@@ -80,11 +82,9 @@ export class CalendarComponent implements OnInit {
         theme: 'custom-tooltip'
       });
     },
-    datesSet: (info) => {
+    datesSet: async (info) => {
     const year = info.view.currentStart.getFullYear();
-    this.utils.getItalianHolidays(year).subscribe(holidays => {
-      this.holidays = holidays;
-    });
+    this.holidays = await this.utils.getItalianHolidays(year).toPromise();
 
     if (window.innerWidth < 768 && info.view.type !== 'dayGridDay') {
         info.view.calendar.changeView('dayGridDay');
@@ -99,20 +99,16 @@ export class CalendarComponent implements OnInit {
       const d = String(arg.date.getDate()).padStart(2, '0');
       const dateStr = `${y}-${m}-${d}`;
 
-      this.utils.getItalianHolidays(y).subscribe(holidays => {
-        this.holidays = holidays;
+      const day = arg.date.getDay();
+      const isSunday = day === 0;
+      const isSaturday = day === 6;
+      const isHoliday = this.holidays!.includes(dateStr);
 
-        const day = arg.date.getDay();
-        const isSunday = day === 0;
-        const isSaturday = day === 6;
-        const isHoliday = this.holidays.includes(dateStr);
-
-        if (isSunday || isSaturday || isHoliday) {
-          arg.el.style.backgroundColor = this.utils.getDisabledColor();
-          arg.el.style.pointerEvents = 'none';
-          arg.el.style.opacity = '0.95';
-        }
-      });
+      if (isSunday || isSaturday || isHoliday) {
+        arg.el.style.backgroundColor = this.utils.getDisabledColor();
+        arg.el.style.pointerEvents = 'none';
+        arg.el.style.opacity = '0.95';
+      }
 
     },
     dateClick: (info) => {
@@ -132,7 +128,7 @@ export class CalendarComponent implements OnInit {
       this.operatorId = o.sub;  
     }
     this.loadEvents(this.operatorId);
-    this.applyEventsToCalendar();
+    //this.applyEventsToCalendar();
   }
 
   openEditEvent(event: any) {
@@ -314,6 +310,7 @@ export class CalendarComponent implements OnInit {
         loop.setDate(loop.getDate() + 1);
       }
     }
+    this.showCalendar = true;
 
     // 🔥 assegna UNA SOLA VOLTA
     this.calendarOptions = {

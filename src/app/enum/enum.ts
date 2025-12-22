@@ -54,3 +54,4 @@ export enum LoginType {
   homeWork = 'Home work',
   onSite = 'In sede',
 }
+

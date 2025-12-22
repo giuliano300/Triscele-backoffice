@@ -23,22 +23,33 @@ export class DashboardNotVisibleComponent {
 
   private subscription: Subscription = new Subscription();
   
- ngOnInit(): void {
-  const isOperator = localStorage.getItem('isOperator') === 'true';
+  ngOnInit(): void {
+      const isOperator = localStorage.getItem('isOperator') === 'true';
       if (isOperator) {
           const o = JSON.parse(localStorage.getItem('operator') || '{}');
           const operatorId = o.sub;  
-          this.authService.ping(operatorId).subscribe((data) =>{
-              if(data)
-                  this.router.navigate(['/operator/dashboard']);
-          });
-  
-          this.subscription = interval(5000).subscribe(() => { // ogni 5s
-              this.authService.ping(operatorId).subscribe((data) =>{
-                  if(data)
-                      this.router.navigate(['/operator/dashboard']);
-              });
-          });        
+          this.authService.getPublicIp().subscribe((myIp)=>{
+            const ip = myIp.ip;
+            console.log(ip);
+            this.authService.ping(operatorId, ip).subscribe((data) =>{
+                if(data)
+                    this.router.navigate(['/operator/dashboard']);
+            });
+    
+            this.subscription = interval(5000).subscribe(() => { // ogni 5s
+                this.authService.ping(operatorId, ip).subscribe((data) =>{
+                    if(data)
+                        this.router.navigate(['/operator/dashboard']);
+                });
+            });        
+          })
+
       }
     }
+
+    
+  ngOnDestroy(): void {
+    if (this.subscription) this.subscription.unsubscribe();
+  }
+  
 }

@@ -14,11 +14,13 @@ import { OperatorService } from '../../services/Operator.service';
 import { Operators } from '../../interfaces/operators';
 import { UtilsService } from '../../services/utils.service';
 import { AddUpdateDeleteAttendanceDialogComponent } from '../../add-update-delete-attendance-dialog/add-update-delete-attendance-dialog.component';
+import { NgIf } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [FullCalendarModule, MatCardModule],
+  imports: [FullCalendarModule, MatCardModule, NgIf],
   templateUrl: './operator-calendar.component.html',
   styleUrls: ['./operator-calendar.component.scss']
 })
@@ -36,11 +38,12 @@ export class OperatorCalendarComponent implements OnInit {
 
   showFullName: boolean = false; 
   operatorName: string = '';
-  holidays: string[] = [];
+  holidays: string[] | undefined = [];
 
   @ViewChild('fullCalendar') calendarComponent!: FullCalendarComponent;
   events: any[] = [];
 
+  showCalendar: boolean = false;
 
   // -----------------------
   // CALENDAR OPTIONS
@@ -63,7 +66,7 @@ export class OperatorCalendarComponent implements OnInit {
 
     selectAllow: (info) => {
       const d = new Date(info.startStr);
-      return !(d.getDay() === 0 || d.getDay() === 6 || this.holidays.includes(info.startStr));
+      return !(d.getDay() === 0 || d.getDay() === 6 || this.holidays!.includes(info.startStr));
     },
     eventDidMount: (info) => {
       const infos: any = info.event.extendedProps;
@@ -90,11 +93,9 @@ export class OperatorCalendarComponent implements OnInit {
         theme: 'custom-tooltip'
       });
     },
-    datesSet: (info) => {
+    datesSet: async (info) => {
       const year = info.view.currentStart.getFullYear();
-      this.utils.getItalianHolidays(year).subscribe(holidays => {
-        this.holidays = holidays;
-      });
+      this.holidays = await this.utils.getItalianHolidays(year).toPromise();
 
       if (window.innerWidth < 768 && info.view.type !== 'dayGridDay') {
         info.view.calendar.changeView('dayGridDay');
@@ -109,21 +110,16 @@ export class OperatorCalendarComponent implements OnInit {
       const d = String(arg.date.getDate()).padStart(2, '0');
       const dateStr = `${y}-${m}-${d}`;
 
-      this.utils.getItalianHolidays(y).subscribe(holidays => {
-        this.holidays = holidays;
+      const day = arg.date.getDay();
+      const isSunday = day === 0;
+      const isSaturday = day === 6;
+      const isHoliday = this.holidays!.includes(dateStr);
 
-        const day = arg.date.getDay();
-        const isSunday = day === 0;
-        const isSaturday = day === 6;
-        const isHoliday = this.holidays.includes(dateStr);
-
-        if (isSunday || isSaturday || isHoliday) {
-          arg.el.style.backgroundColor = this.utils.getDisabledColor();
-          arg.el.style.pointerEvents = 'none';
-          arg.el.style.opacity = '0.95';
-        }
-
-      });
+      if (isSunday || isSaturday || isHoliday) {
+        arg.el.style.backgroundColor = this.utils.getDisabledColor();
+        arg.el.style.pointerEvents = 'none';
+        arg.el.style.opacity = '0.95';
+      }
 
     },
     eventClick: (info) => {
@@ -166,36 +162,39 @@ export class OperatorCalendarComponent implements OnInit {
   // -----------------------
   // SPLIT EVENTI + TOOLTIP COMPLETO
   // -----------------------
+private holidayCache = new Map<number, string[]>(); // cache globale delle festività
 
 async applyEventsToCalendar() {
+  if (!this.events || this.events.length === 0) return;
 
   const splitEvents: EventInput[] = [];
 
-  if (!this.events || this.events.length === 0) return;
+  // 1️⃣ Trova tutti gli anni coinvolti
+  const years = Array.from(
+    new Set(
+      this.events.flatMap(e => [
+        new Date(e.start).getFullYear(),
+        e.end ? new Date(e.end).getFullYear() : null
+      ].filter(y => y !== null))
+    )
+  ) as number[];
 
-  // 🔹 1. anni coinvolti
-  const years = new Set<number>();
+  // 2️⃣ Carica festività per ogni anno solo se non in cache
+  await Promise.all(
+    years.map(async y => {
+      if (!this.holidayCache.has(y)) {
+        const holidays = await firstValueFrom(this.utils.getItalianHolidays(y));
+        this.holidayCache.set(y, holidays ?? []);
+      }
+    })
+  );
+
+  // 3️⃣ Splitta gli eventi per giorno
   for (const e of this.events) {
-    years.add(new Date(e.start).getFullYear());
-    if (e.end) years.add(new Date(e.end).getFullYear());
-  }
-
-  // 🔹 2. carica festività per anno (cache)
-  const holidayMap = new Map<number, string[]>();
-
-  for (const y of years) {
-    const holidays = await this.utils.getItalianHolidays(y).toPromise();
-    holidayMap.set(y, holidays!);
-  }
-
-  // 🔹 3. split eventi
-  for (const e of this.events) {
-
     const isPermission = e.title?.includes('Permesso');
 
     const startDate = new Date(e.start);
     const endDate = e.end ? new Date(e.end) : new Date(e.start);
-
     startDate.setHours(0,0,0,0);
     endDate.setHours(0,0,0,0);
 
@@ -203,9 +202,7 @@ async applyEventsToCalendar() {
     const originalEndStr = endDate.toLocaleDateString('it-IT');
 
     let loop = new Date(startDate);
-
     while (loop <= endDate) {
-
       const y = loop.getFullYear();
       const m = String(loop.getMonth() + 1).padStart(2, '0');
       const d = String(loop.getDate()).padStart(2, '0');
@@ -214,27 +211,21 @@ async applyEventsToCalendar() {
       const day = loop.getDay();
       const isSaturday = day === 6;
       const isSunday = day === 0;
-      const isHoliday = holidayMap.get(y)?.includes(dateStr);
+      const isHoliday = this.holidayCache.get(y)?.includes(dateStr);
 
       if (isSaturday || isSunday || isHoliday) {
         loop.setDate(loop.getDate() + 1);
         continue;
       }
 
-      const dayStart = new Date(loop);
-      const dayEnd = new Date(loop);
-      dayEnd.setDate(dayEnd.getDate() + 1);
-
       splitEvents.push({
         title: this.showFullName
           ? `${e.title}${e.fullName ? ' - ' + e.fullName : ''}`
           : e.title,
-
-        start: dayStart,
-        end: dayEnd,
+        start: new Date(loop),
+        end: new Date(loop),
         allDay: true,
         color: e.color ?? '#90CAF9',
-
         extendedProps: {
           originalEvent: {
             id: e.id,
@@ -255,12 +246,14 @@ async applyEventsToCalendar() {
     }
   }
 
-  // 🔥 assegna SOLO alla fine
+  // 4️⃣ Aggiorna il calendario SOLO alla fine
   this.calendarOptions = {
     ...this.calendarOptions,
     events: splitEvents
   };
+  this.showCalendar = true;
 }
+
 
   openEditEvent(event: any) {
     //console.log(event._def.extendedProps);

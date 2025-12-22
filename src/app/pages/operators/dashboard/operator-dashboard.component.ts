@@ -65,7 +65,8 @@ export class OperatorDashboardComponent {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-   private subscription: Subscription = new Subscription();
+  private pingSubscription: Subscription = new Subscription();
+  private updateTimeInterval: any;
 
   ngOnInit(): void {
     if (!this.isBrowser) return;
@@ -73,27 +74,38 @@ export class OperatorDashboardComponent {
     const o = JSON.parse(localStorage.getItem('operator') || '{}');
     this.operatorId = o?.sub ?? '';
     this.todayAttendance();
-    this.updateTime();
-    setInterval(() => this.updateTime(), 60000);
 
+    // Aggiornamento orario ogni minuto
+    this.updateTime();
+    this.updateTimeInterval = setInterval(() => this.updateTime(), 60000);
+
+    // Ping operator per verificare visibilità
     const isOperator = localStorage.getItem('isOperator') === 'true';
-    if (isOperator) {
-        const o = JSON.parse(localStorage.getItem('operator') || '{}');
-        const operatorId = o.sub;  
-        this.authService.ping(operatorId).subscribe((data) =>{
-            //console.log(data);
-            if(!data)
-                this.router.navigate(['/dashboard-not-visible']);
+    if (isOperator && this.operatorId) {
+
+      this.authService.getPublicIp().subscribe((myIp)=>{
+        const ip = myIp.ip;
+        // Ping iniziale
+        this.authService.ping(this.operatorId, ip).subscribe((data) => {
+          if (!data) this.router.navigate(['/dashboard-not-visible']);
         });
 
-        this.subscription = interval(5000).subscribe(() => { // ogni 5s
-            this.authService.ping(operatorId).subscribe((data) =>{
-                if(!data)
-                    this.router.navigate(['/dashboard-not-visible']);
-            });
-        });        
+        // Ping ogni 5 secondi
+        this.pingSubscription = interval(5000).subscribe(() => {
+          this.authService.ping(this.operatorId, ip).subscribe((data) => {
+            if (!data) this.router.navigate(['/dashboard-not-visible']);
+          });
+        });
+      });
     }
+  }
 
+  ngOnDestroy(): void {
+    // Ferma tutti gli interval e subscription
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    if (this.breakInterval) clearInterval(this.breakInterval);
+    if (this.updateTimeInterval) clearInterval(this.updateTimeInterval);
+    if (this.pingSubscription) this.pingSubscription.unsubscribe();
   }
 
   todayAttendance() {

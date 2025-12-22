@@ -23,6 +23,12 @@
                         </button>
                     </div>
 
+                    <div class="d-flex justify-content-end mb-2 ">
+                        <button mat-stroked-button  class="show-btn" (click)="showSummary = !showSummary">
+                            {{ showSummary ? 'Mostra calendario' : 'Mostra riepilogo' }}
+                        </button>
+                    </div>
+
                     <button mat-button class="export-btn" type="button" (click)="generateExcel()">
                         Download file
                     </button>
@@ -37,64 +43,92 @@
         <mat-card class="trinta-card mb-25 bg-white border-none d-block">
             <mat-card-content>
               <div class="mini-calendar-container">
-                <table class="table table-bordered mini-calendar">
-                    <thead>
-                    <tr>
-                        <th>Operatore</th>
-                        <th *ngFor="let day of monthDays">{{ day }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let op of operators">
-                            <td class="operator-cell">{{ op.fullName }}</td>
-                            <td *ngFor="let day of monthDays">
-
-                                <!-- Weekend o festivo -->
-                                <ng-container *ngIf="isWeekendOrHoliday(day); else workingDay">
-                                    <div 
-                                        class="event-cell not-working"
-                                        matTooltip="Giorno non lavorativo"
-                                        matTooltipPosition="above">
-                                    </div>
-                                </ng-container>
-
-                                <!-- Giorno lavorativo -->
-                                <ng-template #workingDay>
-                                    <ng-container *ngIf="getEventsForDay(op.events, day) as events">
-
-                                        <div 
-                                            class="event-cell"
-                                            [ngClass]="getCellClasses(events)"
-                                            [matTooltip]="getTooltipForDay(op.events, day)"
-                                            matTooltipPosition="above"
-                                        >
-                                            <!-- Presenza -->
-                                            <ng-container *ngIf="getPresence(events) as pres">
-                                                <span
-                                                    [class.late]="isLate(pres.startHour, pres.operatorStartTime, pres.operatorEndTime!)"
-                                                >
-                                                    {{ formatHourMinute(pres.startHour) || '-' }}<br>
-                                                    {{ formatHourMinute(pres.endHour) || '-' }}
-                                                </span>
-                                            </ng-container>
-
-                                            <!-- Permesso -->
-                                            <div *ngIf="hasPermission(events)">P</div>
-
-                                            <!-- Ferie -->
-                                            <div *ngIf="hasVacation(events)">F</div>
-
-                                            <!-- Malattia -->
-                                            <div *ngIf="hasIllness(events)">M</div>
-                                        </div>
-
-                                    </ng-container>
-                                </ng-template>
-
-                            </td>
+                <ng-container *ngIf="!showSummary">
+                    <table class="table table-bordered mini-calendar">
+                        <thead>
+                        <tr>
+                            <th>Operatore</th>
+                            <th *ngFor="let day of monthDays">{{ day }}</th>
                         </tr>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let op of operators">
+                                <td class="operator-cell">{{ op.fullName }}</td>
+                                <td *ngFor="let day of monthDays">
+
+                                    <!-- Weekend o festivo -->
+                                    <ng-container *ngIf="isWeekendOrHoliday(day); else workingDay">
+                                        <div 
+                                            class="event-cell not-working"
+                                            matTooltip="Giorno non lavorativo"
+                                            matTooltipPosition="above">
+                                        </div>
+                                    </ng-container>
+
+                                    <!-- Giorno lavorativo -->
+                                    <ng-template #workingDay>
+                                        <ng-container *ngIf="getEventsForDay(op.events, day) as events">
+
+                                            <div 
+                                                class="event-cell"
+                                                [ngClass]="getCellClasses(events)"
+                                                [matTooltip]="getTooltipForDay(op.events, day)"
+                                                matTooltipPosition="above"
+                                            >
+                                                <!-- Presenza -->
+                                                <ng-container *ngIf="getPresence(events) as pres">
+                                                    <span
+                                                        [class.late]="isLate(pres.startHour, pres.operatorStartTime, pres.operatorEndTime!)"
+                                                    >
+                                                        {{ formatHourMinute(pres.startHour) || '-' }}<br>
+                                                        {{ formatHourMinute(pres.endHour) || '-' }}
+                                                    </span>
+                                                </ng-container>
+
+                                                <!-- Permesso -->
+                                                <div *ngIf="hasPermission(events)">P</div>
+
+                                                <!-- Ferie -->
+                                                <div *ngIf="hasVacation(events)">F</div>
+
+                                                <!-- Malattia -->
+                                                <div *ngIf="hasIllness(events)">M</div>
+                                            </div>
+
+                                        </ng-container>
+                                    </ng-template>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </ng-container>
+                <ng-container *ngIf="showSummary">
+                    <table class="table table-bordered mini-calendar">
+                        <thead>
+                        <tr>
+                            <th class="operator-cell">Operatore</th>
+                            <th>Ore ritardo</th>
+                            <th>Ore straordinario</th>
+                            <th>Ore permesso</th>
+                            <th>Ore uscita anticipata</th>
+                            <th>Giorni ferie</th>
+                            <th>Giorni malattia</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let s of summaries">
+                            <td class="operator-cell">{{ s.fullName }}</td>
+                            <td>{{ s.lateHours }}</td>
+                            <td>{{ s.overtimeHours }}</td>
+                            <td>{{ s.permissionHours }}</td>
+                            <td>{{ s.earlyExitHours }}</td>
+                            <td>{{ s.vacationDays }}</td>
+                            <td>{{ s.sickDays }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </ng-container>
               </div>
             </mat-card-content>
         </mat-card>

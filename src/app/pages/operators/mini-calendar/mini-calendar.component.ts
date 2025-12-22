@@ -13,8 +13,21 @@ interface OperatorMonth {
   operatorId: string;
   fullName: string;
   startTime?: string;
+  endTime?: string;
   events: MiniCalendarEvent[];
 }
+
+interface OperatorSummary {
+  operatorId: string;
+  fullName: string;
+  lateHours: number;
+  overtimeHours: number;
+  permissionHours: number;
+  earlyExitHours: number;
+  vacationDays: number;
+  sickDays: number;
+}
+
 
 @Component({
   selector: 'app-mini-calendar',
@@ -29,6 +42,10 @@ export class MiniCalendarComponent implements OnInit {
   currentMonth: number;
   currentYear: number;
   holidays: string[] = [];
+
+  summaries: OperatorSummary[] = [];
+
+  showSummary = false;
 
   constructor(private calendarService: CalendarService, private utils: UtilsService, private excelService: ExcelService) {
     const today = new Date();
@@ -78,6 +95,7 @@ export class MiniCalendarComponent implements OnInit {
     this.calendarService.getMonthlyCalendarEvents(this.currentMonth + 1, this.currentYear).subscribe({
       next: (events) => {
         this.operators = this.groupByOperator(events.data);
+        this.buildSummaries();
       },
       error: () => this.operators = []
     });
@@ -85,7 +103,7 @@ export class MiniCalendarComponent implements OnInit {
 
   // Raggruppa eventi per operatore
   private groupByOperator(events: MiniCalendarEvent[]): OperatorMonth[] {
-    console.log(events);
+    //console.log(events);
     const map = new Map<string, OperatorMonth>();
     events.forEach(ev => {
       const key = ev.fullName;
@@ -94,6 +112,7 @@ export class MiniCalendarComponent implements OnInit {
           operatorId: ev.id,
           fullName: ev.fullName,
           startTime: ev.operatorStartTime,
+          endTime: ev.operatorEndTime,
           events: []
         });
       }
@@ -285,4 +304,69 @@ export class MiniCalendarComponent implements OnInit {
     }
     return tooltip;
   }
+
+  buildSummaries() {
+    this.summaries = this.operators.map(op => {
+      let lateMinutes = 0;
+      let overtimeMinutes = 0;
+      let permissionMinutes = 0;
+      let earlyExitMinutes = 0;
+      let vacationDays = 0;
+      let sickDays = 0;
+
+      op.events.forEach(ev => {
+        if (ev.tipologia === 'malattia' && ev.startDate && ev.endDate) {
+          sickDays += this.utils.countWorkingDays(
+            ev.startDate,
+            ev.endDate,
+            this.currentMonth,
+            this.currentYear,
+            this.holidays
+          );
+        }
+
+        if (ev.tipologia === 'assenza' && ev.title !== 'Ferie') {
+          if (ev.startHour && ev.endHour) {
+            permissionMinutes += this.utils.diffMinutes(ev.startHour, ev.endHour);
+          }
+        }
+
+        if (ev.tipologia === 'assenza' && ev.title === 'Ferie' && ev.startDate && ev.endDate) {
+          vacationDays += this.utils.countWorkingDays(
+            ev.startDate,
+            ev.endDate,
+            this.currentMonth,
+            this.currentYear,
+            this.holidays
+          );
+        }
+
+        if (ev.tipologia === 'presenza' && ev.startHour && ev.endHour) {
+          if (ev.operatorStartTime && ev.startHour > ev.operatorStartTime) {
+            lateMinutes += this.utils.diffMinutes(ev.operatorStartTime, ev.startHour);
+          }
+
+          if (ev.operatorEndTime && ev.endHour > ev.operatorEndTime) {
+            overtimeMinutes += this.utils.diffMinutes(ev.operatorEndTime, ev.endHour);
+          }
+
+          if (ev.operatorEndTime && ev.endHour < ev.operatorEndTime) {
+            earlyExitMinutes += this.utils.diffMinutes(ev.endHour, ev.operatorEndTime);
+          }
+        }
+      });
+
+      return {
+        operatorId: op.operatorId,
+        fullName: op.fullName,
+        lateHours: +(lateMinutes / 60).toFixed(2),
+        overtimeHours: +(overtimeMinutes / 60).toFixed(2),
+        permissionHours: +(permissionMinutes / 60).toFixed(2),
+        earlyExitHours: +(earlyExitMinutes / 60).toFixed(2),
+        vacationDays,
+        sickDays
+      };
+    });
+  }
+
 }

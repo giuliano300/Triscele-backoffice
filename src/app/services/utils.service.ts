@@ -83,4 +83,56 @@ export class UtilsService {
     getDisabledColor(){
       return "#ffeeeeff";
     }
+
+
+    toMinutes(time?: string): number {
+      if (!time) return 0;
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    diffMinutes(start?: string, end?: string): number {
+        if (!start || !end) return 0;
+        return this.toMinutes(end) - this.toMinutes(start);
+    }
+
+    countWorkingDays(
+      startDate: string,
+      endDate: string,
+      month: number,
+      year: number,
+      holidays: string[]
+    ): number {
+      let count = 0;
+
+      const holidaySet = new Set(holidays);
+      // 🔒 normalizza a mezzanotte locale
+      let current = new Date(startDate + 'T00:00:00');
+      const end = new Date(endDate + 'T00:00:00');
+
+      while (current.getTime() <= end.getTime()) {
+        const y = current.getFullYear();
+        const m = current.getMonth();
+        const d = current.getDate();
+
+        if (y === year && m === month) {
+          const day = current.getDay();
+          const isWeekend = day === 0 || day === 6;
+
+          const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const isHoliday = holidaySet.has(dateStr);
+
+          if (!isWeekend && !isHoliday) {
+            count++;
+          }
+        }
+
+        // 🔥 avanza SEMPRE di 1 giorno netto
+        current.setDate(current.getDate() + 1);
+      }
+
+      return count;
+    }
+
+
 }

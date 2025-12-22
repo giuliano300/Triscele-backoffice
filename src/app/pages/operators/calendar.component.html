@@ -4,7 +4,7 @@
     </ol>
 </nav>
 <div class="row">
-    <div class="col-xxxl-12">
+    <div class="col-xxxl-12" *ngIf="showCalendar">
         <mat-card class="trinta-card full-calendar-card mb-25 bg-white border-none d-block">
             <mat-card-content>
                 <full-calendar #fullCalendar [options]="calendarOptions"></full-calendar>
