@@ -111,6 +111,32 @@
                         </td>
                     </ng-container>
 
+                    <ng-container matColumnDef="remainingNumberOfPermissions">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Ore Permesso
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Ore Permesso">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{element.remainingNumberOfPermissions}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="remainingNumberOfHolidays">
+                        <th mat-header-cell *matHeaderCellDef class="pl-0">
+                            Giorni Ferie
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="pl-0" data-label="Giorni Ferie">
+                            <div class="position-relative">
+                                <h6 class="mt-0 mb-0">
+                                    {{element.remainingNumberOfHolidays}}
+                                </h6>
+                            </div>
+                        </td>
+                    </ng-container>
+
                     <ng-container matColumnDef="status">
                         <th mat-header-cell *matHeaderCellDef class="pl-0">
                             Status

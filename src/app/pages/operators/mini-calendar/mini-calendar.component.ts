@@ -20,10 +20,10 @@ interface OperatorMonth {
 interface OperatorSummary {
   operatorId: string;
   fullName: string;
-  lateHours: number;
-  overtimeHours: number;
-  permissionHours: number;
-  earlyExitHours: number;
+  lateHours: string;
+  overtimeHours: string;
+  permissionHours: string;
+  earlyExitHours: string;
   vacationDays: number;
   sickDays: number;
 }
@@ -359,10 +359,10 @@ export class MiniCalendarComponent implements OnInit {
       return {
         operatorId: op.operatorId,
         fullName: op.fullName,
-        lateHours: +(lateMinutes / 60).toFixed(2),
-        overtimeHours: +(overtimeMinutes / 60).toFixed(2),
-        permissionHours: +(permissionMinutes / 60).toFixed(2),
-        earlyExitHours: +(earlyExitMinutes / 60).toFixed(2),
+        lateHours: this.utils.formatMinutesToHours(lateMinutes),
+        overtimeHours: this.utils.formatMinutesToHours(overtimeMinutes),
+        permissionHours: this.utils.formatMinutesToHours(permissionMinutes),
+        earlyExitHours: this.utils.formatMinutesToHours(earlyExitMinutes),        
         vacationDays,
         sickDays
       };

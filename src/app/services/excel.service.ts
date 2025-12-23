@@ -158,29 +158,27 @@ export class ExcelService {
         }
         });
 
-        
-
         summaryRows.push([
-        op.fullName,
-        +(lateMinutes / 60).toFixed(2),
-        +(overtimeMinutes / 60).toFixed(2),
-        +(permissionMinutes / 60).toFixed(2),
-        +(earlyExitMinutes / 60).toFixed(2),
-        vacationDays,
-        sickDays
-        ]);
-    });
+            op.fullName,
+            this.utils.formatMinutesToHours(lateMinutes),
+            this.utils.formatMinutesToHours(overtimeMinutes),
+            this.utils.formatMinutesToHours(permissionMinutes),
+            this.utils.formatMinutesToHours(earlyExitMinutes),
+            vacationDays,
+            sickDays
+            ]);
+        });
 
-    const wsSummary: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(summaryRows);
+        const wsSummary: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(summaryRows);
 
-    // =========================
-    // WORKBOOK
-    // =========================
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsCalendar, 'Calendario');
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'Riepilogo Mensile');
+        // =========================
+        // WORKBOOK
+        // =========================
+        const wb: XLSX.WorkBook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, wsCalendar, 'Calendario');
+        XLSX.utils.book_append_sheet(wb, wsSummary, 'Riepilogo Mensile');
 
-    XLSX.writeFile(wb, `Calendario_${month + 1}_${year}.xlsx`);
+        XLSX.writeFile(wb, `Calendario_${month + 1}_${year}.xlsx`);
     }
 
     isHolidayOrWeekend(dateStr: string): boolean {
@@ -193,7 +191,5 @@ export class ExcelService {
 
         return isWeekend || isHoliday;
     }
-
-
 
 }

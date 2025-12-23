@@ -40,7 +40,7 @@
 </div>
 <div class="row">
     <div class="col-xxxl-12">
-        <mat-card class="trinta-card mb-25 bg-white border-none d-block">
+        <mat-card class="trinta-card mb-25 bg-white border-none d-block padding-mini-calendar">
             <mat-card-content>
               <div class="mini-calendar-container">
                 <ng-container *ngIf="!showSummary">
@@ -100,6 +100,9 @@
 
                                 </td>
                             </tr>
+                            <tr *ngIf="operators.length == 0">
+                                <td colspan="32" class="text-center bg-white">Nessun dato inserito</td>
+                            </tr>
                         </tbody>
                     </table>
                 </ng-container>
@@ -125,6 +128,9 @@
                             <td>{{ s.earlyExitHours }}</td>
                             <td>{{ s.vacationDays }}</td>
                             <td>{{ s.sickDays }}</td>
+                        </tr>
+                        <tr *ngIf="summaries.length == 0">
+                            <td colspan="7" class="text-center bg-white">Nessun dato inserito</td>
                         </tr>
                         </tbody>
                     </table>
