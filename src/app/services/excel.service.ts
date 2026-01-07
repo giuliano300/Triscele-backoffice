@@ -87,7 +87,7 @@ export class ExcelService {
         'Ore di ritardo',
         'Ore di straordinario',
         'Ore di permesso',
-        'Uscite anticipate',
+        //'Uscite anticipate',
         'Giorni di ferie',
         'Giorni di malattia'
     ]);
@@ -163,7 +163,7 @@ export class ExcelService {
             this.utils.formatMinutesToHours(lateMinutes),
             this.utils.formatMinutesToHours(overtimeMinutes),
             this.utils.formatMinutesToHours(permissionMinutes),
-            this.utils.formatMinutesToHours(earlyExitMinutes),
+            //this.utils.formatMinutesToHours(earlyExitMinutes),
             vacationDays,
             sickDays
             ]);
