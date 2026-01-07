@@ -37,6 +37,7 @@ import { MiniCalendarComponent } from './pages/operators/mini-calendar/mini-cale
 import { AllowedIpComponent } from './pages/allowed-ip/allowed-ip.component';
 import { DashboardNotVisibleComponent } from './pages/dashboard-not-visible/dashboard-not-visible.component';
 import { CustomHolodaysComponent } from './pages/custom-holodays/custom-holodays.component';
+import { ProfileComponent } from './pages/operators/profile/profile.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -110,6 +111,11 @@ export const routes: Routes = [
                 
             },
             { path: 'operator/dashboard', component: OperatorDashboardComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['operatore'] }
+                
+            },
+            { path: 'operator/profile', component: ProfileComponent,
                 canActivate: [RoleGuard],
                 data: { roles: ['operatore'] }
                 

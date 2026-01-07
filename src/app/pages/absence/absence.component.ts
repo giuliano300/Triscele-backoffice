@@ -20,6 +20,7 @@ import { OperatorService } from '../../services/Operator.service';
 import { Operators } from '../../interfaces/operators';
 import { MatTooltip, MatTooltipModule } from "@angular/material/tooltip";
 import { AlertDialogComponent } from '../../alert-dialog/alert-dialog.component';
+import { AddUpdatePermissionHolidayComponent } from '../../add-update-permission-holiday/add-update-permission-holiday.component';
 
 @Component({
   selector: 'app-absence',
@@ -50,7 +51,7 @@ export class AbsenceComponent {
 
   permissionHoliday: PermissionHoliday[] = [];
 
-  displayedColumns: string[] = ['operatorId', 'type', 'reason', 'startDate', 'endDate', 'accepted', 'edit', 'delete'];
+  displayedColumns: string[] = ['operatorId', 'type', 'reason', 'startDate', 'endDate', 'accepted', 'edit', 'editField', 'delete'];
 
   dataSource = new MatTableDataSource<PermissionHoliday>(this.permissionHoliday);
 
@@ -88,10 +89,28 @@ export class AbsenceComponent {
           ...c, 
           action: {
               edit: 'ri-edit-line',
+              editField: 'ri-edit-line',
               delete: 'ri-delete-bin-line'
           }
         }));
     })
+  }
+
+  OpenPopUp(item?:PermissionHoliday){
+    const dialogRef = this.dialog.open(AddUpdatePermissionHolidayComponent, {
+      data: item,
+      width: '600px'
+    });
+    dialogRef.afterClosed().subscribe((result: PermissionHoliday) => {
+      if (result) 
+      {
+        this.getpPermissionHoliday();
+      } 
+      else 
+      {
+        console.log("Close");
+      }
+    });  
   }
 
   UpdateItem(item: PermissionHoliday, approve: boolean){
@@ -139,6 +158,8 @@ export class AbsenceComponent {
       }
     });
   }
+
+  UpdateItemField(item: PermissionHoliday){}
 
   DeleteItem(item: PermissionHoliday){
 

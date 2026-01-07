@@ -1,0 +1,67 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<form [formGroup]="disciplinaryForm" (ngSubmit)="onSubmit()">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3"> 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Operatore</label>
+          <mat-form-field class="w-100">
+            <i-feather name="user"></i-feather>
+            <mat-label>Operatore</mat-label>
+            <mat-select formControlName="operatorId">
+              <mat-option *ngFor="let m of operators" [value]="m._id">
+                {{ m.businessName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>        
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Protocollo</label>
+          <mat-form-field class="w-100">
+            <i-feather name="file"></i-feather>
+            <mat-label>Protocollo</mat-label>
+            <input matInput formControlName="protocol" type="text">
+          </mat-form-field>
+        </div>
+
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Data inizio</label>
+          <mat-form-field class="w-100">
+            <i-feather name="calendar"></i-feather>
+            <mat-label>Data inizio</mat-label>
+            <input matInput [matDatepicker]="pickerStart" formControlName="start">
+            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+            <mat-datepicker #pickerStart></mat-datepicker>          
+          </mat-form-field>
+        </div>
+ 
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Data fine</label>
+          <mat-form-field class="w-100">
+            <i-feather name="calendar"></i-feather>
+            <mat-label>Data fine</mat-label>
+            <input matInput [matDatepicker]="pickerEnd" formControlName="end">
+            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+            <mat-datepicker #pickerEnd></mat-datepicker>          
+          </mat-form-field>
+        </div>
+ 
+
+        <!-- Pulsanti -->
+        <div class="col-sm-6 mt-10 text-start">
+            <button mat-flat-button class="back" type="button" (click)="returnBack()">
+                Indietro
+            </button>
+        </div>
+        <div class="col-sm-6 mt-10 text-end">
+            <button mat-flat-button color="primary" type="submit" [disabled]="disciplinaryForm.invalid">
+                Salva
+            </button>
+        </div>
+
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <input formControlName="id" type="hidden" value="">
+</form>

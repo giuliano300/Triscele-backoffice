@@ -38,6 +38,12 @@
                             Dashboard
                         </span>
                     </a>
+                    <a routerLink="operator/profile" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isOperator">
+                        <i-feather name="user"></i-feather>
+                        <span class="title">
+                            Profilo
+                        </span>
+                    </a>
                     <span class="sub-title text-body sbs" *ngIf="isVisibleUsers">
                         UTENTI
                     </span>

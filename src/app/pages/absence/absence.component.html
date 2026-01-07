@@ -2,6 +2,7 @@
     <ol class="breadcrumb">
         <li aria-current="page" class="breadcrumb-item active">Permessi e assenze</li>
     </ol>
+    <button color="primary" class="btn-download btn btn-primary" (click)="OpenPopUp()"><i class="ri-add-line"></i> Aggiungi assenza</button>
 </nav>
 <mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters">
     <mat-card-content>
@@ -141,6 +142,20 @@
                             </div>
                             <div class="action" *ngIf="element.accepted != null">
                                 -
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="editField">
+                        <th mat-header-cell *matHeaderCellDef class="text-center pr-0 mini">
+                            Modifica
+                        </th>
+                        <td mat-cell *matCellDef="let element" class="text-center pr-0 mini" data-label="Modifica">
+                            <div class="action">
+                                <button type="button" mat-button class="p-0 min-w-auto lh-1 h-auto"
+                                 (click)="OpenPopUp(element)">
+                                    <i class="{{element.action.editField}}"></i>
+                                </button>
                             </div>
                         </td>
                     </ng-container>

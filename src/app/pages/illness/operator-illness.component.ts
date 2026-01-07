@@ -18,6 +18,7 @@ import { FeathericonsModule } from '../../icons/feathericons/feathericons.module
 import { OperatorService } from '../../services/Operator.service';
 import { Operators } from '../../interfaces/operators';
 import { NgFor } from '@angular/common';
+import { AddUpdateIllnessComponent } from '../../add-update-illness/add-update-illness.component';
 
 @Component({
   selector: 'app-operator-illness',
@@ -45,7 +46,7 @@ export class OperatorIllnessComponent {
 
   illness: Illness[] = [];
 
-  displayedColumns: string[] = ['operatorId','protocol', 'startDate', 'endDate', 'delete'];
+  displayedColumns: string[] = ['operatorId','protocol', 'startDate', 'endDate', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Illness>(this.illness);
 
@@ -79,10 +80,28 @@ export class OperatorIllnessComponent {
       this.dataSource.data =  data.map(c => ({
           ...c, 
           action: {
-              delete: 'ri-delete-bin-line'
+            edit: 'ri-edit-line',
+            delete: 'ri-delete-bin-line'
           }
         }));
     })
+  }
+
+  OpenPopUp(item?:Illness){
+    const dialogRef = this.dialog.open(AddUpdateIllnessComponent, {
+        data: item,
+        width: '600px'
+      });
+      dialogRef.afterClosed().subscribe((result: Illness) => {
+      if (result) 
+      {
+        this.getIllness();
+      } 
+      else 
+      {
+        console.log("Close");
+      }
+    });  
   }
 
   DeleteItem(item: Illness){
