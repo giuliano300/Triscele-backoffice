@@ -75,7 +75,7 @@ export class AddUpdatePermissionHolidayComponent {
 
   illness: Illness[] = [];
 
-  type: any[] = [{id: 1, name: "Ferie"}, {id: 2, name: "Permesso"}]
+  type: any[] = [{id: 1, name: "Ferie"}, {id: 2, name: "Permesso"}, {id: 3, name: "Assenza ingiustificata"}]
 
   form: FormGroup;
 
@@ -84,9 +84,11 @@ export class AddUpdatePermissionHolidayComponent {
   operators: Operators[] = [];
 
   dateStartName: string = "";
+  dateEndName: string = "";
 
   isPermesso: boolean = false;
   isFerie: boolean = false;
+  isAssenza: boolean = false;
 
   constructor(
       private router: Router,
@@ -163,6 +165,8 @@ export class AddUpdatePermissionHolidayComponent {
       };
 
       const w: PermissionHoliday = formData;
+      if(w.type == absenceType.assenza_ingiustificata)
+        w.accepted = true;
 
       if(this.data)
       {
@@ -205,14 +209,27 @@ export class AddUpdatePermissionHolidayComponent {
     if(type == absenceType.ferie)
     {
       this.isFerie = true;
+      this.isAssenza = false;
       this.isPermesso = false;
       this.dateStartName = "Data inizio ferie";
+      this.dateEndName = "Data fine ferie";
+      this.form.get('end')?.setValidators([Validators.required]);
+    }
+
+    if(type == absenceType.assenza_ingiustificata)
+    {
+      this.isFerie = false;
+      this.isAssenza = true;
+      this.isPermesso = false;
+      this.dateStartName = "Data inizio assenza";
+      this.dateEndName = "Data fine assenza";
       this.form.get('end')?.setValidators([Validators.required]);
     }
 
     if(type == absenceType.permesso)
     {
       this.isFerie = false;
+      this.isAssenza = false;
       this.isPermesso = true;
       this.dateStartName = "Data permesso";
       // Ore inizio/fine obbligatorie

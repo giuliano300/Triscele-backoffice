@@ -21,6 +21,7 @@ import { Operators } from '../../interfaces/operators';
 import { MatTooltip, MatTooltipModule } from "@angular/material/tooltip";
 import { AlertDialogComponent } from '../../alert-dialog/alert-dialog.component';
 import { AddUpdatePermissionHolidayComponent } from '../../add-update-permission-holiday/add-update-permission-holiday.component';
+import { absenceType } from '../../enum/enum';
 
 @Component({
   selector: 'app-absence',
@@ -188,7 +189,11 @@ export class AbsenceComponent {
   }
 
   getType(p: PermissionHoliday): string {
-    let title = p.type === 1 ? 'Ferie' : 'Permesso';
+    let title = 'Ferie';
+    if(p.type == absenceType.permesso)
+       title = 'Permesso';
+    if(p.type == absenceType.assenza_ingiustificata)
+        title = 'Assenza ingiustificata';
 
     if (p.type !== 1 && p.startHour && p.endHour && p.startDate && p.endDate) {
       const startDate = new Date(p.startDate);

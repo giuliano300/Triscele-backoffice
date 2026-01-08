@@ -85,6 +85,8 @@
                                                     </span>
                                                 </ng-container>
 
+                                                <!-- Assenza ingiustificata -->
+                                                <div *ngIf="hasUnjustified(events)">A</div>
                                                 <!-- Permesso -->
                                                 <div *ngIf="hasPermission(events)">P</div>
 
@@ -116,6 +118,7 @@
                             <th>Ore permesso</th>
                             <th>Giorni ferie</th>
                             <th>Giorni malattia</th>
+                            <th>Assenze ingiustificate</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -126,6 +129,7 @@
                             <td>{{ s.permissionHours }}</td>
                             <td>{{ s.vacationDays }}</td>
                             <td>{{ s.sickDays }}</td>
+                            <td>{{ s.absenceUnjustified }}</td>
                         </tr>
                         <tr *ngIf="summaries.length == 0">
                             <td colspan="7" class="text-center bg-white">Nessun dato inserito</td>

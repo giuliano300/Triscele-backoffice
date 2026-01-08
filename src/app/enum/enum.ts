@@ -47,7 +47,8 @@ export const ConditionalLogicLabels: Record<keyof typeof ConditionalLogic, strin
 
 export enum absenceType{
   ferie = 1, 
-  permesso = 2
+  permesso = 2,
+  assenza_ingiustificata = 3
 }
 
 export enum LoginType {

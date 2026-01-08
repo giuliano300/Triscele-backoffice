@@ -250,6 +250,7 @@ export class CalendarComponent implements OnInit {
     for (const e of this.events) {
 
       const isPermission = e.title?.includes('Permesso');
+      const isAssenzaIngiustificata = e.title?.includes('ingiustificata');
 
       const originalStartDate = new Date(e.start);
       const originalEndDate = e.end
@@ -287,6 +288,10 @@ export class CalendarComponent implements OnInit {
         const dayStart = new Date(loop);
         const dayEnd = new Date(loop);
         dayEnd.setDate(dayEnd.getDate() + 1);
+
+        if(isAssenzaIngiustificata)
+          e.color = '#f00';
+
 
         splitEvents.push({
           title: this.showFullName

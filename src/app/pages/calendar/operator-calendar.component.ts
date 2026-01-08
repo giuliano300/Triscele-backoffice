@@ -198,6 +198,7 @@ async applyEventsToCalendar() {
   // 3️⃣ Splitta gli eventi per giorno
   for (const e of this.events) {
     const isPermission = e.title?.includes('Permesso');
+    const isAssenzaIngiustificata = e.title?.includes('ingiustificata');
 
     const startDate = new Date(e.start);
     const endDate = e.end ? new Date(e.end) : new Date(e.start);
@@ -223,6 +224,9 @@ async applyEventsToCalendar() {
         loop.setDate(loop.getDate() + 1);
         continue;
       }
+
+      if(isAssenzaIngiustificata)
+        e.color = '#f00';
 
       splitEvents.push({
         title: this.showFullName

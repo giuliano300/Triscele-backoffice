@@ -41,8 +41,9 @@ export class ExcelService {
         }
 
         const presenza = events.find((e: any) => e.tipologia === 'presenza');
-        const assenza  = events.find((e: any) => e.tipologia === 'assenza');
+        const assenza  = events.find((e: any) => e.tipologia === 'assenza' && !e.title.includes('ingiustificata'));
         const malattia = events.find((e: any) => e.tipologia === 'malattia');
+        const ingiustificata  = events.find((e: any) => e.tipologia === 'assenza' && e.title.includes('ingiustificata'));
 
         if (malattia) {
             row.push('M');
@@ -51,6 +52,10 @@ export class ExcelService {
 
         if (assenza && assenza.title === 'Ferie') {
             row.push('F');
+            return;
+        }
+        if (ingiustificata) {
+            row.push('A');
             return;
         }
 
@@ -89,7 +94,8 @@ export class ExcelService {
         'Ore di permesso',
         //'Uscite anticipate',
         'Giorni di ferie',
-        'Giorni di malattia'
+        'Giorni di malattia',
+        'Assenze ingiustificate'
     ]);
 
 
@@ -100,6 +106,7 @@ export class ExcelService {
         let vacationDays = 0;
         let sickDays = 0;
         let earlyExitMinutes = 0;
+        let absenceUnjustified = 0;
 
         const operatorStart = op.startTime;
         const operatorEnd   = op.endTime;
@@ -115,11 +122,17 @@ export class ExcelService {
         );
 
         const presenza = events.find((e: any) => e.tipologia === 'presenza');
-        const assenza  = events.find((e: any) => e.tipologia === 'assenza');
+        const assenza  = events.find((e: any) => e.tipologia === 'assenza' && !e.title.includes('ingiustificata'));
         const malattia = events.find((e: any) => e.tipologia === 'malattia');
+        const ingiustificata  = events.find((e: any) => e.tipologia === 'assenza' && e.title.includes('ingiustificata'));
 
         if (malattia) {
             sickDays++;
+            return;
+        }
+
+        if (ingiustificata) {
+            absenceUnjustified++;
             return;
         }
 
@@ -165,7 +178,8 @@ export class ExcelService {
             this.utils.formatMinutesToHours(permissionMinutes),
             //this.utils.formatMinutesToHours(earlyExitMinutes),
             vacationDays,
-            sickDays
+            sickDays,
+            absenceUnjustified
             ]);
         });
 

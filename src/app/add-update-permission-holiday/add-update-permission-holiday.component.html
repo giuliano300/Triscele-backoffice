@@ -28,7 +28,7 @@
           </mat-form-field>        
         </div>
 
-        <div class="col-sm-12" *ngIf="isFerie || isPermesso">
+        <div class="col-sm-12" *ngIf="isFerie || isPermesso || isAssenza">
           <label class="label d-block fw-medium mb-10">{{dateStartName}}</label>
           <mat-form-field class="w-100">
             <i-feather name="calendar"></i-feather>
@@ -39,11 +39,11 @@
           </mat-form-field>
         </div>
  
-        <div class="col-sm-12" *ngIf="isFerie">
-          <label class="label d-block fw-medium mb-10">Data fine ferie</label>
+        <div class="col-sm-12" *ngIf="isFerie || isAssenza">
+          <label class="label d-block fw-medium mb-10">{{dateEndName}}</label>
           <mat-form-field class="w-100">
             <i-feather name="calendar"></i-feather>
-            <mat-label>Data fine ferie</mat-label>
+            <mat-label>{{dateEndName}}</mat-label>
             <input matInput [matDatepicker]="pickerEnd" formControlName="end">
             <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
             <mat-datepicker #pickerEnd></mat-datepicker>          
@@ -77,7 +77,7 @@
           </mat-form-field>
         </div>
 
-        <div class="col-sm-12">
+        <div class="col-sm-12" *ngIf="!isAssenza">
           <label class="label d-block fw-medium mb-10">Accetta/Rifiuta</label>
           <mat-form-field class="w-100">
             <i-feather name="command"></i-feather>

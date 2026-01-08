@@ -26,6 +26,7 @@ interface OperatorSummary {
   earlyExitHours: string;
   vacationDays: number;
   sickDays: number;
+  absenceUnjustified: number;
 }
 
 
@@ -135,8 +136,13 @@ export class MiniCalendarComponent implements OnInit {
     return {
       presence: events.some(e => e.tipologia === 'presenza'),
       illness: events.some(e => e.tipologia === 'malattia'),
-      absence: events.some(e => e.tipologia === 'assenza')
+      absence: events.some(e => e.tipologia === 'assenza'),
+      unjustified: events.some(e => e.title.includes('ingiustificata'))
     };
+  }
+
+  getUnjustified(events: MiniCalendarEvent[]) {
+    return events.find(e => e.tipologia === 'assenza' && e.title.includes('ingiustificata'));
   }
 
   getPresence(events: MiniCalendarEvent[]) {
@@ -144,7 +150,11 @@ export class MiniCalendarComponent implements OnInit {
   }
 
   hasPermission(events: MiniCalendarEvent[]) {
-    return events.some(e => e.tipologia === 'assenza' && e.title !== 'Ferie');
+    return events.some(e => e.tipologia === 'assenza' && e.title !== 'Ferie'&& !e.title.includes('ingiustificata'));
+  }
+
+  hasUnjustified(events: MiniCalendarEvent[]) {
+    return events.some(e => e.tipologia === 'assenza' && e.title.includes('ingiustificata'));
   }
 
   hasVacation(events: MiniCalendarEvent[]) {
@@ -174,17 +184,24 @@ export class MiniCalendarComponent implements OnInit {
         const start = this.formatHourMinute(ev.startHour) ?? '';
         const end = this.formatHourMinute(ev.endHour) ?? '';
         desc = `Presenza${start || end ? ` (${start} - ${end})` : ''}`;
-      } else if (tipo === 'assenza') {
+      } 
+      else if (tipo === 'assenza') 
+      {
         // distinguo ferie / permesso
         if ((ev.title ?? '').toLowerCase() === 'ferie' || (ev.title ?? '').toLowerCase() === 'f') {
           desc = `Ferie`;
-        } else {
+        } 
+        else if(ev.title.includes('ingiustificata')) {
+          desc = `Assenza ingiustificata`;
+        }
+        else {
           // permesso può avere orari parziali
           const start = this.formatHourMinute(ev.startHour) ?? '';
           const end = this.formatHourMinute(ev.endHour) ?? '';
           desc = `Permesso${start || end ? ` (${start} - ${end})` : ''}`;
         }
-      } else if (tipo === 'malattia') {
+      } 
+      else if (tipo === 'malattia') {
         desc = `Malattia`;
         // se ci sono orari, mostriamoli (opzionale)
         if (ev.startHour || ev.endHour) {
@@ -313,6 +330,7 @@ export class MiniCalendarComponent implements OnInit {
       let earlyExitMinutes = 0;
       let vacationDays = 0;
       let sickDays = 0;
+      let absenceUnjustified = 0;
 
       op.events.forEach(ev => {
         if (ev.tipologia === 'malattia' && ev.startDate && ev.endDate) {
@@ -333,6 +351,16 @@ export class MiniCalendarComponent implements OnInit {
 
         if (ev.tipologia === 'assenza' && ev.title === 'Ferie' && ev.startDate && ev.endDate) {
           vacationDays += this.utils.countWorkingDays(
+            ev.startDate,
+            ev.endDate,
+            this.currentMonth,
+            this.currentYear,
+            this.holidays
+          );
+        }
+
+        if (ev.tipologia === 'assenza' && ev.title.includes('ingiustificata') && ev.startDate && ev.endDate) {
+          absenceUnjustified += this.utils.countWorkingDays(
             ev.startDate,
             ev.endDate,
             this.currentMonth,
@@ -364,7 +392,8 @@ export class MiniCalendarComponent implements OnInit {
         permissionHours: this.utils.formatMinutesToHours(permissionMinutes),
         earlyExitHours: this.utils.formatMinutesToHours(earlyExitMinutes),        
         vacationDays,
-        sickDays
+        sickDays,
+        absenceUnjustified
       };
     });
   }
