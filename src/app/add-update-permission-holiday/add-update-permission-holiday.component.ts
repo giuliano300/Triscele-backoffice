@@ -164,7 +164,7 @@ export class AddUpdatePermissionHolidayComponent {
 
       const w: PermissionHoliday = formData;
 
-      if(this.data._id)
+      if(this.data)
       {
         w._id = this.data._id;
         this.permissionHolidayService.updatePermissionHoliday(w)

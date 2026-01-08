@@ -171,7 +171,7 @@ export class OperatorCalendarComponent implements OnInit {
 private holidayCache = new Map<number, string[]>(); // cache globale delle festività
 
 async applyEventsToCalendar() {
-  if (!this.events || this.events.length === 0) return;
+  //if (!this.events || this.events.length === 0) return;
 
   const splitEvents: EventInput[] = [];
 

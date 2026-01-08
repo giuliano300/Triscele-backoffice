@@ -234,7 +234,7 @@ export class CalendarComponent implements OnInit {
   async applyEventsToCalendar() {
 
     const splitEvents: EventInput[] = [];
-    if (!this.events || this.events.length === 0) return;
+    //if (!this.events || this.events.length === 0) return;
 
     // 🔹 cache festività per anno
     const holidayCache = new Map<number, string[]>();
