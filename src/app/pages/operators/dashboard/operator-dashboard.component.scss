@@ -114,8 +114,8 @@
     .active-day{
       width: 100%;
     .row{
-        width: 60%;
-        margin: 0 20%;
+        width: 70%;
+        margin: 0 15%;
         min-height: 60vh;
 
         .card-timer {
@@ -219,7 +219,7 @@
     background: linear-gradient(145deg, #fff, #f9fafa);
     transition: transform .3s ease, box-shadow .3s ease;
     border: solid 1px #eee;
-    min-height: 340px;
+    min-height: 390px;
 
 
     h2{
@@ -291,7 +291,7 @@
 .breaks-list {
   margin-top: 0;
   padding-top: 0;
-  height: 190px;
+  height: 244px;
   overflow-y: auto;
 }
 
@@ -320,3 +320,10 @@
 }
 
 .center{justify-content: center;}
+
+.red{
+  color: #7f0000 !important;
+}
+.green{
+  color:#07a30e;
+}

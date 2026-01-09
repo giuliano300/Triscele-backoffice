@@ -47,6 +47,7 @@ export class MiniCalendarComponent implements OnInit {
   summaries: OperatorSummary[] = [];
 
   showSummary = false;
+show: any;
 
   constructor(private calendarService: CalendarService, private utils: UtilsService, private excelService: ExcelService) {
     const today = new Date();
@@ -166,102 +167,53 @@ export class MiniCalendarComponent implements OnInit {
   }
 
   getTooltipForDay(events: MiniCalendarEvent[], day: number): string {
-    // 1) Se è giorno non lavorativo -> tooltip fisso
     if (this.isWeekendOrHoliday(day)) {
       return 'Giorno non lavorativo';
     }
 
-    // 2) Recupera tutti gli eventi del giorno
     const dayEvents = this.getEventsForDay(events, day) || [];
-    if (!dayEvents.length) return ''; // niente tooltip
+    if (!dayEvents.length) return '';
 
-    // 3) Mappa ogni evento in una stringa descrittiva
-    const parts: string[] = dayEvents.map(ev => {
-      const tipo = ev.tipologia;
-      let desc = '';
+    return dayEvents.map(ev => {
+      if (ev.tipologia === 'presenza') {
+        let text = 'Presenza';
 
-      if (tipo === 'presenza') {
-        const start = this.formatHourMinute(ev.startHour) ?? '';
-        const end = this.formatHourMinute(ev.endHour) ?? '';
-        desc = `Presenza${start || end ? ` (${start} - ${end})` : ''}`;
-      } 
-      else if (tipo === 'assenza') 
-      {
-        // distinguo ferie / permesso
-        if ((ev.title ?? '').toLowerCase() === 'ferie' || (ev.title ?? '').toLowerCase() === 'f') {
-          desc = `Ferie`;
-        } 
-        else if(ev.title.includes('ingiustificata')) {
-          desc = `Assenza ingiustificata`;
-        }
-        else {
-          // permesso può avere orari parziali
-          const start = this.formatHourMinute(ev.startHour) ?? '';
-          const end = this.formatHourMinute(ev.endHour) ?? '';
-          desc = `Permesso${start || end ? ` (${start} - ${end})` : ''}`;
-        }
-      } 
-      else if (tipo === 'malattia') {
-        desc = `Malattia`;
-        // se ci sono orari, mostriamoli (opzionale)
         if (ev.startHour || ev.endHour) {
-          const start = this.formatHourMinute(ev.startHour) ?? '';
-          const end = this.formatHourMinute(ev.endHour) ?? '';
-          if (start || end) desc += ` (${start} - ${end})`;
+          text += `\n⏰ ${this.formatHourMinute(ev.startHour)} - ${this.formatHourMinute(ev.endHour) ?? 'in corso'}`;
         }
-      } else {
-        // fallback: titolo ed eventuali orari
-        desc = ev.title ?? 'Evento';
-        const start = this.formatHourMinute(ev.startHour) ?? '';
-        const end = this.formatHourMinute(ev.endHour) ?? '';
-        if (start || end) desc += ` (${start} - ${end})`;
+
+        if (ev.breaks?.length) {
+          text += '\nPause';
+          ev.breaks.forEach(b => {
+            text += `\n⏸ ${this.formatHourMinute(b.start)} - ${this.formatHourMinute(b.end)}`;
+          });
+        }
+
+        if(this.isLate(ev))
+          text += "\nRitardo\n" + this.utils.calculateEventDelay(ev) + " min";
+
+        return text;
       }
 
-      // aggiungi note se presenti
-      if (ev.notes) desc += `: ${ev.notes}`;
+      if (ev.tipologia === 'assenza') {
+        return ev.title ?? 'Assenza';
+      }
 
-      return desc;
-    });
+      if (ev.tipologia === 'malattia') {
+        return 'Malattia';
+      }
 
-    // 4) Unisci e ritorna
-    return parts.join(' | ');
+      return ev.title ?? '';
+    }).join('\n────────\n');
   }
 
   // Controlli ritardo e pausa
   isLate(
-    entryTime?: string,
-    operatorStartTime?: string,
-    operatorEndTime?: string,
-    exitTime?: string
+    ev: MiniCalendarEvent
   ): boolean {
 
-    if (!entryTime || !operatorStartTime) return false;
-
-    // ingresso
-    const [eh, em] = entryTime.split(':').map(Number);
-    const [sh, sm] = operatorStartTime.split(':').map(Number);
-
-    const entryMinutes = eh * 60 + em;
-    const startMinutes = sh * 60 + sm;
-
-    // ritardo ingresso
-    if (entryMinutes > startMinutes) {
+    if (this.utils.calculateEventDelay(ev) > 0)
       return true;
-    }
-
-    // uscita anticipata (se forniti)
-    if (exitTime && operatorEndTime) {
-      const [xh, xm] = exitTime.split(':').map(Number);
-      const [eh2, em2] = operatorEndTime.split(':').map(Number);
-
-      const exitMinutes = xh * 60 + xm;
-      const endMinutes = eh2 * 60 + em2;
-
-      if (exitMinutes < endMinutes) {
-        return true;
-      }
-    }
-
     return false;
   }
 
@@ -371,7 +323,7 @@ export class MiniCalendarComponent implements OnInit {
 
         if (ev.tipologia === 'presenza' && ev.startHour && ev.endHour) {
           if (ev.operatorStartTime && ev.startHour > ev.operatorStartTime) {
-            lateMinutes += this.utils.diffMinutes(ev.operatorStartTime, ev.startHour);
+            lateMinutes += this.utils.calculateEventDelay(ev);
           }
 
           if (ev.operatorEndTime && ev.endHour > ev.operatorEndTime) {

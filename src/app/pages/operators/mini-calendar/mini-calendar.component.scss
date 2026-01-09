@@ -190,3 +190,15 @@
 .padding-mini-calendar{
   padding:20px 15px!important;
 }
+
+::ng-deep .multiline-tooltip {
+  text-align: left !important;
+  white-space: pre-line; 
+  max-width: 320px;
+  padding: 8px 12px;
+  background-color: #313131;
+  color: #fff;
+  border-radius: 4px;          
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}

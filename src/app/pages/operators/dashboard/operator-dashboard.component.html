@@ -66,6 +66,13 @@
                     <h4>Tempo Lavorato</h4>
                     <h3 class="timer">{{ liveTimer }}</h3>
                   </div>
+                  <h4>Ritardo</h4>
+                  <div *ngIf="isLate" class="red">
+                    In questo momento hai un ritardo<br> di {{minLate}} minuti da recuperare in giornata.
+                  </div>
+                  <div *ngIf="!isLate" class="green">
+                    In questo momento non hai ritardi da recuperare
+                  </div>
                 </div>
               </div>
               <div class="col-lg-6">
@@ -148,6 +155,12 @@
                     <span class="label">Totale ore lavorate</span>
                     <span class="value">
                         {{ calculateWorkedTime() }}
+                    </span>
+                </div>
+                <div class="summary-row total red" *ngIf="isLate">
+                    <span class="label">Ritardo</span>
+                    <span class="value">
+                        {{ this.minLate }} minuti
                     </span>
                 </div>
 

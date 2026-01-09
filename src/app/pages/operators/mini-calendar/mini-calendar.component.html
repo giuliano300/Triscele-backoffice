@@ -73,12 +73,13 @@
                                                 class="event-cell"
                                                 [ngClass]="getCellClasses(events)"
                                                 [matTooltip]="getTooltipForDay(op.events, day)"
+                                                matTooltipClass="multiline-tooltip"
                                                 matTooltipPosition="above"
                                             >
                                                 <!-- Presenza -->
                                                 <ng-container *ngIf="getPresence(events) as pres">
                                                     <span
-                                                        [class.late]="isLate(pres.startHour, pres.operatorStartTime, pres.operatorEndTime!)"
+                                                        [class.late]="isLate(pres)"
                                                     >
                                                         {{ formatHourMinute(pres.startHour) || '-' }}<br>
                                                         {{ formatHourMinute(pres.endHour) || '-' }}

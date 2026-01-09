@@ -13,6 +13,10 @@ import { FeathericonsModule } from '../../../icons/feathericons/feathericons.mod
 import { AuthService } from '../../../services/auth.service';
 import { interval, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { UtilsService } from '../../../services/utils.service';
+import { MiniCalendarEvent } from '../../../interfaces/miniCalendarEvent';
+import { Operators } from '../../../interfaces/operators';
+import { OperatorService } from '../../../services/Operator.service';
 
 @Component({
   selector: 'app-operator-dashboard',
@@ -55,11 +59,17 @@ export class OperatorDashboardComponent {
   entryTime: string = '';
   private timerInterval: any;
   private breakInterval: any;
+  isLate: boolean = false;
+  minLate: number = 0;
+  miniCalendarEvent: MiniCalendarEvent | undefined = undefined;
+  operator: Operators | undefined = undefined;
 
   constructor(
     private router: Router,
     private attendanceService: AttendanceService,
     private authService: AuthService,
+    private operatorService: OperatorService,
+    private utils: UtilsService,
     @Inject(PLATFORM_ID) private platformId: any
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
@@ -73,7 +83,10 @@ export class OperatorDashboardComponent {
 
     const o = JSON.parse(localStorage.getItem('operator') || '{}');
     this.operatorId = o?.sub ?? '';
-    this.todayAttendance();
+    this.operatorService.getOperator(this.operatorId).subscribe((data) => {
+      this.operator = data;
+      this.todayAttendance();
+   })
 
     // Aggiornamento orario ogni minuto
     this.updateTime();
@@ -98,6 +111,7 @@ export class OperatorDashboardComponent {
         });
       });
     }
+
   }
 
   ngOnDestroy(): void {
@@ -108,6 +122,24 @@ export class OperatorDashboardComponent {
     if (this.pingSubscription) this.pingSubscription.unsubscribe();
   }
 
+  calculateDelay(attendance: Attendance){
+    this.miniCalendarEvent = {
+      ...attendance,
+      fullName: this.operator?.name! + " " + this.operator?.lastName!,
+      id: attendance._id?.toString()!,
+      operatorEndTime: this.operator?.endTime!,
+      operatorStartTime: this.operator?.startTime!,
+      tipologia: 'presenza',
+      title: 'Presenza odierna',
+      date: attendance.date?.toString().split('T')[0],
+      startHour: attendance.entryTime,
+      endHour: attendance.exitTime
+    }
+    this.minLate = this.utils.calculateEventDelay(this.miniCalendarEvent);
+    if(this.minLate > 0)
+      this.isLate = true;  
+  }
+
   todayAttendance() {
     this.attendanceService.getTodayAttendance(this.operatorId).subscribe({
       next: (data) => {
@@ -115,6 +147,8 @@ export class OperatorDashboardComponent {
         if (data?.entryTime && !data.exitTime) this.startTimer(data.entryTime);
         const activeBreak = this.getActiveBreak();
         if (activeBreak) this.startBreakTimer(activeBreak.start);
+
+        this.calculateDelay(this.attendance);
       },
       error: () => (this.attendance = undefined),
     });
@@ -155,6 +189,7 @@ export class OperatorDashboardComponent {
     this.attendanceService.updateAttendance(this.attendance).subscribe(() => {
       clearInterval(this.breakInterval);
       this.startTimer(this.attendance!.entryTime);
+      this.calculateDelay(this.attendance!);
     });
   }
 

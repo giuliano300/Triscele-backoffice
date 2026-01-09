@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HolidayService } from './holiday.service';
 import { Observable } from 'rxjs';
+import { MiniCalendarEvent } from '../interfaces/miniCalendarEvent';
 
 @Injectable({
   providedIn: 'root'
@@ -145,5 +146,58 @@ export class UtilsService {
       return count;
     }
 
+  calculateEventDelay(event: MiniCalendarEvent, allowedBreakMinutes = 90): number {
+    if (!event.startHour || !event.operatorStartTime) return 0;
+
+    const toMinutes = (time: string) => {
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    let delay = 0;
+
+    // --- Ritardo ingresso ---
+    const entryMinutes = toMinutes(event.startHour);
+    const startMinutes = toMinutes(event.operatorStartTime);
+
+    // Ritardo ingresso
+    if (entryMinutes > startMinutes) {
+      delay += entryMinutes - startMinutes;
+    } 
+    // Recupero se arriva in anticipo
+    else if (entryMinutes < startMinutes) {
+      delay -= startMinutes - entryMinutes;
+    }
+
+    // --- Uscita anticipata / recupero ore ---
+    if (event.endHour && event.operatorEndTime) {
+      const exitMinutes = toMinutes(event.endHour);
+      const endMinutes = toMinutes(event.operatorEndTime);
+
+      if (exitMinutes < endMinutes) {
+        // uscita anticipata → aumenta ritardo
+        delay += endMinutes - exitMinutes;
+      } else if (exitMinutes > endMinutes) {
+        // uscita oltre orario → riduce ritardo
+        delay -= exitMinutes - endMinutes;
+      }
+    }
+
+    // --- Gestione pause ---
+    let totalBreakMinutes = 0;
+    if (event.breaks?.length) {
+      event.breaks.forEach(b => {
+        const start = toMinutes(b.start);
+        const end = toMinutes(b.end!);
+        totalBreakMinutes += end - start;
+      });
+    }
+
+    // Differenza tra pausa effettiva e quella consentita
+    const breakDifference = totalBreakMinutes - allowedBreakMinutes;
+    delay += breakDifference; // <0 riduce ritardo, >0 aumenta
+
+    return delay; // minuti di ritardo totali (positivo = ritardo, negativo = recupero)
+  }
 
 }

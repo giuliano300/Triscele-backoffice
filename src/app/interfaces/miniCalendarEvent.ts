@@ -1,3 +1,5 @@
+import { Break } from "./attendance";
+
 export interface MiniCalendarEvent {
   tipologia: 'presenza' | 'assenza' | 'malattia';
   id: string;
@@ -11,4 +13,5 @@ export interface MiniCalendarEvent {
   startHour?: string; // HH:mm:ss
   endHour?: string;   // HH:mm:ss
   notes?: string;
+  breaks?: Break[];
 }
