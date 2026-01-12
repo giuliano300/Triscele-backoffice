@@ -70,8 +70,11 @@
                   <div *ngIf="isLate" class="red">
                     In questo momento hai un ritardo<br> di {{minLate}} minuti da recuperare in giornata.
                   </div>
-                  <div *ngIf="!isLate" class="green">
-                    In questo momento non hai ritardi da recuperare
+                  <div *ngIf="!isLate && !advance" class="green">
+                    In questo momento non hai ritardi da recuperare<br><br>
+                  </div>
+                  <div *ngIf="!isLate && advance" class="green">
+                    Sei entrato {{ minLate < 0 ? -minLate : minLate }} minuti prima.<br>Puoi uscire prima rispettando i tempi.
                   </div>
                 </div>
               </div>

@@ -321,13 +321,15 @@ show: any;
           );
         }
 
+        let minLate =  this.utils.calculateEventDelay(ev)
+
         if (ev.tipologia === 'presenza' && ev.startHour && ev.endHour) {
-          if (ev.operatorStartTime && ev.startHour > ev.operatorStartTime) {
-            lateMinutes += this.utils.calculateEventDelay(ev);
+          if (ev.operatorStartTime) {
+            lateMinutes += minLate;
           }
 
-          if (ev.operatorEndTime && ev.endHour > ev.operatorEndTime) {
-            overtimeMinutes += this.utils.diffMinutes(ev.operatorEndTime, ev.endHour);
+          if (ev.operatorEndTime && ev.endHour > ev.operatorEndTime && minLate == 0) {
+            overtimeMinutes += this.utils.calculateOvertime(ev);
           }
 
           if (ev.operatorEndTime && ev.endHour < ev.operatorEndTime) {

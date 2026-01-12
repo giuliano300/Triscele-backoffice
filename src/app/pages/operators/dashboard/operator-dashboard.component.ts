@@ -60,6 +60,7 @@ export class OperatorDashboardComponent {
   private timerInterval: any;
   private breakInterval: any;
   isLate: boolean = false;
+  advance: boolean = false;
   minLate: number = 0;
   miniCalendarEvent: MiniCalendarEvent | undefined = undefined;
   operator: Operators | undefined = undefined;
@@ -135,9 +136,11 @@ export class OperatorDashboardComponent {
       startHour: attendance.entryTime,
       endHour: attendance.exitTime
     }
-    this.minLate = this.utils.calculateEventDelay(this.miniCalendarEvent);
+    this.minLate = this.utils.calculateEventDelay(this.miniCalendarEvent, 90, true);
     if(this.minLate > 0)
       this.isLate = true;  
+    if(this.minLate < 0)
+      this.advance = true;
   }
 
   todayAttendance() {

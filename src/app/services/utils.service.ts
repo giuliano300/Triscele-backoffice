@@ -92,6 +92,54 @@ export class UtilsService {
       return h * 60 + m;
     }
 
+    calculateOvertime(ev: MiniCalendarEvent, allowedBreakMinutes = 90): number {
+      const toMinutes = (time: string) => {
+        const [h, m] = time.split(':').map(Number);
+        return h * 60 + m;
+      };
+
+      if (!ev.endHour || !ev.operatorEndTime || !ev.operatorStartTime) return 0;
+
+      const actualStart = toMinutes(ev.startHour!);
+      const actualEnd = toMinutes(ev.endHour);
+      const scheduledStart = toMinutes(ev.operatorStartTime);
+      const scheduledEnd = toMinutes(ev.operatorEndTime);
+
+      // -------------------------
+      // Straordinario iniziale = minuti lavorati oltre previsto
+      // -------------------------
+      let overtime = 0;
+
+      // ingresso anticipato → aggiunge minuti
+      if (actualStart < scheduledStart) {
+        overtime += scheduledStart - actualStart;
+      }
+
+      // uscita oltre → aggiunge minuti
+      if (actualEnd > scheduledEnd) {
+        overtime += actualEnd - scheduledEnd;
+      }
+
+      // -------------------------
+      // Calcola pause totali
+      // -------------------------
+      let totalBreak = 0;
+      if (ev.breaks?.length) {
+        for (const b of ev.breaks) {
+          if (b.end) {
+            totalBreak += toMinutes(b.end) - toMinutes(b.start);
+          }
+        }
+      }
+
+      // se le pause > allowedBreakMinutes → riduce lo straordinario
+      const extraBreak = Math.max(0, totalBreak - allowedBreakMinutes);
+      overtime -= extraBreak;
+
+      // non può essere negativo
+      return Math.max(0, overtime);
+    }
+
     diffMinutes(start?: string, end?: string): number {
         if (!start || !end) return 0;
         return this.toMinutes(end) - this.toMinutes(start);
@@ -146,7 +194,7 @@ export class UtilsService {
       return count;
     }
 
-  calculateEventDelay(event: MiniCalendarEvent, allowedBreakMinutes = 90): number {
+  calculateEventDelayOLD(event: MiniCalendarEvent, allowedBreakMinutes = 90): number {
     if (!event.startHour || !event.operatorStartTime) return 0;
 
     const toMinutes = (time: string) => {
@@ -200,4 +248,75 @@ export class UtilsService {
     return delay; // minuti di ritardo totali (positivo = ritardo, negativo = recupero)
   }
 
+  calculateEventDelay(
+    event: MiniCalendarEvent,
+    allowedBreakMinutes = 90,
+    isDashboard = false
+  ): number {
+
+    if (!event.startHour || !event.operatorStartTime) return 0;
+
+    const toMinutes = (time: string) => {
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    let debt = 0;    // minuti di ritardo
+    let credit = 0;  // anticipo ingresso
+
+    // =========================
+    // INGRESSO
+    // =========================
+    const scheduledStart = toMinutes(event.operatorStartTime);
+    const actualStart    = toMinutes(event.startHour);
+
+    if (actualStart > scheduledStart) {
+      debt += actualStart - scheduledStart;
+    } else if (actualStart < scheduledStart) {
+      credit += scheduledStart - actualStart;
+    }
+
+    // =========================
+    // PAUSE
+    // =========================
+    let totalBreakMinutes = 0;
+    if (event.breaks?.length) {
+      for (const b of event.breaks) {
+        const start = toMinutes(b.start);
+        const end   = b.end ? toMinutes(b.end) : start; // pausa in corso = 0
+        totalBreakMinutes += end - start;
+      }
+    }
+
+    if (totalBreakMinutes > allowedBreakMinutes) {
+      debt += totalBreakMinutes - allowedBreakMinutes;
+    }
+
+    // =========================
+    // USCITA
+    // =========================
+    if (event.endHour && event.operatorEndTime) {
+      const scheduledEnd = toMinutes(event.operatorEndTime);
+      const actualEnd    = toMinutes(event.endHour);
+
+      if (actualEnd < scheduledEnd) {
+        // uscita anticipata → usa il credito se disponibile
+        const earlyExit = scheduledEnd - actualEnd;
+        const usedCredit = Math.min(credit, earlyExit);
+        const remainingEarlyExit = earlyExit - usedCredit;
+
+        debt += remainingEarlyExit;
+        credit -= usedCredit; // credito residuo
+      } 
+      // uscita posticipata non riduce il debito
+    }
+
+    // =========================
+    // RISULTATO FINALE
+    // =========================
+    const result = debt - 0 + (credit > 0 ? -credit : 0); // positivo = ritardo, negativo = credito residuo
+
+    return isDashboard ? result : Math.max(0, result);
+  }
 }
+
