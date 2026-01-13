@@ -206,6 +206,16 @@
   100% { box-shadow: 0 0 0 0 rgba(25,118,210,0); }
 }
 
+.pulse-red {
+  animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(197, 10, 10, 0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(25,118,210,0); }
+  100% { box-shadow: 0 0 0 0 rgba(25,118,210,0); }
+}
+
 .disabled-form{
     background: linear-gradient(145deg, #fafafa, #f3f3f3)!important;
 }
@@ -237,7 +247,7 @@
     }
 
     .start-pause{
-      margin-top: 10px;
+      margin: 10px 0 -10px;
 
       .btn-text{
         margin: 0 0 0 10px;
@@ -277,7 +287,7 @@
       border: none;
       border-radius: 20px;
       padding: 13px 0;
-      margin-top: 5px;
+      margin-top: 0px;
       cursor: pointer;
   }
 
@@ -291,7 +301,7 @@
 .breaks-list {
   margin-top: 0;
   padding-top: 0;
-  height: 264px;
+  height: 183px;
   overflow-y: auto;
 }
 
@@ -308,6 +318,7 @@
   padding: 6px 8px;
   margin-bottom: 6px;
   font-size: 14px;
+  line-height: 16px;
 }
 
 .break-index {
@@ -326,4 +337,41 @@
 }
 .green{
   color:#07a30e;
+}
+
+.breakExceeded{
+  .over-label, h3{
+    color: #7f0000 !important;
+    margin-bottom: 0!important;
+  }
+
+  .over-label{
+    font-size: 13px!important;
+  }
+}
+
+.progress-bar-container {
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 8px;
+  margin: 4px 0 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #81c784);
+  border-radius: 8px;
+  transition: width 0.3s ease;
+}
+
+.breakExceeded .progress-bar {
+  background: linear-gradient(90deg, #ff5252, #ff8a80);
+}
+
+
+.timer-cards{
+  margin: 5px 0 10px; 
+  height: 80px;
+  overflow: hidden;
 }

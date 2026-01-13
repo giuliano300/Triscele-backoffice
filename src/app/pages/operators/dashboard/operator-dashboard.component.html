@@ -4,7 +4,7 @@
   </ol>
 </nav>
 
-<mat-card  class="trinta-card full-calendar-card mb-25 bg-white border-none d-block">
+<mat-card class="trinta-card full-calendar-card mb-25 bg-white border-none d-block">
   <mat-card-content>
 
     <div class="dashboard-container">
@@ -74,44 +74,80 @@
                     In questo momento non hai ritardi da recuperare<br><br>
                   </div>
                   <div *ngIf="!isLate && advance" class="green">
-                    Sei entrato {{ minLate < 0 ? -minLate : minLate }} minuti prima.<br>Puoi uscire prima rispettando i tempi.
+                    Hai {{ minLate < 0 ? -minLate : minLate }} minuti di 'credito'.<br>Puoi uscire prima rispettando i tempi.
                   </div>
                 </div>
               </div>
+              
+
               <div class="col-lg-6">
+
+                <!-- ========================= -->
+                <!-- MOMENTO 1: NON IN PAUSA -->
+                <!-- ========================= -->
                 <div class="active-form" *ngIf="!hasActiveBreak()" @fadeIn>
-                  <!-- Lista pause già fatte -->
+
                   <div class="breaks-list">
                     <h2>Pause effettuate</h2>
 
                     <div class="break-item" *ngFor="let b of attendance.breaks; let i = index">
                       <span class="break-index">#{{ i + 1 }}</span>
                       <span class="break-time">
-                        {{ b.start}} – {{ b.end ? b.end : 'in corso' }}
+                        {{ b.start }} – {{ b.end ? b.end : 'in corso' }}
                       </span>
                     </div>
 
-                    <div class="break-item center" *ngIf="attendance.breaks!.length == 0">
-                        <span>Nessuna pausa ancora effettuata</span>
+                    <div class="break-item center" *ngIf="attendance.breaks.length === 0">
+                      <span>Nessuna pausa ancora effettuata</span>
                     </div>
                   </div>
-                  <button mat-raised-button class="btn-confirm start-pause" (click)="startBreak()">
+
+                  <!-- TEMPO PAUSA RIMANENTE GIORNALIERO -->
+                  <div class="timer-cards" [class.breakExceeded]="breakExceeded">
+                    <small>Tempo pausa rimanente oggi</small>
+                    <h3 class="timer">{{ getRemainingDailyBreak() }}</h3>
+                     <small *ngIf="breakExceeded" class="over-label">
+                      Limite di pausa superato
+                    </small>
+                  </div>
+
+                  <button mat-raised-button
+                          class="btn-confirm start-pause"
+                          (click)="startBreak()"
+                          [disabled]="getRemainingDailyBreak() === '0h 0m 0s'">
                     Inizia Pausa
                   </button>
-                </div>          
-               <div class="active-form" *ngIf="hasActiveBreak()" @fadeIn>
+                </div>
+
+                <!-- ========================= -->
+                <!-- MOMENTO 2: PAUSA ATTIVA -->
+                <!-- ========================= -->
+                <div class="active-form" *ngIf="hasActiveBreak()" @fadeIn>
                   <h3>Pausa in corso</h3>
-                  <div class="timer-card pulse" @fadeIn>
-                    <h3 class="timer">{{ breakTimer }}</h3>
+
+                  <!-- COUNTDOWN LIMITE PAUSA -->
+                  <div class="timer-card pulse" [class.breakExceeded]="breakExceeded" [class.pulse-red]="breakExceeded">
+                    <h4>Tempo rimanente</h4>
+                    <h3 class="timer">{{ breakRemaining }}</h3>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar" [style.width.%]="getBreakProgress()"></div>
+                    </div>
+
+                    <small *ngIf="breakExceeded" class="over-label">
+                      Limite di pausa superato
+                    </small>
                   </div>
-                  <button mat-raised-button class="btn-close"(click)="endBreak()">
+
+                  <button mat-raised-button class="btn-close" (click)="endBreak()">
                     Termina Pausa
                   </button>
                 </div>
               </div>
+
+
               <div class="col-lg-12">
                 <div @fadeIn>
-                  <button class="close-day" (click)="confirmExit()">
+                  <button class="close-day" (click)="confirmExit()" [disabled]="hasActiveBreak()">
                     Chiudi Giornata
                   </button>
                 </div>
