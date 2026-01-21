@@ -34,4 +34,6 @@ export class ProductViewModel {
     
     options: ProductOptions[] = [];
     selectedOptions?: ConfigProductToOrder[];
+
+    isNew?: boolean;
 }

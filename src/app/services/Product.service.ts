@@ -51,8 +51,8 @@ export class ProductService {
       return this.http.post<Product>(this.apiUrl, c);
     }
 
-    duplicateProduct(id: string):Observable<Product>{
-      return this.http.post<Product>(this.apiUrl + "/" + id + "/duplicate", null);
+    duplicateProduct(id: string, name?: string):Observable<Product>{
+      return this.http.post<Product>(this.apiUrl + "/" + id + "/duplicate", { name });
     }
 
     updateProduct(c: Product):Observable<boolean>{

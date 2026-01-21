@@ -18,4 +18,5 @@ export interface Product {
   subProducts?: SubProducts[];
   options: ProductOptions[];
   purchasePackage?: string;
+  isNew?: boolean;
 }

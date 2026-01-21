@@ -31,7 +31,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MovementType } from '../../enum/enum';
 import { AddGeneralMovementComponent } from '../../add-general-movement-dialog/add-general-movement-dialog.component';
 import { MatProgressBar } from "@angular/material/progress-bar";
-import { finalize, tap } from 'rxjs';
+import { finalize, forkJoin, tap } from 'rxjs';
+import { AddDuplicateProductComponent } from '../../add-duplicate-product-dialog/add-duplicate-product-dialog.component';
 
 @Component({
   selector: 'app-products',
@@ -67,8 +68,6 @@ export class ProductsComponent {
     'category',
     'supplier',
     'supplierCode',
-    'price',
-    'cost',
     'theshold',
     'stock',
     'duplicate',
@@ -253,20 +252,32 @@ export class ProductsComponent {
   }
 
   DuplicateItem(item: ProductViewModel) {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {title: "Duplicazione prodotto" , description: "Sei sicuro di voler duplicare " + item.name + "?", confirm: "Conferma"},
+    const dialogRef = this.dialog.open(AddDuplicateProductComponent, {
+      data: {id: item.id, name: item.name },
       width: '500px'
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.productService.duplicateProduct(item!.id!)
-          .subscribe((data: any) => {
-            if (data) {
-              this.getProducts();
-              this.findLowStock();
-            }
-          });
+        this.firstLoading = true;
+        console.log(result);
+
+        const requests = [];
+
+        for (let i = 0; i < result.number; i++) {
+          const name = result[`duplicate_${i + 1}`];
+
+          requests.push(
+            this.productService.duplicateProduct(item!.id!, name)
+          );
+        }
+
+        forkJoin(requests).subscribe(() => {
+          this.getProducts();
+          this.findLowStock();
+          this.firstLoading = false;
+        });
+        
       } else {
         console.log("Close");
       }

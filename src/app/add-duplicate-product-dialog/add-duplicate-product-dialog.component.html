@@ -1,0 +1,70 @@
+<h1 mat-dialog-title>{{ title }} {{ name }}</h1>
+
+<form [formGroup]="form">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3">
+
+        <!-- NUMERO DUPLICAZIONI -->
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">
+            Numero di duplicazioni
+          </label>
+
+          <mat-form-field class="w-100">
+            <i-feather name="command"></i-feather>
+            <mat-label>Numero di duplicazioni</mat-label>
+
+            <mat-select
+              formControlName="number"
+              (selectionChange)="changeDuplicate()">
+
+              <mat-option *ngFor="let n of numbers" [value]="n">
+                {{ n }}
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- DUPLICAZIONI -->
+        <div
+          class="col-sm-12"
+          *ngFor="let i of duplications; let idx = index">
+
+          <label class="label d-block fw-medium mb-10">
+            Nome prodotto n° {{ idx + 1 }}
+          </label>
+
+          <mat-form-field class="w-100">
+            <i-feather name="layers"></i-feather>
+            <mat-label> Nome prodotto n° {{ idx + 1 }}</mat-label>
+
+            <input
+              matInput
+              type="text"
+              [formControlName]="'duplicate_' + (idx + 1)">
+          </mat-form-field>
+
+        </div>
+
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <input type="hidden" formControlName="productId">
+</form>
+
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()" class="btn back">
+    Chiudi
+  </button>
+
+  <button
+    mat-flat-button
+    (click)="onSave()"
+    class="btn"
+    [disabled]="form.invalid">
+    Salva
+  </button>
+</mat-dialog-actions>

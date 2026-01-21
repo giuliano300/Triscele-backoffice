@@ -1,3 +1,5 @@
+
+
 .trinta-card {
     &.to-do-list-card {
         .search-box {
@@ -140,12 +142,19 @@
             .to-do-list-table {
                 .mat-mdc-table {
                     .mat-mdc-row{
-                        background-color: #fafafa!important;
+                        background-color: #fff;
 
-                        &:nth-child(2n){
-                            background-color: #ffff!important;
+                        &:hover{
+                            background-color: #fafafa !important;
                         }
 
+                    }
+                    .new-row {
+                        background-color: #feffe0 !important;
+                    }
+
+                    .new-row:hover {
+                        background-color: #e8faff !important;
                     }
 
                     .mat-mdc-cell {
