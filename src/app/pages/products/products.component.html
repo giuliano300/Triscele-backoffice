@@ -4,65 +4,88 @@
   </ol>
 </nav>
 
-<mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters">
+
+<div class="alert-container">
+  <div *ngFor="let alert of alerts"
+       class="alert alert-success d-flex justify-content-between align-items-center fade-in">
+
+    <span>
+      <i class="ri-thumb-up-line"></i>
+      {{ alert.description }}
+    </span>
+
+    <button type="button" data-dismiss="alert" aria-label="Close" class="close bg-transparent p-0 border-none"
+            (click)="removeAlert(alert.id)">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>
+</div>
+
+<div class="icon-filter-wrapper">
+    <div class="icon-filter" (click)="showCloseFilter()">
+        <span *ngIf="!show">Apri filtri</span>
+        <span *ngIf="show">Chiudi filtri</span>
+    </div>
+</div>
+
+<mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters" *ngIf="show">
     <mat-card-content>
         <div class="filter-panel">
             <input type="checkbox" id="toggleFilter" class="toggle-checkbox">
             <label for="toggleFilter" class="toggle-label">
                 Filtro prodotti <span class="arrow">&#9660;</span>
             </label>
-
             <div class="filter-content">
-              <form [formGroup]="form">
-                  <div class="container">
-                      <div class="row">
-                          <div class="col-lg-3">
-                              <mat-form-field>
-                                  <i-feather name="star"></i-feather>
-                                  <mat-label>Filtra per categorie</mat-label>
-                                  <mat-select formControlName="categoryId">
-                                      <mat-option *ngFor="let option of categories" [value]="option._id">
-                                      {{ option.name }}
-                                      </mat-option>
-                                  </mat-select>
-                              </mat-form-field>                        
-                          </div>
-                          <div class="col-lg-2">
-                              <mat-form-field>
-                                  <i-feather name="star"></i-feather>
-                                  <mat-label>Filtra per fornitore</mat-label>
-                                  <mat-select formControlName="supplierId">
-                                      <mat-option *ngFor="let option of suppliers" [value]="option._id">
-                                      {{ option.businessName }}
-                                      </mat-option>
-                                  </mat-select>
-                              </mat-form-field>                        
-                          </div>
-                          <div class="col-lg-3">
-                              <mat-form-field>
-                                  <i-feather name="tag"></i-feather>
-                                  <mat-label>Cerca prodotto</mat-label>
-                                  <input matInput formControlName="name">
-                              </mat-form-field>                        
-                          </div>
-                          <div class="col-lg-1">
-                              <button mat-button class="filter" type="submit" [disabled]="form.invalid" (click)="onSubmit()">
-                                  Filtra
-                              </button>               
-                          </div>
-                          <div class="col-lg-1">
-                              <button mat-button class="remove" type="submit" [disabled]="form.invalid" (click)="remove()">
-                                  Rimuovi
-                              </button>               
-                          </div>
-                          <div class="col-lg-2">
-                              <button mat-button class="movements" type="button" [disabled]="form.invalid" (click)="AddGeneralMovement()">
-                                  Carico/Scarico
-                              </button>               
-                          </div>
-                      </div>
-                  </div>
-              </form>
+                <form [formGroup]="form">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <mat-form-field>
+                                    <i-feather name="star"></i-feather>
+                                    <mat-label>Filtra per categorie</mat-label>
+                                    <mat-select formControlName="categoryId">
+                                        <mat-option *ngFor="let option of categories" [value]="option._id">
+                                        {{ option.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>                        
+                            </div>
+                            <div class="col-lg-2">
+                                <mat-form-field>
+                                    <i-feather name="star"></i-feather>
+                                    <mat-label>Filtra per fornitore</mat-label>
+                                    <mat-select formControlName="supplierId">
+                                        <mat-option *ngFor="let option of suppliers" [value]="option._id">
+                                        {{ option.businessName }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>                        
+                            </div>
+                            <div class="col-lg-3">
+                                <mat-form-field>
+                                    <i-feather name="tag"></i-feather>
+                                    <mat-label>Cerca prodotto</mat-label>
+                                    <input matInput formControlName="name">
+                                </mat-form-field>                        
+                            </div>
+                            <div class="col-lg-1">
+                                <button mat-button class="filter" type="submit" [disabled]="form.invalid" (click)="onSubmit()">
+                                    Filtra
+                                </button>               
+                            </div>
+                            <div class="col-lg-1">
+                                <button mat-button class="remove" type="submit" [disabled]="form.invalid" (click)="remove()">
+                                    Rimuovi
+                                </button>               
+                            </div>
+                            <div class="col-lg-2">
+                                <button mat-button class="movements" type="button" [disabled]="form.invalid" (click)="AddGeneralMovement()">
+                                    Carico/Scarico
+                                </button>               
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </mat-card-content>
@@ -77,6 +100,7 @@
     <i class="ri-close-line"></i>
   </button>
 </div>
+
 <mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
   <mat-card-content>
     <div class="to-do-list-table">

@@ -55,6 +55,9 @@ export class AddMovementComponent {
       stock: [null, Validators.required],
       productId: [null, Validators.required]
     });
+
+    this.title += " a " + data.name
+
   }
 
   

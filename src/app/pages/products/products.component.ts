@@ -34,6 +34,11 @@ import { MatProgressBar } from "@angular/material/progress-bar";
 import { finalize, forkJoin, tap } from 'rxjs';
 import { AddDuplicateProductComponent } from '../../add-duplicate-product-dialog/add-duplicate-product-dialog.component';
 
+export interface AlertMessage {
+  id: number;
+  description: string;
+}
+
 @Component({
   selector: 'app-products',
   imports: [
@@ -59,6 +64,7 @@ import { AddDuplicateProductComponent } from '../../add-duplicate-product-dialog
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
+
 export class ProductsComponent {
 
   Products: ProductViewModel[] = [];
@@ -76,6 +82,7 @@ export class ProductsComponent {
     'delete'
   ];
 
+  
   form: FormGroup;
 
   dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
@@ -97,6 +104,17 @@ export class ProductsComponent {
 
   lowStock: ProductViewModel[] = [];
 
+  show:boolean = false;
+
+  description: string = "";
+
+  visible = false;
+  private timeoutId: any;
+
+
+
+alerts: AlertMessage[] = [];
+private alertId = 0;
 
   constructor(
     private router: Router,
@@ -163,6 +181,10 @@ export class ProductsComponent {
         sort.direction === '' ? 'desc' : sort.direction
       );
     });
+  }
+
+  showCloseFilter(){
+    this.show = !this.show;
   }
 
   onSubmit(){
@@ -350,6 +372,12 @@ export class ProductsComponent {
             if (data) {
               this.getProducts();
               this.findLowStock();
+
+              const description =
+                (result.movementType == MovementType[0].id ? 'Carico' : 'Scarico') +
+                ` del prodotto ${item.name} di ${data.stock} ${item.stock_type}`;
+
+              this.showAlertMovement(description);
             }
           });
       } else {
@@ -381,4 +409,16 @@ export class ProductsComponent {
   closeAlert(): void {
     this.showStock = false;
   }
+
+showAlertMovement(description: string) {
+    const id = ++this.alertId;
+    this.alerts.push({ id, description });
+
+    setTimeout(() => this.removeAlert(id), 3000);
+  }
+
+  removeAlert(id: number) {
+    this.alerts = this.alerts.filter(a => a.id !== id);
+  }
+
 }
