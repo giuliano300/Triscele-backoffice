@@ -69,7 +69,7 @@ export class ProductsComponent {
 
   Products: ProductViewModel[] = [];
 
-  displayedColumns: string[] = [
+  readonly ALL_COLUMNS: string[] = [
     'name',
     'category',
     'supplier',
@@ -82,6 +82,7 @@ export class ProductsComponent {
     'delete'
   ];
 
+  displayedColumns: string[] = [];
   
   form: FormGroup;
 
@@ -153,6 +154,7 @@ private alertId = 0;
       });
 
       this.findLowStock();
+      this.updateColumns();
   }
 
   ngAfterViewInit() {
@@ -185,6 +187,15 @@ private alertId = 0;
 
   showCloseFilter(){
     this.show = !this.show;
+    this.updateColumns();
+  }
+
+  private updateColumns() {
+    const supplierCols = ['category', 'supplier', 'supplierCode'];
+
+    this.displayedColumns = this.ALL_COLUMNS.filter(col =>
+      this.show || !supplierCols.includes(col)
+    );
   }
 
   onSubmit(){

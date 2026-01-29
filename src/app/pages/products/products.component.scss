@@ -83,8 +83,7 @@
                     letter-spacing: 0.14px;
                     background: transparent;
                     border-bottom: 1px solid #edeff5;
-                    min-width: 70px;
-                    max-width: 160px;
+                    min-width: 80px;
 
                     .task-name {
                         padding-left: 28px;
@@ -128,6 +127,7 @@
                             }
                         }
                     }
+
                 }
             }
             .mat-mdc-paginator {
@@ -551,12 +551,12 @@
 
 .icon-filter{
     align-items: end;
-    margin: -38px 0 -10px;
+    margin: -8px 0 -8px;
     background-color: #3761ee;
     padding: 10px 0 14px;
     cursor: pointer;
     border-radius: 5px;
-    width: 130px;
+    width: 160px;
     text-align: center;
     font-size: 13px;
     color: #ffffff;
@@ -568,7 +568,7 @@
 }
 
 .alert-success{
-    margin-bottom: 50px;
+    margin-bottom: 10px;
     margin-top: -10px;
 }
 
