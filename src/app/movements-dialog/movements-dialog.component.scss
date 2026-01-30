@@ -358,3 +358,7 @@ h1[mat-dialog-title] {
 .mat-mdc-dialog-title::before{
     display: none;
 }
+
+::ng-deep .table-responsive{
+    max-height: 80vh!important;
+}

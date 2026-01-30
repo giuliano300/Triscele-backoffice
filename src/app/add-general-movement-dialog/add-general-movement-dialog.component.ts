@@ -72,7 +72,6 @@ export class AddGeneralMovementComponent {
       supplierName: ['']
     });
 
-    this.title += " a " + data.name
   }
 
   get productsForm() {

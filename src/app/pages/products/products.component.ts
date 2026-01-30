@@ -110,12 +110,12 @@ export class ProductsComponent {
   description: string = "";
 
   visible = false;
-  private timeoutId: any;
 
+  currentSortField: string = '_id';
+  currentSortDirection: 'asc' | 'desc' = 'desc';
 
-
-alerts: AlertMessage[] = [];
-private alertId = 0;
+  alerts: AlertMessage[] = [];
+  private alertId = 0;
 
   constructor(
     private router: Router,
@@ -164,23 +164,20 @@ private alertId = 0;
     // Evento cambio pagina
     this.paginator.page.subscribe(() => {
       this.getProducts(
-        this.form.value.categoryId,
-        this.form.value.supplierId,
-        this.form.value.name,
         this.paginator.pageIndex,
         this.paginator.pageSize
       );
     });
 
     this.sort.sortChange.subscribe(sort => {
+      this.currentSortField = sort.active;
+      this.currentSortDirection = sort.direction === '' ? 'desc' : sort.direction;
+
       this.getProducts(
-        this.form.value.categoryId,
-        this.form.value.supplierId,
-        this.form.value.name,
         this.pageIndex,
         this.pageSize,
-        sort.active,
-        sort.direction === '' ? 'desc' : sort.direction
+        this.currentSortField,
+        this.currentSortDirection
       );
     });
   }
@@ -199,8 +196,7 @@ private alertId = 0;
   }
 
   onSubmit(){
-    const { categoryId, supplierId, name } = this.form.value;
-    this.getProducts(categoryId, supplierId, name);
+    this.getProducts();
   }
 
   remove(){
@@ -213,14 +209,13 @@ private alertId = 0;
   }
 
   getProducts(
-    categoryId?: string,
-    supplierId?: string,
-    name?: string,
     pageIndex: number = 0,
     pageSize: number = 20,
-    sortField: string = '_id',
-    sortDirection: 'asc' | 'desc' = 'desc'
+    sortField: string = this.currentSortField,
+    sortDirection: 'asc' | 'desc' = this.currentSortDirection
   ) {
+    const { categoryId, supplierId, name } = this.form.value;
+
     this.firstLoading = true;
     const params = new URLSearchParams();
 
@@ -259,6 +254,11 @@ private alertId = 0;
       // 🔹 Aggiornamento datasource e sort
       this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
       this.dataSource.sort = this.sort;
+
+      if (this.sort.active) {
+        this.sort.active = this.currentSortField;
+        this.sort.direction = this.currentSortDirection;
+      }
 
       this.firstLoading = false;
     });
