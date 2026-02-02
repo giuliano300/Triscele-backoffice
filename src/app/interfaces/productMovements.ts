@@ -7,4 +7,6 @@ export interface ProductMovements {
     supplierCode?: string;
     productId: string;
     createdAt: string;
+    productName?: string;
+    stock_type?: string;
 }

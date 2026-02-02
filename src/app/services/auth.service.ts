@@ -91,6 +91,13 @@ export class AuthService {
     return this.http.post<boolean>(API_URL + `auth/ping?operatorId=${operatorId}&ip=${ip}`, {});
   }
 
+  checkOldPassword(payload: { userId: string; oldPassword: string }) {
+    return this.http.post<boolean>(
+      API_URL + 'auth/check-old-password',
+      payload
+    );
+  }
+
    getPublicIp() {
      return this.http.get<{ ip: string }>('https://api.ipify.org?format=json');
    }

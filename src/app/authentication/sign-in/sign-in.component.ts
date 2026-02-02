@@ -66,7 +66,7 @@ export class SignInComponent {
                 {
                     this.operatorService.loginOperator(login).subscribe((data: any) => {
                         if(data.success == false){
-                            this.errorMessage = data.message
+                            //this.errorMessage = data.message
                             this.isError = true;
                         }
                         else

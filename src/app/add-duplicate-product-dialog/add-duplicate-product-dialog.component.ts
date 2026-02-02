@@ -47,7 +47,7 @@ export class AddDuplicateProductComponent {
 
   movementType: any[] = MovementType;
 
-  numbers = [1,2,3,4,5,6,7,8,9,10];
+  numbers = Array.from({ length: 50 }, (_, i) => i + 1);  
   duplications: number[] = [];
 
   constructor(public dialogRef: MatDialogRef<AddDuplicateProductComponent>,

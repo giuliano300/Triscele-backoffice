@@ -36,8 +36,9 @@ import { AbsenceComponent } from './pages/absence/absence.component';
 import { MiniCalendarComponent } from './pages/operators/mini-calendar/mini-calendar.component';
 import { AllowedIpComponent } from './pages/allowed-ip/allowed-ip.component';
 import { DashboardNotVisibleComponent } from './pages/dashboard-not-visible/dashboard-not-visible.component';
-import { CustomHolodaysComponent } from './pages/custom-holodays/custom-holodays.component';
+import { CustomHolidaysComponent } from './pages/custom-holidays/custom-holidays.component';
 import { ProfileComponent } from './pages/operators/profile/profile.component';
+import { ChangePasswordComponent } from './pages/change-password/change-password.component';
 
 export const routes: Routes = [
     { path: '', redirectTo : '/authentication', pathMatch: 'full' },
@@ -174,7 +175,7 @@ export const routes: Routes = [
                 canActivate: [RoleGuard],
                 data: { role: 'admin' }
             },
-            { path: 'custom-holodays', component: CustomHolodaysComponent,
+            { path: 'custom-holidays', component: CustomHolidaysComponent,
                 canActivate: [RoleGuard],
                 data: { role: 'admin' }
             },
@@ -183,6 +184,10 @@ export const routes: Routes = [
                 data: { role: 'admin' }
             },
             { path: 'order-state', component: OrderStateComponent,
+                canActivate: [RoleGuard],
+                data: { role: 'admin' }
+            },
+            { path: 'change-password', component: ChangePasswordComponent,
                 canActivate: [RoleGuard],
                 data: { role: 'admin' }
             },

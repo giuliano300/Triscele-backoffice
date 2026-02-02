@@ -91,9 +91,9 @@ export class AddSupplierComponent {
       sdi: [''],
       email: ['', Validators.required],
       address: [''],
-      zipCode: [''],
+      zipCode: ['', Validators.required],
       province: ['', Validators.required],
-      city: [''],
+      city: ['', Validators.required],
       id: [''],
     });
 

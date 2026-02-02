@@ -253,10 +253,17 @@
                         </span>
                     </a>         
 
-                    <a routerLink="/custom-holodays" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                    <a routerLink="/custom-holidays" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
                         <i-feather name="bookmark"></i-feather>
                         <span class="title">
                            Festività
+                        </span>
+                    </a>         
+
+                    <a routerLink="/change-password" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                        <i-feather name="lock"></i-feather>
+                        <span class="title">
+                           Cambia password
                         </span>
                     </a>         
 

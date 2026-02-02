@@ -4,23 +4,6 @@
   </ol>
 </nav>
 
-
-<div class="alert-container">
-  <div *ngFor="let alert of alerts"
-       class="alert alert-success d-flex justify-content-between align-items-center fade-in">
-
-    <span>
-      <i class="ri-thumb-up-line"></i>
-      {{ alert.description }}
-    </span>
-
-    <button type="button" data-dismiss="alert" aria-label="Close" class="close bg-transparent p-0 border-none"
-            (click)="removeAlert(alert.id)">
-      <i class="ri-close-line"></i>
-    </button>
-  </div>
-</div>
-
 <mat-card class="trinta-card to-do-list-card mb-10 bg-white border-none d-block filters">
     <mat-card-content>
         <div class="filter-panel">

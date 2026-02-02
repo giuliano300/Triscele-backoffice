@@ -126,7 +126,9 @@ export class AddGeneralMovementComponent {
   onSave() {
     if (this.form.valid) {
       const result: ProductMovements = {
-        ...this.form.value
+        ...this.form.value,
+        productName: this.product.name,
+        stock_type: this.stock_type
       };
       this.dialogRef.close(result);
     }

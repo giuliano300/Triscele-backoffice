@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CustomHolodaysComponent } from './custom-holodays.component';
+import { CustomHolidaysComponent } from './custom-holidays.component';
 
-describe('CustomHolodaysComponent', () => {
-  let component: CustomHolodaysComponent;
-  let fixture: ComponentFixture<CustomHolodaysComponent>;
+describe('CustomHolidaysComponent', () => {
+  let component: CustomHolidaysComponent;
+  let fixture: ComponentFixture<CustomHolidaysComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CustomHolodaysComponent]
+      imports: [CustomHolidaysComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CustomHolodaysComponent);
+    fixture = TestBed.createComponent(CustomHolidaysComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

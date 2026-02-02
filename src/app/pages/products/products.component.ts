@@ -33,6 +33,7 @@ import { AddGeneralMovementComponent } from '../../add-general-movement-dialog/a
 import { MatProgressBar } from "@angular/material/progress-bar";
 import { finalize, forkJoin, tap } from 'rxjs';
 import { AddDuplicateProductComponent } from '../../add-duplicate-product-dialog/add-duplicate-product-dialog.component';
+import { ToastrService } from 'ngx-toastr';
 
 export interface AlertMessage {
   id: number;
@@ -124,7 +125,8 @@ export class ProductsComponent {
     private supplierService: SupplierService,
     private categoryService: CategoryService,
     private dialog: MatDialog,
-    private productMovementsService: ProductMovementsService
+    private productMovementsService: ProductMovementsService,
+    private toastr: ToastrService
   ) 
   { 
     this.form = this.fb.group({
@@ -354,6 +356,13 @@ export class ProductsComponent {
             if (data) {
               this.getProducts();
               this.findLowStock();
+              const title = result.movementType == MovementType[0].id ? 'Carico' : 'Scarico';
+
+              const description =
+                title +
+                ` del prodotto ${result.productName} di ${data.stock} ${result.stock_type}`;
+
+              this.toastr.info(description);
             }
           });
       } else {
@@ -384,11 +393,13 @@ export class ProductsComponent {
               this.getProducts();
               this.findLowStock();
 
+              const title = result.movementType == MovementType[0].id ? 'Carico' : 'Scarico';
+
               const description =
-                (result.movementType == MovementType[0].id ? 'Carico' : 'Scarico') +
+                title +
                 ` del prodotto ${item.name} di ${data.stock} ${item.stock_type}`;
 
-              this.showAlertMovement(description);
+              this.toastr.info(description);
             }
           });
       } else {

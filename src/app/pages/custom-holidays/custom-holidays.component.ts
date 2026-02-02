@@ -17,10 +17,10 @@ import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-custom-holodays',
   imports: [MatCardModule, MatButtonModule, MatMenuModule, MatPaginatorModule, MatTableModule, MatCheckboxModule, DatePipe],
-  templateUrl: './custom-holodays.component.html',
-  styleUrl: './custom-holodays.component.scss'
+  templateUrl: './custom-holidays.component.html',
+  styleUrl: './custom-holidays.component.scss'
 })
-export class CustomHolodaysComponent {
+export class CustomHolidaysComponent {
 
   holidays: Holiday[] = [];
 
