@@ -375,3 +375,48 @@
   height: 80px;
   overflow: hidden;
 }
+
+@media only screen and (max-width: 480px) {
+    .mat-mdc-card.trinta-card {
+        padding: 0px;
+    }
+
+    .dashboard-container {
+      padding: 0;
+      margin: 0;
+
+      .active-day{
+        padding: 10px 0 20px;
+        .row{
+            width: 100%;
+            margin: 0;
+            min-height: 60vh;
+        }
+      }
+  }
+
+  .entry-form {
+      max-width: 100%;
+      min-width: 50vh;
+      margin: auto;
+      border-radius: 0!important;
+      box-shadow: 0 0 0 rgba(255, 255, 255, 0)!important;
+      padding: 30px;
+      border: none!important;
+      background: none!important;
+
+      h2{
+        margin: 0px 0 30px;
+      }
+  }
+
+  .active-form {
+      max-width: 100%;
+      margin: auto;
+      border-radius: 0;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0) !important;
+      padding: 20px;
+      background: none!important;
+      border: none;
+  }
+}

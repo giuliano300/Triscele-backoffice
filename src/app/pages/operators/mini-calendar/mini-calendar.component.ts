@@ -96,6 +96,7 @@ show: any;
   loadCalendar() {
     this.calendarService.getMonthlyCalendarEvents(this.currentMonth + 1, this.currentYear).subscribe({
       next: (events) => {
+        console.log(events);
         this.operators = this.groupByOperator(events.data);
         this.buildSummaries();
       },
