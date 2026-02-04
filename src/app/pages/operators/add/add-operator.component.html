@@ -131,7 +131,7 @@
                   
                 <div class="row g-3"> 
                     <div class="col-sm-6 mt-10 text-start">
-                        <button mat-flat-button onclick="returnBack()" class="mr-15 back">Indietro</button>
+                        <button mat-flat-button (click)="returnBack()" class="mr-15 back">Indietro</button>
                     </div>
                     <div class="col-sm-6 mt-10 text-end">
                       <button type="button" mat-flat-button matStepperNext color="primary" [disabled]="disciplinaryForm.get('personalData')?.invalid">Avanti</button>

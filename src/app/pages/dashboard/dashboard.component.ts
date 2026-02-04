@@ -88,7 +88,7 @@ export class DashboardComponent {
     });
     this.notificationsService.getAdminNotRead().subscribe((data: Notifications[]) => {
         this.notifications = data;
-        console.log(this.notifications);
+        //console.log(this.notifications);
         this.socketService.setInitialCounter(data.length);
       
         data.forEach(notification => {
@@ -274,7 +274,7 @@ export class DashboardComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(result);
+      //console.log(result);
       if (result) {
         this.productMovementsService.setProductMovements(result)
           .subscribe((data: ProductMovements) => {

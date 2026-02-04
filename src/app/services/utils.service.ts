@@ -261,8 +261,10 @@ export class UtilsService {
       return h * 60 + m;
     };
 
-    let debt = 0;    // minuti di ritardo
-    let credit = 0;  // anticipo ingresso
+    let entryDelay = 0;
+    let breakDelay = 0;
+    let exitExtra = 0;
+    let earlyExitDelay = 0;
 
     // =========================
     // INGRESSO
@@ -271,25 +273,24 @@ export class UtilsService {
     const actualStart    = toMinutes(event.startHour);
 
     if (actualStart > scheduledStart) {
-      debt += actualStart - scheduledStart;
-    } else if (actualStart < scheduledStart) {
-      credit += scheduledStart - actualStart;
+      entryDelay = actualStart - scheduledStart;
     }
 
     // =========================
     // PAUSE
     // =========================
     let totalBreakMinutes = 0;
+
     if (event.breaks?.length) {
       for (const b of event.breaks) {
         const start = toMinutes(b.start);
-        const end   = b.end ? toMinutes(b.end) : start; // pausa in corso = 0
-        totalBreakMinutes += end - start;
+        const end   = b.end ? toMinutes(b.end) : start;
+        totalBreakMinutes += Math.max(0, end - start);
       }
     }
 
     if (totalBreakMinutes > allowedBreakMinutes) {
-      debt += totalBreakMinutes - allowedBreakMinutes;
+      breakDelay = totalBreakMinutes - allowedBreakMinutes;
     }
 
     // =========================
@@ -299,22 +300,20 @@ export class UtilsService {
       const scheduledEnd = toMinutes(event.operatorEndTime);
       const actualEnd    = toMinutes(event.endHour);
 
-      if (actualEnd < scheduledEnd) {
-        // uscita anticipata → usa il credito se disponibile
-        const earlyExit = scheduledEnd - actualEnd;
-        const usedCredit = Math.min(credit, earlyExit);
-        const remainingEarlyExit = earlyExit - usedCredit;
-
-        debt += remainingEarlyExit;
-        credit -= usedCredit; // credito residuo
-      } 
-      // uscita posticipata non riduce il debito
+      if (actualEnd > scheduledEnd) {
+        exitExtra = actualEnd - scheduledEnd;
+      } else if (actualEnd < scheduledEnd) {
+        earlyExitDelay = scheduledEnd - actualEnd;
+      }
     }
 
     // =========================
-    // RISULTATO FINALE
+    // COMPENSAZIONE
     // =========================
-    const result = debt - 0 + (credit > 0 ? -credit : 0); // positivo = ritardo, negativo = credito residuo
+    const totalDelay = entryDelay + breakDelay;
+    const compensatedDelay = Math.max(0, totalDelay - exitExtra);
+
+    const result = compensatedDelay + earlyExitDelay;
 
     return isDashboard ? result : Math.max(0, result);
   }
