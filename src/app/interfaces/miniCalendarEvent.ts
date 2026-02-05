@@ -14,4 +14,6 @@ export interface MiniCalendarEvent {
   endHour?: string;   // HH:mm:ss
   notes?: string;
   breaks?: Break[];
+  permissionMinutes?: number;
+  calculatedDelay?: number;
 }

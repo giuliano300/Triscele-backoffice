@@ -34,11 +34,14 @@ import { MatProgressBar } from "@angular/material/progress-bar";
 import { finalize, forkJoin, tap } from 'rxjs';
 import { AddDuplicateProductComponent } from '../../add-duplicate-product-dialog/add-duplicate-product-dialog.component';
 import { ToastrService } from 'ngx-toastr';
+import { ProductsState } from '../../interfaces/products-state';
 
 export interface AlertMessage {
   id: number;
   description: string;
 }
+
+const PRODUCTS_STATE_KEY = 'products_state';
 
 @Component({
   selector: 'app-products',
@@ -145,7 +148,20 @@ export class ProductsComponent {
 
 
   ngOnInit(): void {
-    //this.getProducts();
+
+    const cached = sessionStorage.getItem(PRODUCTS_STATE_KEY);
+
+     if (cached) {
+        const state: ProductsState = JSON.parse(cached);
+
+        this.form.patchValue(state.filters);
+        this.pageIndex = state.pageIndex;
+        this.pageSize = state.pageSize;
+        this.currentSortField = state.sortField;
+        this.currentSortDirection = state.sortDirection;
+        this.show = state.show;
+     }
+
      this.supplierService.getSuppliers()
       .subscribe((data: Supplier[]) => {
         this.suppliers = data;
@@ -159,33 +175,44 @@ export class ProductsComponent {
       this.updateColumns();
   }
 
+  private saveState() {
+    const state: ProductsState = {
+      filters: this.form.value,
+      pageIndex: this.pageIndex,
+      pageSize: this.pageSize,
+      sortField: this.currentSortField,
+      sortDirection: this.currentSortDirection,
+      show: this.show
+    };
+
+    sessionStorage.setItem(PRODUCTS_STATE_KEY, JSON.stringify(state));
+  }
+
   ngAfterViewInit() {
     // Chiamata iniziale
     this.getProducts();
 
     // Evento cambio pagina
     this.paginator.page.subscribe(() => {
-      this.getProducts(
-        this.paginator.pageIndex,
-        this.paginator.pageSize
-      );
+      this.pageIndex = this.paginator.pageIndex;
+      this.pageSize = this.paginator.pageSize;
+      this.saveState();
+      this.getProducts();
     });
 
     this.sort.sortChange.subscribe(sort => {
       this.currentSortField = sort.active;
-      this.currentSortDirection = sort.direction === '' ? 'desc' : sort.direction;
-
-      this.getProducts(
-        this.pageIndex,
-        this.pageSize,
-        this.currentSortField,
-        this.currentSortDirection
-      );
+      this.currentSortDirection = sort.direction || 'desc';
+      this.pageIndex = 0;
+      this.paginator.firstPage();
+      this.saveState();
+      this.getProducts();
     });
   }
 
   showCloseFilter(){
     this.show = !this.show;
+    this.saveState();
     this.updateColumns();
   }
 
@@ -198,33 +225,40 @@ export class ProductsComponent {
   }
 
   onSubmit(){
+    this.pageIndex = 0;
+    this.paginator.firstPage();
+    this.saveState();
     this.getProducts();
   }
 
   remove(){
-    this.getProducts();
+    sessionStorage.removeItem('products_state');
+    
     this.form.patchValue({
       categoryId: [],
       supplierId: [],
       name: []
     });
+
+    this.pageIndex = 0;
+      if (this.paginator) {
+        this.paginator.pageIndex = 0;
+      }
+
+    this.getProducts();
   }
 
-  getProducts(
-    pageIndex: number = 0,
-    pageSize: number = 20,
-    sortField: string = this.currentSortField,
-    sortDirection: 'asc' | 'desc' = this.currentSortDirection
-  ) {
+  getProducts() 
+  {
     const { categoryId, supplierId, name } = this.form.value;
 
     this.firstLoading = true;
     const params = new URLSearchParams();
 
-    params.append('page', (pageIndex + 1).toString());
-    params.append('limit', pageSize.toString());
-    params.append('sortField', sortField);
-    params.append('sortDirection', sortDirection);
+    params.append('page', (this.pageIndex + 1).toString());
+    params.append('limit', this.pageSize.toString());
+    params.append('sortField', this.currentSortField);
+    params.append('sortDirection', this.currentSortDirection);
 
     if (categoryId) params.append('categoryId', categoryId);
     if (supplierId) params.append('supplierId', supplierId);
@@ -256,6 +290,9 @@ export class ProductsComponent {
       // 🔹 Aggiornamento datasource e sort
       this.dataSource = new MatTableDataSource<ProductViewModel>(this.Products);
       this.dataSource.sort = this.sort;
+
+      this.paginator.pageIndex = this.pageIndex;
+      this.paginator.length = this.totalItems;
 
       if (this.sort.active) {
         this.sort.active = this.currentSortField;

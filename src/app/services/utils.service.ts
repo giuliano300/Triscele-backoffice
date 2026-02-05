@@ -310,10 +310,11 @@ export class UtilsService {
     // =========================
     // COMPENSAZIONE
     // =========================
+    const permissionMinutes = event.permissionMinutes ?? 0;
     const totalDelay = entryDelay + breakDelay;
     const compensatedDelay = Math.max(0, totalDelay - exitExtra);
 
-    const result = compensatedDelay + earlyExitDelay;
+    const result = compensatedDelay + earlyExitDelay - permissionMinutes;
 
     return isDashboard ? result : Math.max(0, result);
   }

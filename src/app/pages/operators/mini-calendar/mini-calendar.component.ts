@@ -96,7 +96,7 @@ show: any;
   loadCalendar() {
     this.calendarService.getMonthlyCalendarEvents(this.currentMonth + 1, this.currentYear).subscribe({
       next: (events) => {
-        console.log(events);
+        //console.log(events);
         this.operators = this.groupByOperator(events.data);
         this.buildSummaries();
       },
@@ -109,6 +109,10 @@ show: any;
     //console.log(events);
     const map = new Map<string, OperatorMonth>();
     events.forEach(ev => {
+      if (ev.tipologia === 'presenza') {
+        ev.calculatedDelay = this.utils.calculateEventDelay(ev);
+      }
+
       const key = ev.fullName;
       if (!map.has(key)) {
         map.set(key, {
@@ -190,8 +194,10 @@ show: any;
           });
         }
 
-        if(this.isLate(ev))
-          text += "\nRitardo\n" + this.utils.calculateEventDelay(ev) + " min";
+        const late = ev.calculatedDelay ?? 0;
+        if (late > 0) {
+          text += `\nRitardo\n${late} min`;
+        }
 
         return text;
       }
@@ -209,15 +215,9 @@ show: any;
   }
 
   // Controlli ritardo e pausa
-  isLate(
-    ev: MiniCalendarEvent
-  ): boolean {
-
-    if (this.utils.calculateEventDelay(ev) > 0)
-      return true;
-    return false;
+  isLate(ev: MiniCalendarEvent): boolean {
+    return (ev.calculatedDelay ?? 0) > 0;
   }
-
 
   isLongLunch(start?: string, end?: string): boolean {
     if (!start || !end) return false;
@@ -322,7 +322,7 @@ show: any;
           );
         }
 
-        let minLate =  this.utils.calculateEventDelay(ev)
+        let minLate =  ev.calculatedDelay ?? 0;
 
         if (ev.tipologia === 'presenza' && ev.startHour && ev.endHour) {
           if (ev.operatorStartTime) {
