@@ -205,7 +205,7 @@ export const routes: Routes = [
             },
             { path: 'products/options', component: OptionsComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore'] }
             },
             { path: 'orders', component: OrdersComponent,
                 canActivate: [RoleGuard],
