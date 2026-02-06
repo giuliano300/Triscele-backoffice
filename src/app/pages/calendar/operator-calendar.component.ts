@@ -46,6 +46,8 @@ export class OperatorCalendarComponent implements OnInit {
   showCalendar: boolean = false;
   currentYear: number =  new Date().getFullYear();
 
+  operatorId: string = "";
+
   // -----------------------
   // CALENDAR OPTIONS
   // -----------------------
@@ -147,8 +149,10 @@ export class OperatorCalendarComponent implements OnInit {
       const id = params.get('id');
       if (!id) this.router.navigate(["access-denied"]);
 
-      this.operatorService.getOperator(id!).subscribe((data: Operators) => {
-        this.loadEvents(id!);
+      this.operatorId = id!;
+
+      this.operatorService.getOperator(this.operatorId).subscribe((data: Operators) => {
+        this.loadEvents();
         this.operatorName = data.businessName;
       });
     });
@@ -158,8 +162,8 @@ export class OperatorCalendarComponent implements OnInit {
   // CARICAMENTO EVENTI
   // -----------------------
 
-  loadEvents(operatorId?: string) {
-    this.calendarService.calendar(operatorId).subscribe(events => {
+  loadEvents() {
+    this.calendarService.calendar(this.operatorId).subscribe(events => {
       this.events = events;
       this.applyEventsToCalendar();
     });
