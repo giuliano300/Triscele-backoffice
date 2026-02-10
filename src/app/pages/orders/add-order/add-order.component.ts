@@ -415,19 +415,10 @@ export class AddOrderComponent {
               this.productsForm.push(group);
             });      
             
-          const isOperator = localStorage.getItem('isOperator') === 'true';
-          if(isOperator){
-             const o = JSON.parse(localStorage.getItem("operator") || "{}");
-             const operatorId = o.sub;  
-             this.productForm.patchValue({
-                operatorId: operatorId
-             });
-          }
-
           this.getFinalPrice();
 
-      });
-    }
+        });
+      }
     });
   }
 
@@ -548,23 +539,23 @@ export class AddOrderComponent {
         if (elem._id === parentId)
           elem.note += "<br>Rimosso prodotto: " + item.value.name;
       }
- }
+  }
 
- setShippingValues(event: any){
-  const c = this.customers.find(c => c._id === event.value);
-  this.productForm.patchValue({
-    shippingAddress:c.address,
-    shippingZipcode: c.zipCode,
-    shippingName: c.name,
-    shippingLastName: c.lastName,
-    shippingBusinessName: c.businessName,
-    shippingTelephone: c.mobile,
-    shippingEmail: c.email,
-    shippingProvince: c.province,
-    shippingCity: c.city,
-    customerNote: c.customerNote
-  })
- }
+  setShippingValues(event: any){
+    const c = this.customers.find(c => c._id === event.value);
+    this.productForm.patchValue({
+      shippingAddress:c.address,
+      shippingZipcode: c.zipCode,
+      shippingName: c.name,
+      shippingLastName: c.lastName,
+      shippingBusinessName: c.businessName,
+      shippingTelephone: c.mobile,
+      shippingEmail: c.email,
+      shippingProvince: c.province,
+      shippingCity: c.city,
+      customerNote: c.customerNote
+    })
+  }
 
   onSubmit() {
     let navigation = "/orders";
@@ -580,12 +571,12 @@ export class AddOrderComponent {
     const ddEx = String(dEx.getDate()).padStart(2, '0');
 
     
-  for (const name in this.productForm.controls) {
-    const control = this.productForm.get(name);
-    if (control && control.invalid) {
-      console.log(`${name} is invalid`, control.errors);
+    for (const name in this.productForm.controls) {
+      const control = this.productForm.get(name);
+      if (control && control.invalid) {
+        console.log(`${name} is invalid`, control.errors);
+      }
     }
-  }
 
     if (this.productForm.valid) {
       const formData: Order = {

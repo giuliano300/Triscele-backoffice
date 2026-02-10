@@ -271,6 +271,9 @@ export class OperatorDashboardComponent {
   }
 
   calculateDelay(attendance: Attendance) {
+    if(!attendance)
+      return;
+    
     this.miniCalendarEvent = {
       ...attendance,
       fullName: this.operator?.name! + " " + this.operator?.lastName!,

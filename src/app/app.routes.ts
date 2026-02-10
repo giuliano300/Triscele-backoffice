@@ -209,7 +209,7 @@ export const routes: Routes = [
             },
             { path: 'orders', component: OrdersComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore'] }
             },
             { path: 'operator-orders', component: OperatorOrdersComponent,
                 canActivate: [RoleGuard],
@@ -217,15 +217,15 @@ export const routes: Routes = [
             },
             { path: 'quotations', component: QuotationsComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore'] }
             },
             { path: 'order/add/:id', component: AddOrderComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore'] }
             },
             { path: 'order/add', component: AddOrderComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore'] }
             },
             {
                 path: 'access-denied',

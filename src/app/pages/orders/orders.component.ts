@@ -107,11 +107,7 @@ export class OrdersComponent {
 
   orderState: OrderState[] = [];
 
-  IsOperatorView: boolean = false;
-
   firstLoading: boolean = false;
-
-  admin: boolean = true;
 
   totalItems = 0;
   pageSize = 20;
@@ -156,14 +152,10 @@ export class OrdersComponent {
     }
 
   ngOnInit(): void {
-    const isOperator = localStorage.getItem('isOperator') === 'true';
-    if(isOperator)
-      this.IsOperatorView = true;
-
     this.customerService.getCustomers('')
       .subscribe((data: Customers[]) => {
         this.customers = data;
-    });
+    }); 
 
     this.operatorService.getOperators()
       .subscribe((data: Operators[]) => {
@@ -220,20 +212,7 @@ export class OrdersComponent {
 
     this.firstLoading = true;
     
-    if(this.IsOperatorView)
-    {
-      const o = JSON.parse(localStorage.getItem("operator") || "{}");
-      operatorId = o.sub;  
-      sectorId = o.sectorId;  
-      this.admin = false;
-    }
-
-    if (!this.IsOperatorView && !this.displayedColumns.includes('history')) {
-      const lastIndex = this.displayedColumns.length - 1;
-      this.displayedColumns.splice(lastIndex, 0, 'history');
-    }
-
-    if (customerId || operatorId || sectorId || status || start || end || pageIndex || pageSize || this.admin) {
+    if (customerId || operatorId || sectorId || status || start || end || pageIndex || pageSize) {
       const params = new URLSearchParams();
       params.append('page', (pageIndex + 1).toString()); 
       params.append('limit', pageSize.toString());
@@ -243,7 +222,7 @@ export class OrdersComponent {
       if (status) params.append('status', status.toString());
       if (start) params.append('start', start);
       if (end) params.append('end', end);
-      if (this.admin) params.append('admin', this.admin ? 'true' : 'false');
+      params.append('admin', 'true');
       query = `?${params.toString()}`;
     }
     this.orderService.getOrders(query)

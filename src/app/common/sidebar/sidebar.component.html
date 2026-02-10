@@ -167,7 +167,7 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleAdmin">
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleAdmin || isOfficeOperator">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <i-feather name="file-text"></i-feather>
@@ -192,14 +192,14 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <a routerLink="/operator-orders" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleOperatorOrders">
+                    <a routerLink="/operator-orders" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleOperatorOrders && !isOfficeOperator">
                         <i-feather name="file-text"></i-feather>
                         <span class="title">
                             Ordini
                         </span>
                     </a>
 
-                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleOrders">
+                    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = true" *ngIf="isVisibleOrders || isOfficeOperator">
                         <mat-expansion-panel-header>
                             <mat-panel-title>
                                 <i-feather name="file-text"></i-feather>
@@ -222,38 +222,38 @@
                         </ul>
                     </mat-expansion-panel>
 
-                    <span class="sub-title text-body sbs" *ngIf="isVisibleAdmin">
+                    <span class="sub-title text-body sbs" *ngIf="isVisibleAdmin || isOfficeOperator">
                         SETTINGS
                     </span>
-                    <a routerLink="/sectors" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                    <a routerLink="/sectors" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin || isOfficeOperator">
                         <i-feather name="credit-card"></i-feather>
                         <span class="title">
                             Settori
                         </span>
                     </a>                
 
-                    <a routerLink="/agents" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                    <a routerLink="/agents" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin || isOfficeOperator">
                         <i-feather name="users"></i-feather>
                         <span class="title">
                             Agenti
                         </span>
                     </a>                
 
-                    <a routerLink="/order-state" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                    <a routerLink="/order-state" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin || isOfficeOperator">
                         <i-feather name="bar-chart-2"></i-feather>
                         <span class="title">
                             Stato ordini
                         </span>
                     </a>                
 
-                    <a routerLink="/allowed-ip" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                    <a routerLink="/allowed-ip" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin || isOfficeOperator">
                         <i-feather name="check"></i-feather>
                         <span class="title">
                             Ip consentiti
                         </span>
                     </a>         
 
-                    <a routerLink="/custom-holidays" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin">
+                    <a routerLink="/custom-holidays" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin || isOfficeOperator">
                         <i-feather name="bookmark"></i-feather>
                         <span class="title">
                            Festività

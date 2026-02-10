@@ -31,6 +31,7 @@ export class SidebarComponent {
     isVisibleSectors: boolean = true;
     isVisibleAdmin: boolean = true;
     isVisibleOperatorOrders: boolean = false;
+    isOfficeOperator: boolean = false;
 
     count:number = 0;
 
@@ -103,6 +104,8 @@ export class SidebarComponent {
                 this.saveLocal('persistentPermissions', permissions);
 
                 this.applyPermissions(permissions);
+
+                //console.log(permissions);
             });
         });
 
@@ -135,6 +138,9 @@ export class SidebarComponent {
         this.isVisibleSuppliers = has("SuppliersModule");
         this.isVisibleProducts = has("ProductsModule");
         this.isVisibleOperatorOrders = has("OrdersModule");
+        this.isOfficeOperator = has("OfficeOperatorsModule");
+
+        //console.log(this.isOfficeOperator);
 
         this.isVisibleUsers = this.isVisibleCustomers || this.isVisibleOperators || this.isVisibleSuppliers;
         this.isVisibleProductions = this.isVisibleProducts || this.isVisibleOperatorOrders;
@@ -145,6 +151,7 @@ export class SidebarComponent {
         this.isAdmin = true;
         this.isOperator = false;
         this.isVisibleOperatorOrders = false;
+        this.isOfficeOperator = false;
 
         this.isVisibleDashboard = true;
         this.isVisibleCustomers = true;
