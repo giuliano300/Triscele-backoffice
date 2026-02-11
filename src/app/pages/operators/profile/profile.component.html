@@ -36,7 +36,7 @@
                   </li>
                   <li class="position-relative text-black">
                       <i-feather name="clock"></i-feather>
-                      Ore di permesso: {{operator?.remainingNumberOfPermissions}} / {{operator?.numberOfPermissions}}
+                      Ore di permesso: {{operator?.remainingNumberOfPermissions | number:'1.2-2'}} / {{operator?.numberOfPermissions}}
                   </li>
               </ul>
           </mat-card-content>
@@ -63,7 +63,7 @@
         <mat-card-header>
           <mat-card-title>
               <h5 class="mt-0 mb-0">
-                Ore di permesso {{permessiRimanenti}} su {{permessi}}
+                Ore di permesso {{permessiRimanenti | number:'1.2-2'}} su {{permessi}}
               </h5>
           </mat-card-title>
         </mat-card-header>
@@ -75,3 +75,151 @@
       </mat-card>
     </div>
  </div>
+
+ <!-- ================= PRESENZE OPERATORE ================= -->
+<div class="row">
+  <div class="col-12">
+
+    <mat-card class="trinta-card mb-25 bg-white border-none d-block">
+      <mat-card-content>
+
+        <!-- Header mese -->
+        <div class="calendar-header d-flex align-items-center justify-content-between mb-5">
+
+          <div class="d-flex align-items-center">
+            <button mat-icon-button (click)="previousMonth()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            <h4 class="mb-0">
+              {{ currentMonthName | titlecase }} {{ currentYear }}
+            </h4>
+
+            <button mat-icon-button (click)="nextMonth()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+
+      <mat-tab-group animationDuration="0ms">
+
+         <!-- TAB DETTAGLIO -->
+        <mat-tab label="Dettaglio giornaliero">
+
+          <div class="attendance-table-wrapper mt-5">
+
+            <table class="attendance-table">
+              <thead>
+                <tr>
+                  <th class="text-start">Giorno</th>
+                  <th>Presenza</th>
+                  <th>Pause</th>
+                  <th>Ritardo</th>
+                  <th class="text-start">Note</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                <tr *ngFor="let day of monthDays"
+                    [ngClass]="getRowClasses(day)"
+                    [matTooltip]="isWeekendOrHoliday(day) ? 'Giorno non lavorativo' : null"
+                    matTooltipPosition="above">
+
+                  <ng-container *ngIf="getEventsForDay(operators[0]!.events, day) as events">
+
+                    <td class="day-cell">{{ day }}</td>
+
+                    <td class="presence-cell" [class.presence-late]="getPresence(events)?.calculatedDelay! > 0">
+                      <ng-container *ngIf="getPresence(events) as pres">
+                        {{ formatHourMinute(pres.startHour) }} -
+                        {{ formatHourMinute(pres.endHour) }}
+                      </ng-container>
+                    </td>
+
+                    <td>
+                      <div class="break-pill"
+                          *ngFor="let b of getPresence(events)?.breaks">
+                        {{ formatHourMinute(b.start) }} - {{ formatHourMinute(b.end) }}
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="delay-badge"
+                            *ngIf="getPresence(events)?.calculatedDelay as delay"
+                            [class.show]="delay > 0">
+                        {{ delay }} min
+                      </span>
+                    </td>
+
+                    <td class="text-start">
+                      <div *ngFor="let ev of events">
+                        <span *ngIf="ev.tipologia !== 'presenza'" class="note-pill">
+                          {{ ev.title }}
+                        </span>
+                      </div>
+                    </td>
+
+                  </ng-container>
+
+                </tr>
+
+              </tbody>
+            </table>
+
+          </div>
+
+        </mat-tab>
+
+       <!-- TAB RIEPILOGO -->
+        <mat-tab label="Riepilogo mensile">
+
+          <div class="row margin-mat-table" *ngIf="summaries?.length">
+            <div class="col-md-1"></div>
+            <div class="col-md-2">
+              <div class="summary-box">
+                <div class="title">Ritardi</div>
+                <div class="value">{{ summaries[0].lateHours }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="summary-box">
+                <div class="title">Straordinari</div>
+                <div class="value">{{ summaries[0].overtimeHours }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="summary-box">
+                <div class="title">Permessi</div>
+                <div class="value">{{ summaries[0].permissionHours }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="summary-box">
+                <div class="title">Ferie</div>
+                <div class="value">{{ summaries[0].vacationDays }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="summary-box">
+                <div class="title">Malattia</div>
+                <div class="value">{{ summaries[0].sickDays }}</div>
+              </div>
+            </div>
+
+          </div>
+
+        </mat-tab>
+
+
+      </mat-tab-group>
+
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>

@@ -47,7 +47,7 @@ export class MiniCalendarComponent implements OnInit {
   summaries: OperatorSummary[] = [];
 
   showSummary = false;
-show: any;
+  show: any;
 
   constructor(private calendarService: CalendarService, private utils: UtilsService, private excelService: ExcelService) {
     const today = new Date();

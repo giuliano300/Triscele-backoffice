@@ -161,7 +161,7 @@ export const routes: Routes = [
             },
             { path: 'agents', component: AgentsComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore']  }
             },
             { path: 'categories', component: CategoriesComponent,
                 canActivate: [RoleGuard],
@@ -173,19 +173,19 @@ export const routes: Routes = [
             },
             { path: 'allowed-ip', component: AllowedIpComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore']  }
             },
             { path: 'custom-holidays', component: CustomHolidaysComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore']  }
             },
             { path: 'sectors', component: SectorsComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore']  }
             },
             { path: 'order-state', component: OrderStateComponent,
                 canActivate: [RoleGuard],
-                data: { role: 'admin' }
+                data: { roles: ['admin', 'operatore']  }
             },
             { path: 'change-password', component: ChangePasswordComponent,
                 canActivate: [RoleGuard],

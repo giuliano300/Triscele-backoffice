@@ -172,3 +172,306 @@
 
 /* Min width 1600px */
 @media only screen and (min-width: 1600px) {}
+
+
+@media (max-width: 768px) {
+
+  ::ng-deep table.attendance-table {
+    display: block;
+  }
+
+  ::ng-deep table.attendance-table thead {
+    display: none !important;
+  }
+
+  ::ng-deep table.attendance-table tbody {
+    display: block;
+  }
+
+  ::ng-deep table.attendance-table tr {
+    display: block !important;
+    background: #ffffff;
+    border-radius: 16px;
+    margin-bottom: 14px;
+    padding: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.05);
+    border: 1px solid #eef2f7;
+  }
+
+  ::ng-deep table.attendance-table td {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 6px;
+    border-bottom: 1px dashed #e5e7eb;
+    text-align: right;
+    white-space: normal;
+  }
+
+  ::ng-deep table.attendance-table td:last-child {
+    border-bottom: none;
+  }
+
+  /* labels */
+  ::ng-deep table.attendance-table td:nth-child(1)::before { content: "Giorno"; }
+  ::ng-deep table.attendance-table td:nth-child(2)::before { content: "Presenza"; }
+  ::ng-deep table.attendance-table td:nth-child(3)::before { content: "Pause"; }
+  ::ng-deep table.attendance-table td:nth-child(4)::before { content: "Ritardo"; }
+  ::ng-deep table.attendance-table td:nth-child(5)::before { content: "Note"; }
+
+  ::ng-deep table.attendance-table td::before {
+    font-weight: 400;
+    color: #6b7280;
+  }
+
+   /* nasconde tutte le celle */
+  ::ng-deep table.attendance-table tr.non-working td {
+    display: none !important;
+  }
+
+  /* mostra solo la prima */
+  ::ng-deep table.attendance-table tr.non-working td:first-child {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+  }
+
+  /* scritta a sinistra */
+  ::ng-deep table.attendance-table tr.non-working td:first-child::before {
+    content: "Non lavorativo";
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+}
+
+/* ===== HEADER CALENDARIO ===== */
+.calendar-header {
+  h4 {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0 5px;
+  }
+}
+
+/* ===== SUMMARY KPI ===== */
+.summary-box {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  transition: all .25s ease;
+  border: 1px solid #eef2f7;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.06);
+  }
+
+  .title {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 6px;
+  }
+
+  .value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+/* ===== TABLE ===== */
+.table {
+  border-radius: 14px;
+  overflow: hidden;
+  background: white;
+
+  thead {
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+      font-size: 13px;
+      text-align: center;
+    }
+  }
+
+  tbody {
+    td {
+      vertical-align: middle;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+  }
+}
+
+/* ===== CELLE SPECIFICHE ===== */
+.presence-cell {
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.presence-late {
+  color: #dc2626 !important;   // rosso ritardo
+}
+
+.delay-cell {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.break-cell {
+  font-size: 13px;
+  color: #374151;
+}
+
+/* ===== CARD ===== */
+.trinta-card {
+  border-radius: 18px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .summary-box {
+    margin-bottom: 15px;
+  }
+}
+
+
+.attendance-table-wrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 14px rgba(0,0,0,.04);
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: #f8fafc;
+
+    th {
+      font-weight: 600;
+      font-size: 13px;
+      padding: 14px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background .15s;
+
+      &:hover {
+        background: #fdfdfd;
+      }
+
+      &.empty-day {
+        opacity: .55;
+      }
+    }
+
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+  }
+}
+
+.day-cell {
+  font-weight: 600;
+  text-align: left !important;
+}
+
+.presence-cell {
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.break-pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 12px;
+  margin: 2px;
+}
+
+.delay-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: 600;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity .2s;
+
+  &.show {
+    opacity: 1;
+  }
+}
+
+.note-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 12px;
+  margin: 2px;
+}
+
+
+.non-working {
+  background: #f8f8f8;
+
+  &:hover{
+    background: #f8f8f8!important;
+  }
+}
+
+.non-working td {
+  opacity: 0.75;
+}
+
+.row-illness {
+  background: #fcefef;   // rosso chiaro
+  &:hover{
+    background: #fdeded!important;
+  }
+}
+
+.row-permission {
+  background: #fffde5;   // giallo chiaro
+  &:hover{
+    background: #fcf8cb!important;
+  }
+}
+
+.row-vacation {
+  background: #f0fff6;   // verde chiaro
+  &:hover{
+    background: #dcfce7!important;
+  }
+}
+
+::ng-deep .margin-mat-table{
+    margin:40px 0 50px 0;
+}
+
+
+.mobile-days {
+  display: none;
+}

@@ -1,5 +1,5 @@
 import { Component, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser, NgIf, NgFor } from '@angular/common';
+import { isPlatformBrowser, NgIf, NgFor, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,6 +11,32 @@ import { FeathericonsModule } from '../../../icons/feathericons/feathericons.mod
 import { Router } from '@angular/router';
 import { OperatorService } from '../../../services/Operator.service';
 import { Operators } from '../../../interfaces/operators';
+import { CalendarService } from '../../../services/Calendar.service';
+import { MiniCalendarEvent } from '../../../interfaces/miniCalendarEvent';
+import { UtilsService } from '../../../services/utils.service';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+interface OperatorMonth {
+  operatorId: string;
+  fullName: string;
+  startTime?: string;
+  endTime?: string;
+  events: MiniCalendarEvent[];
+}
+
+interface OperatorSummary {
+  operatorId: string;
+  fullName: string;
+  lateHours: string;
+  overtimeHours: string;
+  permissionHours: string;
+  earlyExitHours: string;
+  vacationDays: number;
+  sickDays: number;
+  absenceUnjustified: number;
+}
+
 
 @Component({
   selector: 'app-profile',
@@ -22,7 +48,10 @@ import { Operators } from '../../../interfaces/operators';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    FeathericonsModule
+    FeathericonsModule,
+    CommonModule,
+    MatTabsModule,
+    MatTooltipModule
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
@@ -50,33 +79,246 @@ export class ProfileComponent {
   permessi: string | undefined;
 
   operator: Operators | null = null;
+  operators: OperatorMonth[] = [];
+  currentMonth: number;
+  currentYear: number;
+  holidays: string[] = [];
+
+  summaries: OperatorSummary[] = [];
+  monthDays: number[] = [];
+
 
   constructor(
     private router: Router,
     private operatorService: OperatorService,
+    private calendarService: CalendarService,
+    private utils: UtilsService,
     @Inject(PLATFORM_ID) private platformId: any
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
+    const today = new Date();
+    this.currentMonth = today.getMonth(); // 0-11
+    this.currentYear = today.getFullYear();
   }
 
-  async ngOnInit(): Promise<void> {
-    if (!this.isBrowser) return;
+    async ngOnInit(): Promise<void> {
+        if (!this.isBrowser) return;
 
-    const o = JSON.parse(localStorage.getItem('operator') || '{}');
-    this.operatorId = o?.sub ?? '';
+        const o = JSON.parse(localStorage.getItem('operator') || '{}');
+        this.operatorId = o?.sub ?? '';
 
-    this.operatorService.getOperator(this.operatorId).subscribe(async (data) =>{
-      this.operator = data;
-      this.ferieRimanenti = data?.remainingNumberOfHolidays!.toString();
-      this.ferie = data?.numberOfHolidays!.toString();
-      this.permessiRimanenti = data?.remainingNumberOfPermissions!.toString();
-      this.permessi = data?.numberOfPermissions!.toString();
+        this.utils.getItalianHolidays(this.currentYear)
+            .subscribe(h => this.holidays = h);
 
-      await this.loadChartHolidays();
-      await this.loadChartPermissions();
-  })
+        this.operatorService.getOperator(this.operatorId).subscribe(async (data) =>{
+            this.operator = data;
+            this.ferieRimanenti = data?.remainingNumberOfHolidays!.toString();
+            this.ferie = data?.numberOfHolidays!.toString();
+            this.permessiRimanenti = data?.remainingNumberOfPermissions!.toString();
+            this.permessi = data?.numberOfPermissions!.toString();
 
-  }
+            await this.loadChartHolidays();
+            await this.loadChartPermissions();
+            this.generateMonthDays();
+            this.loadCalendarOperator(this.operatorId);
+        })
+
+    }
+
+    getRowClasses(day: number) {
+
+        const events = this.getEventsForDay(this.operators[0]?.events || [], day);
+
+        return {
+            'non-working': this.isWeekendOrHoliday(day),
+            'row-illness': this.hasIllness(events),
+            'row-permission': this.hasPermission(events),
+            'row-vacation': this.hasVacation(events),
+            'row-unjustified': this.hasUnjustified(events)
+        };
+    }
+
+
+    hasPermission(events: MiniCalendarEvent[]) {
+        return events.some(e => e.tipologia === 'assenza' && e.title !== 'Ferie'&& !e.title.includes('ingiustificata'));
+    }
+
+    hasUnjustified(events: MiniCalendarEvent[]) {
+        return events.some(e => e.tipologia === 'assenza' && e.title.includes('ingiustificata'));
+    }
+
+    hasVacation(events: MiniCalendarEvent[]) {
+        return events.some(e => e.tipologia === 'assenza' && e.title === 'Ferie');
+    }
+
+    hasIllness(events: MiniCalendarEvent[]) {
+        return events.some(e => e.tipologia === 'malattia');
+    }
+
+
+    isWeekendOrHoliday(day: number): boolean {
+
+        const date = new Date(this.currentYear, this.currentMonth, day);
+
+        // weekend
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+
+        // festivi
+        const dateStr =
+            `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+
+        const isHoliday = this.holidays.includes(dateStr);
+
+        return isWeekend || isHoliday;
+    }
+
+    loadCalendarOperator(operatorId: string) {
+    this.calendarService
+        .getMonthlyCalendarEvents(this.currentMonth + 1, this.currentYear, operatorId)
+        .subscribe(res => {
+            this.operators = this.groupByOperator(res.data);
+            this.buildSummaries();
+        });
+    }
+
+    buildSummaries() {
+
+    this.summaries = this.operators.map(op => {
+
+        let lateMinutes = 0;
+        let overtimeMinutes = 0;
+        let permissionMinutes = 0;
+        let earlyExitMinutes = 0;
+        let vacationDays = 0;
+        let sickDays = 0;
+        let absenceUnjustified = 0;
+
+        op.events.forEach(ev => {
+
+        if (ev.tipologia === 'malattia' && ev.startDate && ev.endDate) {
+            sickDays += this.utils.countWorkingDays(
+                ev.startDate,
+                ev.endDate,
+                this.currentMonth,
+                this.currentYear,
+                this.holidays
+            );
+        }
+
+        if (ev.tipologia === 'assenza' && ev.title === 'Ferie' && ev.startDate && ev.endDate) {
+            vacationDays += this.utils.countWorkingDays(
+                ev.startDate,
+                ev.endDate,
+                this.currentMonth,
+                this.currentYear,
+                this.holidays
+            );
+        }
+
+        if (ev.tipologia === 'presenza') {
+            lateMinutes += ev.calculatedDelay ?? 0;
+        }
+
+        });
+
+        return {
+        operatorId: op.operatorId,
+        fullName: op.fullName,
+        lateHours: this.utils.formatMinutesToHours(lateMinutes),
+        overtimeHours: this.utils.formatMinutesToHours(overtimeMinutes),
+        permissionHours: this.utils.formatMinutesToHours(permissionMinutes),
+        earlyExitHours: this.utils.formatMinutesToHours(earlyExitMinutes),
+        vacationDays,
+        sickDays,
+        absenceUnjustified
+        };
+
+    });
+
+    }
+
+    private groupByOperator(events: MiniCalendarEvent[]): OperatorMonth[] {
+
+        const map = new Map<string, OperatorMonth>();
+
+        events.forEach(ev => {
+
+            if (ev.tipologia === 'presenza') {
+                ev.calculatedDelay = this.utils.calculateEventDelay(ev);
+            }
+
+            const key = ev.fullName;
+
+            if (!map.has(key)) {
+            map.set(key, {
+                operatorId: ev.id,
+                fullName: ev.fullName,
+                startTime: ev.operatorStartTime,
+                endTime: ev.operatorEndTime,
+                events: []
+            });
+            }
+
+            map.get(key)!.events.push(ev);
+        });
+
+        return Array.from(map.values());
+    }
+
+    getEventsForDay(events: MiniCalendarEvent[], day: number): MiniCalendarEvent[] {
+
+        const dateStr = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+        return events.filter(e =>
+            e.date === dateStr ||
+            (e.startDate && e.endDate && dateStr >= e.startDate && dateStr <= e.endDate)
+        );
+    }
+
+    getPresence(events: MiniCalendarEvent[]) {
+    return events.find(e => e.tipologia === 'presenza');
+    }
+
+    formatHourMinute(time?: string): string | null {
+        if (!time) return null;
+        const [h,m] = time.split(':');
+        return `${h}:${m}`;
+    }
+    
+    generateMonthDays() {
+        const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+        this.monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    }
+
+    previousMonth() {
+        if (this.currentMonth === 0) {
+            this.currentMonth = 11;
+            this.currentYear--;
+        } else {
+            this.currentMonth--;
+        }
+
+        this.generateMonthDays();
+        this.loadCalendarOperator(this.operatorId);
+    }
+
+    nextMonth() {
+
+        if (this.currentMonth === 11) {
+            this.currentMonth = 0;
+            this.currentYear++;
+        } else {
+            this.currentMonth++;
+        }
+
+        this.generateMonthDays();
+        this.loadCalendarOperator(this.operatorId);
+    }
+
+    get currentMonthName(): string {
+        return new Date(this.currentYear, this.currentMonth)
+            .toLocaleString('default', { month: 'long' });
+    }
 
     async loadChartHolidays(): Promise<void> {
         if (this.isBrowser) {
