@@ -91,6 +91,7 @@ export class AddProductComponent {
   
   stockTypes = [
     { value: 'pezzi', label: 'Pezzi' },
+    { value: 'coppia', label: 'Coppia' },
     { value: 'm', label: 'Metri' },
     { value: 'l', label: 'Litri' },
     { value: 'kg', label: 'KG' },

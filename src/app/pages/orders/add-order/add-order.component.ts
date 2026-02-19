@@ -139,7 +139,7 @@ export class AddOrderComponent {
     this.productForm = this.fb.group({
       customerId: ['', Validators.required],
       operatorId: [null as string | null],
-      sectorId: [''],
+      sectorId: ['', Validators.required],
       agentId: [''],
       paymentMethod: ['', Validators.required],
       status: [OrderStatus.IN_LAVORAZIONE],

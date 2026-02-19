@@ -395,6 +395,12 @@
 
 
 @media (max-width: 991px) {
+
+  .mini{
+    max-width: 100%!important;
+    min-width: 100%!important;
+ }
+
   ::ng-deep {
     .trinta-card.to-do-list-card {
       .to-do-list-table {

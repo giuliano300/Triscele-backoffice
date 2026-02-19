@@ -204,6 +204,13 @@ export class ProfileComponent {
                 this.holidays
             );
         }
+        
+        if (ev.tipologia === 'assenza' && ev.title !== 'Ferie') {
+          if (ev.startHour && ev.endHour) {
+            permissionMinutes += this.utils.diffMinutes(ev.startHour, ev.endHour);
+          }
+        }
+
 
         if (ev.tipologia === 'assenza' && ev.title === 'Ferie' && ev.startDate && ev.endDate) {
             vacationDays += this.utils.countWorkingDays(
@@ -215,8 +222,20 @@ export class ProfileComponent {
             );
         }
 
-        if (ev.tipologia === 'presenza') {
-            lateMinutes += ev.calculatedDelay ?? 0;
+        let minLate =  ev.calculatedDelay ?? 0;
+
+        if (ev.tipologia === 'presenza' && ev.startHour && ev.endHour) {
+          if (ev.operatorStartTime) {
+            lateMinutes += minLate;
+          }
+
+          if (ev.operatorEndTime && ev.endHour > ev.operatorEndTime && minLate == 0) {
+            overtimeMinutes += this.utils.calculateOvertime(ev);
+          }
+
+          if (ev.operatorEndTime && ev.endHour < ev.operatorEndTime) {
+            earlyExitMinutes += this.utils.diffMinutes(ev.endHour, ev.operatorEndTime);
+          }
         }
 
         });
