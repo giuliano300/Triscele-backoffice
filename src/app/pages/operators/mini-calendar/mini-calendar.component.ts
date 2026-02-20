@@ -341,6 +341,7 @@ export class MiniCalendarComponent implements OnInit {
         }
       });
 
+      console.log(lateMinutes - overtimeMinutes);
       return {
         operatorId: op.operatorId,
         fullName: op.fullName,

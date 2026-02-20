@@ -157,50 +157,53 @@ export class UtilsService {
     }
 
     formatMinutesToHoursRec(minutes: number): string {
-        const h = Math.floor(minutes / 60);
-        const m = minutes % 60;
+        const sign = minutes < 0 ? "-" : "";
+        const absMinutes = Math.abs(minutes);
 
-        if (h > 0 && m > 0) return `${h}h ${m}m`;
-        if (h > 0) return `${h}h`;
-        return `${m}m`;
-    }
+        const h = Math.floor(absMinutes / 60);
+        const m = absMinutes % 60;
 
+        if (h > 0 && m > 0) return `${sign}${h}h ${m}m`;
+        if (h > 0) return `${sign}${h}h`;
+        return `${sign}${m}m`;
+    }    
+    
     countWorkingDays(
-      startDate: string,
-      endDate: string,
-      month: number,
-      year: number,
-      holidays: string[]
-    ): number {
-      let count = 0;
+          startDate: string,
+          endDate: string,
+          month: number,
+          year: number,
+          holidays: string[]
+        ): number {
+          let count = 0;
 
-      const holidaySet = new Set(holidays);
-      // 🔒 normalizza a mezzanotte locale
-      let current = new Date(startDate + 'T00:00:00');
-      const end = new Date(endDate + 'T00:00:00');
+          const holidaySet = new Set(holidays);
+          // 🔒 normalizza a mezzanotte locale
+          let current = new Date(startDate + 'T00:00:00');
+          const end = new Date(endDate + 'T00:00:00');
 
-      while (current.getTime() <= end.getTime()) {
-        const y = current.getFullYear();
-        const m = current.getMonth();
-        const d = current.getDate();
+          while (current.getTime() <= end.getTime()) {
+            const y = current.getFullYear();
+            const m = current.getMonth();
+            const d = current.getDate();
 
-        if (y === year && m === month) {
-          const day = current.getDay();
-          const isWeekend = day === 0 || day === 6;
+            if (y === year && m === month) {
+              const day = current.getDay();
+              const isWeekend = day === 0 || day === 6;
 
-          const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const isHoliday = holidaySet.has(dateStr);
+              const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+              const isHoliday = holidaySet.has(dateStr);
 
-          if (!isWeekend && !isHoliday) {
-            count++;
+              if (!isWeekend && !isHoliday) {
+                count++;
+              }
+            }
+
+            // 🔥 avanza SEMPRE di 1 giorno netto
+            current.setDate(current.getDate() + 1);
           }
-        }
 
-        // 🔥 avanza SEMPRE di 1 giorno netto
-        current.setDate(current.getDate() + 1);
-      }
-
-      return count;
+          return count;
     }
 
   calculateEventDelayOLD(event: MiniCalendarEvent, allowedBreakMinutes = 90): number {
