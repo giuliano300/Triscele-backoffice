@@ -254,19 +254,32 @@ export class AddOrderComponent {
   }
 
   get grandTotal(): number {
+
     return this.productsForm.controls.reduce((acc, ctrl) => {
-      const isSubs = ctrl.get('isSubs')?.value;
-      if (isSubs) return acc; // salta i sub-items
 
-      const price = ctrl.get('price')?.value || 0;
-      const qty = ctrl.get('quantity')?.value || 0;
-      const discount = ctrl.get('discount')?.value || 0;
-      const selectedOptions = ctrl.get('selectedOptions')?.value || [];
+      if (ctrl.get('isSubs')?.value) return acc;
 
-      // calcolo prezzo totale del gruppo includendo selectedOptions ricorsivamente
-      const optionsTotal = sumSelectedOptionsPrice(selectedOptions);
+      const price = Number(ctrl.get('price')?.value) || 0;
+      const qty = Number(ctrl.get('quantity')?.value) || 1;
+      const discount = Number(ctrl.get('discount')?.value) || 0;
 
-      return acc + (price * qty - discount) + optionsTotal;
+      const raw = ctrl.get('selectedOptions')?.value;
+
+      const selectedOptions: ConfigProductToOrder[] =
+        Array.isArray(raw)
+          ? raw
+          : raw
+            ? [raw]
+            : [];
+            const optionsTotal = selectedOptions.reduce(
+              (sum, option) => sum + this.calculateOptionPrice(option),
+              0
+            );
+
+      const gross = (price + optionsTotal) * qty;
+
+      return acc + (gross - discount);
+
     }, 0);
   }
 
@@ -364,6 +377,9 @@ export class AddOrderComponent {
 
         this.orderService.getOrder(this.id)
           .subscribe((data: Order) => {
+
+            //console.log(JSON.stringify(data.orderProducts));
+
             const [year, month, day] = data.insertDate.substring(0, 10).split('-').map(Number);
 
             const [yearEx, monthEx, dayEx] = data.expectedDelivery.substring(0, 10).split('-').map(Number);
@@ -407,7 +423,12 @@ export class AddOrderComponent {
                 note: [product.note],
                 parentId: [product.parentId],
                 options: [product.options],
-                selectedOptions: [product.selectedOptions || null]
+                selectedOptions: (() => {
+                  const so = product.selectedOptions;
+                  if (!Array.isArray(so)) return [];
+                  if (so.length > 0 && Array.isArray(so[0])) return so[0];
+                  return so;
+                })()
               });
 
               //console.log(group);
@@ -423,19 +444,65 @@ export class AddOrderComponent {
   }
 
   getFinalPrice(): number {
-    let total = 0;
-    (this.productsForm.controls as FormGroup[]).forEach((group: FormGroup, i: number) => {
-      this.groupTotals[i] = calculateFinalPrice(
-        +group.get('price')?.value || 0,
-        +group.get('quantity')?.value || 0,
-        +group.get('discount')?.value || 0,
-        group.get('selectedOptions')?.value || []
+
+    let ftotal = 0;
+
+    (this.productsForm.controls as FormGroup[]).forEach((group, i) => {
+
+      const basePrice = Number(group.get('price')?.value) || 0;
+      const quantity = Number(group.get('quantity')?.value) || 1;
+      const discount = Number(group.get('discount')?.value) || 0;
+
+      const raw = group.get('selectedOptions')?.value;
+
+      const selectedOptions: ConfigProductToOrder[] =
+        Array.isArray(raw)
+          ? raw
+          : raw
+            ? [raw]
+            : [];
+
+      const optionsTotal = selectedOptions.reduce(
+        (sum, option) => sum + this.calculateOptionPrice(option),
+        0
       );
-      total += this.groupTotals[i];
+
+     //console.log("SELECTED OPTIONS RAW:", group.get('selectedOptions')?.value);
+
+      const gross = (basePrice + optionsTotal) * quantity;
+      const total = gross - discount;
+
+      this.groupTotals[i] = total;
+      ftotal += total;
     });
-    return total;
+
+    return Math.round(ftotal * 100) / 100;
   }
 
+  private calculateOptionPrice(option: ConfigProductToOrder): number {
+
+    let total = 0;
+
+    // 1️⃣ Somma il prodotto selezionato se esiste
+    if (option?.selectedProduct?.price) {
+
+      const price = Number(option.selectedProduct.price) || 0;
+      const qta = Number(option.selectedProduct.qta) || 1;
+
+      total += price * qta;
+    }
+
+    // 2️⃣ Somma ricorsivamente i figli
+    if (Array.isArray(option.children) && option.children.length > 0) {
+
+      option.children.forEach(child => {
+        total += this.calculateOptionPrice(child);
+      });
+
+    }
+
+    return total;
+  }
 
   addProductToList(product: ProductViewModel){
     const exists = this.productsForm.controls.some(ctrl => {
@@ -589,7 +656,12 @@ export class AddOrderComponent {
       formData.operatorId = formData.operatorId ?? undefined;
 
       formData.origin = "1";
-      formData.orderProducts = this.productsForm.value;
+      formData.orderProducts = this.productsForm.value.map((p: any) => ({
+        ...p,
+        selectedOptions: Array.isArray(p.selectedOptions)
+          ? p.selectedOptions
+          : []
+      }));
 
       formData.totalPrice = this.getFinalPrice();
 
@@ -624,55 +696,56 @@ export class AddOrderComponent {
     }
   }
 
-  openConfigurator(c: Product){
-    //console.log(JSON.stringify(c));
-    if(c.options.length > 0){
-      const dialogRef = this.dialog.open(AddUpdateOptionsToOrderDialogComponent, {
-          data: c,
-          width: '80vw',
-          maxWidth: '1000px'
-      });
+  openConfigurator(product: Product) {
 
-      dialogRef.afterClosed().subscribe((result: ConfigProductToOrder) => {
-        if (result) 
-          this.addOrUpdateProductOptions(c, result);
-        else 
-          console.log("Close");
-      });
-    }
-  }
-
-  addOrUpdateProductOptions(product: Product, result: ConfigProductToOrder) {
-    // Trova il FormGroup corrispondente
     const fg = this.productsForm.controls.find(
       (c: AbstractControl) => c.get('_id')?.value === product._id
     ) as FormGroup;
 
     if (!fg) return;
 
-    // Prendi l'array di selectedOptions
     const selectedOptions = fg.get('selectedOptions')?.value || [];
 
-    // Controlla se l'opzione è già presente (update) o aggiungila (push)
-    const existingIndex = selectedOptions.findIndex((o: ConfigProductToOrder) => o._id === result._id);
+    const productWithSelection = {
+      ...product,
+      selectedOptions: selectedOptions
+    };
 
-    if (existingIndex >= 0) {
-      // Aggiorna
-      selectedOptions[existingIndex] = result;
-    } else {
-      // Aggiungi
-      selectedOptions.push(result);
-    }
+    const dialogRef = this.dialog.open(
+      AddUpdateOptionsToOrderDialogComponent,
+      {
+        data: productWithSelection,
+        width: '80vw',
+        maxWidth: '1000px'
+      }
+    );
 
+    dialogRef.afterClosed().subscribe((result: ConfigProductToOrder[]) => {
+      if (result) {
+        fg.get('selectedOptions')?.setValue(result);
+        fg.get('selectedOptions')?.updateValueAndValidity();
+        this.getFinalPrice();
+      }
+    });
+  }
 
-    //console.log(JSON.stringify(selectedOptions));
+  addOrUpdateProductOptions(product: Product, result: ConfigProductToOrder[]) {
 
-    // Aggiorna il FormControl
-    fg.get('selectedOptions')?.setValue(selectedOptions);
+    const fg = this.productsForm.controls.find(
+      (c: AbstractControl) => c.get('_id')?.value === product._id
+    ) as FormGroup;
+
+    if (!fg) return;
+
+    // 🔥 GARANTIAMO SEMPRE ARRAY
+    const normalizedResult: ConfigProductToOrder[] =
+      Array.isArray(result) ? result : [result];
+
+    fg.get('selectedOptions')?.setValue([...normalizedResult]);
+
+    fg.get('selectedOptions')?.markAsDirty();
     fg.get('selectedOptions')?.updateValueAndValidity();
 
     this.getFinalPrice();
-
   }
-
 }

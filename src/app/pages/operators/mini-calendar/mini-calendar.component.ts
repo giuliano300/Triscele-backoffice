@@ -22,6 +22,7 @@ interface OperatorSummary {
   fullName: string;
   lateHours: string;
   overtimeHours: string;
+  lateOvertimeHours: string;
   permissionHours: string;
   earlyExitHours: string;
   vacationDays: number;
@@ -284,6 +285,7 @@ export class MiniCalendarComponent implements OnInit {
       let vacationDays = 0;
       let sickDays = 0;
       let absenceUnjustified = 0;
+      let lateOvertimeHours = 0;
 
       op.events.forEach(ev => {
         if (ev.tipologia === 'malattia' && ev.startDate && ev.endDate) {
@@ -344,6 +346,7 @@ export class MiniCalendarComponent implements OnInit {
         fullName: op.fullName,
         lateHours: this.utils.formatMinutesToHours(lateMinutes),
         overtimeHours: this.utils.formatMinutesToHours(overtimeMinutes),
+        lateOvertimeHours: this.utils.formatMinutesToHoursRec(lateMinutes - overtimeMinutes),
         permissionHours: this.utils.formatMinutesToHours(permissionMinutes),
         earlyExitHours: this.utils.formatMinutesToHours(earlyExitMinutes),        
         vacationDays,

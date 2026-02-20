@@ -30,6 +30,7 @@ interface OperatorSummary {
   fullName: string;
   lateHours: string;
   overtimeHours: string;
+  lateOvertimeHours: string;
   permissionHours: string;
   earlyExitHours: string;
   vacationDays: number;
@@ -192,6 +193,7 @@ export class ProfileComponent {
         let vacationDays = 0;
         let sickDays = 0;
         let absenceUnjustified = 0;
+        let lateOvertimeHours = 0;
 
         op.events.forEach(ev => {
 
@@ -245,6 +247,7 @@ export class ProfileComponent {
         fullName: op.fullName,
         lateHours: this.utils.formatMinutesToHours(lateMinutes),
         overtimeHours: this.utils.formatMinutesToHours(overtimeMinutes),
+        lateOvertimeHours: this.utils.formatMinutesToHoursRec(lateMinutes - overtimeMinutes),
         permissionHours: this.utils.formatMinutesToHours(permissionMinutes),
         earlyExitHours: this.utils.formatMinutesToHours(earlyExitMinutes),
         vacationDays,

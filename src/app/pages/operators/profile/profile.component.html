@@ -175,7 +175,6 @@
         <mat-tab label="Riepilogo mensile">
 
           <div class="row margin-mat-table" *ngIf="summaries?.length">
-            <div class="col-md-1"></div>
             <div class="col-md-2">
               <div class="summary-box">
                 <div class="title">Ritardi</div>
@@ -187,6 +186,13 @@
               <div class="summary-box">
                 <div class="title">Straordinari</div>
                 <div class="value">{{ summaries[0].overtimeHours }}</div>
+              </div>
+            </div>
+
+            <div class="col-md-2">
+              <div class="summary-box">
+                <div class="title">Recupero</div>
+                <div class="value">{{ summaries[0].lateOvertimeHours }}</div>
               </div>
             </div>
 

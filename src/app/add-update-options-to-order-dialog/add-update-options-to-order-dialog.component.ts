@@ -49,8 +49,8 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   form: FormGroup;
 
   stockTypes = [
-    { value: 'pezzi', label: 'Pezzi' },
     { value: 'm', label: 'Metri' },
+    { value: 'pezzi', label: 'Pezzi' },
     { value: 'l', label: 'Litri' },
     { value: 'kg', label: 'KG' },
     { value: 'ha', label: 'Ettari' },
@@ -83,9 +83,10 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     // Opzioni di primo livello
     this.masterOptions = p.options.filter(a => !a.parent) || [];
 
-    //console.log(JSON.stringify(this.masterOptions));
+    //console.log(JSON.stringify(p.selectedOptions));
 
     // Crea il form ricorsivo
+    
     this.form = this.createFormGroupForOptions(this.masterOptions, p.selectedOptions);
   }
 
@@ -97,7 +98,15 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   // --- CREA FORM RICORSIVO ---
   createFormGroupForOptions(options: any[], selectedOptions?: any[]): FormGroup {
     const group: any = {};
-    const flatSelected = selectedOptions && selectedOptions.length > 0 ? selectedOptions[0] : [];
+    let flatSelected: any[] = [];
+
+      if (Array.isArray(selectedOptions)) {
+        flatSelected = selectedOptions;
+      } else if (selectedOptions) {
+        flatSelected = [selectedOptions];
+      }
+
+    //console.log(flatSelected);
 
     options.forEach(optionNode => {
       const id = optionNode.option._id;
