@@ -44,3 +44,20 @@
     color: var(--blackColor);
     top: 15px;
 }
+
+.checkbox-field {
+  height: 60px; // altezza standard mat-form-field
+  border: 1px solid #f5f7fa;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: #f5f7fa;
+  border-radius: 10px;
+  max-width: 95%;
+  
+  label
+  {
+    font-size: 11px!important;
+  }
+}

@@ -96,71 +96,109 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   }
 
   // --- CREA FORM RICORSIVO ---
-  createFormGroupForOptions(options: any[], selectedOptions?: any[]): FormGroup {
-    const group: any = {};
-    let flatSelected: any[] = [];
+createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
 
-      if (Array.isArray(selectedOptions)) {
-        flatSelected = selectedOptions;
-      } else if (selectedOptions) {
-        flatSelected = [selectedOptions];
+  const group: any = {};
+
+  options.forEach(optionNode => {
+
+    const id = optionNode.option._id;
+    const type = optionNode.option.optionType;
+
+    // 🔎 trova il nodo selected corretto (NON flat!)
+    let selected = null;
+
+    if (Array.isArray(selectedOptions)) {
+      selected = selectedOptions.find((s: any) => s._id === id);
+    } else if (selectedOptions && selectedOptions._id === id) {
+      selected = selectedOptions;
+    }
+
+    let initialValue: any = null;
+    let qtaValue: number = 1;
+
+    // =========================
+    // SELECT
+    // =========================
+    if (type === OptionType.select) {
+
+      let matchedProduct = null;
+
+      // 🔵 MODIFICA
+      if (selected?.selectedProduct?._id) {
+
+        matchedProduct =
+          optionNode.option.products.find(
+            (p: any) => p._id === selected.selectedProduct._id
+          ) || null;
+
+        qtaValue =
+          selected.selectedProduct?.qta ??
+          matchedProduct?.quantity ??
+          1;
       }
 
-    //console.log(flatSelected);
+      // 🟢 INSERIMENTO
+      else {
 
-    options.forEach(optionNode => {
-      const id = optionNode.option._id;
-      const type = optionNode.option.optionType;
+        matchedProduct =
+          optionNode.option.products.find((p: any) => p.selected) || null;
 
-      const selected = flatSelected.find((s: any) => s._id === id);
-      let initialValue: any = null;
+        qtaValue =
+          matchedProduct?.quantity ??
+          1;
+      }
 
-      if (selected) {
-        if (type === OptionType.select) {
-          const selectedId = selected.selectedProduct?._id || selected.value?._id;
-          const matched = optionNode.option.products.find((p: any) => p._id === selectedId);
-          initialValue = matched || null;
-          
-          optionNode.selectedUnit = this.getStockTypeLabel(selected.selectedProduct.stock_type) || 'Quantità';
+      initialValue = matchedProduct;
 
+      optionNode.selectedUnit =
+        this.getStockTypeLabel(matchedProduct?.stock_type) || 'Quantità';
 
-          // POPOLA I CHILDREN ALL'INIZIALIZZAZIONE
-          const children = this.data.options.filter(opt =>
-            opt.parent?._id === id &&
-            (!opt.parentProduct || opt.parentProduct._id === matched?._id)
+      group[id] = new FormControl(initialValue);
+      group['qta_' + id] = new FormControl(qtaValue);
+
+      // ===== CHILDREN =====
+      const children = this.data.options.filter(opt =>
+        opt.parent?._id === id &&
+        (!opt.parentProduct || opt.parentProduct._id === matchedProduct?._id)
+      );
+
+      if (children.length > 0) {
+        optionNode.children = children;
+
+        group[id + '_children'] =
+          this.createFormGroupForOptions(
+            children,
+            selected?.children   // 🔥 PASSIAMO SOLO IL RAMO CORRETTO
           );
-
-          if (children.length > 0) {
-            optionNode.children = children;
-            group[id + '_children'] = this.createFormGroupForOptions(children, selectedOptions);
-          }
-        } 
-        else 
-        {
-          initialValue = selected.value ?? null;
-        }
-      } else {
-        initialValue = type === OptionType.select ? optionNode.selectedProduct || null : optionNode.value || null;
       }
 
-      // FormControl
+    }
+    // =========================
+    // NON SELECT
+    // =========================
+    else {
+
+      initialValue =
+        selected?.value ??
+        optionNode.value ??
+        null;
+
       group[id] = new FormControl(initialValue);
 
-      if (type === OptionType.select) {
-        const qtaValue = selected?.selectedProduct?.qta ?? 1;
-        group['qta_' + id] = new FormControl(qtaValue);
-        
+      if (optionNode.children?.length > 0) {
+        group[id + '_children'] =
+          this.createFormGroupForOptions(
+            optionNode.children,
+            selected?.children
+          );
       }
+    }
 
-      // Figli ricorsivi
-      if (optionNode.children && optionNode.children.length > 0) {
-        group[id + '_children'] = this.createFormGroupForOptions(optionNode.children, selectedOptions);
-      }
-    });
+  });
 
-    return new FormGroup(group);
-  }
-
+  return new FormGroup(group);
+}
   // --- COMPARA OGGETTI PER SELECT ---
   compareProducts(p1: any, p2: any): boolean {
     return p1 && p2 ? p1._id === p2._id : p1 === p2;

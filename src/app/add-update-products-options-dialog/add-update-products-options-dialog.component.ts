@@ -17,6 +17,7 @@ import { OptionsService } from '../services/Options.service';
 import { ProductUp } from '../interfaces/productsUp';
 import { OptionType, OptionTypeLabels } from '../enum/enum';
 import { MatSelect } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-add-update-products-options-dialog',
@@ -36,7 +37,8 @@ import { MatSelect } from '@angular/material/select';
     MatLabel, 
     CommonModule,
    ReactiveFormsModule,
-   MatSelect
+   MatSelect,
+   MatCheckboxModule
   ]
 })
 export class AddUpdateProductsOptionsDialogComponent {
@@ -114,6 +116,8 @@ export class AddUpdateProductsOptionsDialogComponent {
           name: [product.name],
           price: [product.price || 0],
           stock_type :  [product.stock_type || undefined],
+          quantity: [product.quantity || 1],
+          selected: [product.selected || false]
         });
 
         this.productsForm.push(group);    
@@ -161,39 +165,37 @@ export class AddUpdateProductsOptionsDialogComponent {
     
  }
 
-  addProductToList(product: ProductViewModel){
+  addProductToList(product: ProductViewModel) {
+
     const exists = this.productsForm.controls.some(ctrl => {
       const group = ctrl as FormGroup;
-      const id = group.get('_id')?.value;
-
-      return id === product.id;
+      return group.get('_id')?.value === product.id;
     });
 
-    if(exists){
-      const dialogRef = this.dialog.open(AlertDialogComponent, {
-        data: {title:"Prodotto già inserito", message: "Attenzione, hai già inserito questo prodotto nell'opzione."},
+    if (exists) {
+      this.dialog.open(AlertDialogComponent, {
+        data: {
+          title: "Prodotto già inserito",
+          message: "Attenzione, hai già inserito questo prodotto nell'opzione."
+        },
         width: '500px'
       });
+
       this.productCtrl.setValue('');
       return;
     }
 
-    if (!exists) {
-      const group = this.fb.group({
-        _id: [product.id],
-        name: [product.name],
-        price: [product.price],
-        stock_type:[product.stock_type]
-      });
+    const group = this.fb.group({
+      _id: [product.id],
+      name: [product.name],
+      price: [product.price],
+      stock_type: [product.stock_type],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      selected: [false]
+    });
 
-      this.productsForm.push(group);
-      this.productCtrl.setValue('');
-
-      //console.log(this.productsForm.value);
-    }    
-    
+    this.productsForm.push(group);
     this.productCtrl.setValue('');
-    
   }
 
   changeType(c:any){

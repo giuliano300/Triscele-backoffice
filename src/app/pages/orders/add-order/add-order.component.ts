@@ -711,6 +711,8 @@ export class AddOrderComponent {
       selectedOptions: selectedOptions
     };
 
+    console.log(JSON.stringify(productWithSelection));
+
     const dialogRef = this.dialog.open(
       AddUpdateOptionsToOrderDialogComponent,
       {
