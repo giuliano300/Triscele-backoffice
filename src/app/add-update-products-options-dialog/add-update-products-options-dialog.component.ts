@@ -58,6 +58,7 @@ export class AddUpdateProductsOptionsDialogComponent {
   OptionTypeLabels = OptionTypeLabels;
 
   isSelect: boolean = false;
+  isMultiProduct: boolean = false;
 
   productOptionsValue: ProductUp[] = [];
 
@@ -109,6 +110,9 @@ export class AddUpdateProductsOptionsDialogComponent {
       });
       if(this.data.optionType == OptionType.select)
         this.isSelect = true;
+
+      if(this.data.optionType == OptionType.multiproduct)
+        this.isMultiProduct = true;
 
       this.data.products!.forEach((product) => {
         const group = this.fb.group({
@@ -199,9 +203,11 @@ export class AddUpdateProductsOptionsDialogComponent {
   }
 
   changeType(c:any){
+    this.isSelect = false;
+    this.isMultiProduct = false;
     if(c.value == OptionType.select)
       this.isSelect = true;
-    else
-      this.isSelect = false;
+    if(c.value == OptionType.multiproduct)
+      this.isMultiProduct = true;
   }
 }

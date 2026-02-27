@@ -23,7 +23,44 @@
 
         <ng-container [ngSwitch]="o.option.optionType">
 
+        <!-- MULTIPRODUCT -->
+        <div *ngSwitchCase="OptionType.multiproduct"
+            [formArrayName]="o.option._id">
 
+          <div *ngFor="let ctrl of parentForm.get(o.option._id).controls; let i = index"
+              [formGroupName]="i"
+              class="row">
+
+            <div class="col-sm-8">
+              <mat-form-field class="w-100">
+                <i-feather name="list"></i-feather>
+                <mat-label>Nome</mat-label>
+                <input matInput formControlName="name" readonly>
+              </mat-form-field>
+            </div>
+
+            <div class="col-sm-2">
+              <mat-form-field class="w-100">
+                <i-feather name="layers"></i-feather>
+                <mat-label>Quantità</mat-label>
+                <input matInput type="number" formControlName="quantity" readonly>
+              </mat-form-field>
+            </div>
+
+            <div class="col-sm-2">
+              <mat-form-field class="w-100">
+              <span class="material-symbols-outlined in-mat">
+                euro
+              </span>                
+              <mat-label>Prezzo</mat-label>
+                <input matInput type="number" formControlName="price" readonly>
+              </mat-form-field>
+            </div>
+
+
+          </div>
+
+          </div>        
         <!--select-->
         <div class="row" *ngSwitchCase="OptionType.select">
           <div class="col-sm-8">

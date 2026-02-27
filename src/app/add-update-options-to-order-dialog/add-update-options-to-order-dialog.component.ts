@@ -16,6 +16,7 @@ import { MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule, provideNativeDa
 import { ColorPickerModule } from 'ngx-color-picker';
 import { ConfigProductToOrder } from '../interfaces/config-product-to-order';
 import { ProductViewModel } from '../classess/productViewModel';
+import { AbstractControl, FormArray } from '@angular/forms';
 
 export const MY_DATE_FORMATS = {
   parse: { dateInput: 'dd/MM/yyyy' },
@@ -98,7 +99,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   // --- CREA FORM RICORSIVO ---
 createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
 
-  const group: any = {};
+  const group: Record<string, AbstractControl> = {};
 
   options.forEach(optionNode => {
 
@@ -174,6 +175,25 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
       }
 
     }
+    // =========================
+    // MULTIPRODOTTO
+    // =========================
+    else if (type === OptionType.multiproduct) {
+
+      const productsArray = new FormArray<FormGroup>([]);
+
+      optionNode.option.products.forEach((p: any) => {
+        productsArray.push(
+          this.fb.group({
+            name: [p.name],
+            price: [p.price],
+            quantity: [p.quantity ?? 1]
+          })
+        );
+      });
+
+      group[id] = productsArray;
+    }    
     // =========================
     // NON SELECT
     // =========================
@@ -264,6 +284,20 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
           ? { ...selectedProduct, qta: qtaValue }
           : null;
       } 
+      else if (optionNode.option.optionType === OptionType.multiproduct) {
+
+        const productsFormArray = control as FormArray;
+
+        node.selectedProducts = productsFormArray.controls.map(ctrl => {
+          const value = ctrl.value;
+          return {
+            name: value.name,
+            price: value.price,
+            qta: value.quantity
+          };
+        });
+
+      }
       else {
         node.value = control?.value ?? null;
       }

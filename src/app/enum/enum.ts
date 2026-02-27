@@ -24,7 +24,8 @@ export enum OptionType{
   text,
   textarea,
   date,
-  color
+  color,
+  multiproduct
 }
 
 export const OptionTypeLabels: Record<keyof typeof OptionType, string> = {
@@ -32,7 +33,8 @@ export const OptionTypeLabels: Record<keyof typeof OptionType, string> = {
   date: 'Campo data',
   color: ' Campo colore',
   text: 'Campo di testo',
-  textarea: 'Area di testo'
+  textarea: 'Area di testo',
+  multiproduct: 'Opzione multi prodotto'
 };
 
 export enum ConditionalLogic{

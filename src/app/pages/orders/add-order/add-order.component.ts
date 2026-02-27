@@ -483,27 +483,32 @@ export class AddOrderComponent {
 
     let total = 0;
 
-    // 1️⃣ Somma il prodotto selezionato se esiste
+    // SELECT
     if (option?.selectedProduct?.price) {
-
       const price = Number(option.selectedProduct.price) || 0;
       const qta = Number(option.selectedProduct.qta) || 1;
-
       total += price * qta;
     }
 
-    // 2️⃣ Somma ricorsivamente i figli
-    if (Array.isArray(option.children) && option.children.length > 0) {
+    // MULTIPRODUCT
+    if (Array.isArray(option?.selectedProducts)) {
+      option.selectedProducts!.forEach(p => {
+        const price = Number(p.price) || 0;
+        const qta = Number(p.qta) || 1;
+        total += price * qta;
+      });
+    }
 
+    // FIGLI
+    if (Array.isArray(option.children) && option.children.length > 0) {
       option.children.forEach(child => {
         total += this.calculateOptionPrice(child);
       });
-
     }
 
     return total;
   }
-
+  
   addProductToList(product: ProductViewModel){
     const exists = this.productsForm.controls.some(ctrl => {
       const group = ctrl as FormGroup;
