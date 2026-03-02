@@ -27,33 +27,38 @@ bootstrapApplication(AppComponent, {
 
 
 export function generateOptionText(option: any): string[] {
-  let texts: string[] = [];
+  const lines: string[] = [];
 
-  // Se l'opzione è un array, eseguiamo una chiamata ricorsiva
-  if (Array.isArray(option)) {
-    option.forEach(opt => {
-      texts = texts.concat(generateOptionText(opt)); // Ricorsiva
-    });
-  } else {
-    // Se l'opzione ha un prodotto selezionato, lo aggiungiamo
-    if (option.selectedProduct) {
-      const sp = option.selectedProduct;
-      if (sp) {
-        texts.push(`• ${sp.name} (x${sp.qta || 1}) - €${sp.price.toFixed(2)}`);
-      }
-    }
+  if (!option) return lines;
 
-    // Se l'opzione ha delle "children", le gestiamo ricorsivamente
-    if (option.children && Array.isArray(option.children) && option.children.length > 0) {
-      option.children.forEach((child: any) => {
-        // Aggiungiamo un livello di indentazione per le children
-        const childTexts = generateOptionText(child);  // Ricorsiva
-        texts = texts.concat(childTexts.map(text => `  ${text}`)); // Aggiungi l'indentazione
-      });
-    }
+  const optionName = option.name ?? '';
+
+  // 🔵 SELECT
+  if (option.selectedProduct) {
+    const p = option.selectedProduct;
+    const qta = p.qta ?? 1;
+
+    lines.push(`- ${optionName}:${qta} x ${p.name} (${p.price}€)`);
   }
 
-  return texts;
+  // 🟢 MULTIPRODUCT
+  if (Array.isArray(option.selectedProducts) && option.selectedProducts.length > 0) {
+    lines.push(`- ${optionName}:`);
+
+    option.selectedProducts.forEach((p: any) => {
+      const qta = p.qta ?? 1;
+      lines.push(`${qta} x ${p.name} (${p.price}€)`);
+    });
+  }
+
+  // 🟡 FIGLI
+  if (Array.isArray(option.children) && option.children.length > 0) {
+    option.children.forEach((child: any) => {
+      lines.push(...generateOptionText(child));
+    });
+  }
+
+  return lines;
 }
 
 export  function calculateFinalPrice(basePrice: number, quantity: number, discount: number, selectedOptions: any[] = []): number {

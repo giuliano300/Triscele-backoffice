@@ -78,6 +78,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    
     const p: ProductViewModel = JSON.parse(JSON.stringify(this.data));
     this.title += ": " + p.name;
 
@@ -89,6 +90,8 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     // Crea il form ricorsivo
     
     this.form = this.createFormGroupForOptions(this.masterOptions, p.selectedOptions);
+
+    //console.log("SELECTED OPTIONS IN MODIFICA:", JSON.stringify(p.selectedOptions));
   }
 
   getStockTypeLabel(value: string): string {
@@ -134,9 +137,9 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
           ) || null;
 
         qtaValue =
-          selected.selectedProduct?.qta ??
-          matchedProduct?.quantity ??
-          1;
+          selected.selectedProduct?.qta ?? 1;
+
+        initialValue = matchedProduct;        
       }
 
       // 🟢 INSERIMENTO
@@ -150,7 +153,9 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
           1;
       }
 
-      initialValue = matchedProduct;
+      initialValue = matchedProduct
+        ? { ...matchedProduct }
+        : null;
 
       optionNode.selectedUnit =
         this.getStockTypeLabel(matchedProduct?.stock_type) || 'Quantità';
@@ -185,6 +190,7 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
       optionNode.option.products.forEach((p: any) => {
         productsArray.push(
           this.fb.group({
+            _id: [p._id], 
             name: [p.name],
             price: [p.price],
             quantity: [p.quantity ?? 1]
@@ -291,6 +297,7 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
         node.selectedProducts = productsFormArray.controls.map(ctrl => {
           const value = ctrl.value;
           return {
+            _id: value._id,
             name: value.name,
             price: value.price,
             qta: value.quantity
@@ -306,6 +313,8 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
       if (optionNode.children && optionNode.children.length > 0 && childrenControl) {
         node.children = this.getFullSelection(optionNode.children, childrenControl);
       }
+
+      //console.log("NODE COSTRUITO:", JSON.stringify(node));
 
       return node;
     });

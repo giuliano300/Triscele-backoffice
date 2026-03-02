@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ProductViewModel } from '../../../classess/productViewModel';
 import { CustomerService } from '../../../services/Customer.service';
 import { OperatorService } from '../../../services/Operator.service';
-import { OrderStatus, PaymentMethod } from '../../../enum/enum';
+import { OptionType, OrderStatus, PaymentMethod } from '../../../enum/enum';
 import {  MatDatepickerModule } from "@angular/material/datepicker";
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import localeIt from '@angular/common/locales/it';
@@ -423,12 +423,7 @@ export class AddOrderComponent {
                 note: [product.note],
                 parentId: [product.parentId],
                 options: [product.options],
-                selectedOptions: (() => {
-                  const so = product.selectedOptions;
-                  if (!Array.isArray(so)) return [];
-                  if (so.length > 0 && Array.isArray(so[0])) return so[0];
-                  return so;
-                })()
+                selectedOptions: [product.selectedOptions ?? []]
               });
 
               //console.log(group);
@@ -466,8 +461,6 @@ export class AddOrderComponent {
         (sum, option) => sum + this.calculateOptionPrice(option),
         0
       );
-
-     //console.log("SELECTED OPTIONS RAW:", group.get('selectedOptions')?.value);
 
       const gross = (basePrice + optionsTotal) * quantity;
       const total = gross - discount;
@@ -567,13 +560,12 @@ export class AddOrderComponent {
 
       this.getFinalPrice();
 
-      //console.log(this.productsForm.value);
-
       this.syncDiscount(group);
 
-      this.openConfigurator(mapToProduct(product));
-
-    }    
+      Promise.resolve().then(() => {
+        this.openConfigurator(product.id!);
+      });    
+  }    
     
     this.productCtrl.setValue('');
     
@@ -701,22 +693,25 @@ export class AddOrderComponent {
     }
   }
 
-  openConfigurator(product: Product) {
+  openConfigurator(productId: string) {
+
+    console.log("ID PASSATO:", productId);
+    console.log("FORM IDS:", this.productsForm.controls.map(c => c.get('_id')?.value));
 
     const fg = this.productsForm.controls.find(
-      (c: AbstractControl) => c.get('_id')?.value === product._id
+      (c: AbstractControl) => c.get('_id')?.value === productId
     ) as FormGroup;
 
+    console.log("fg:" + fg);
     if (!fg) return;
 
-    const selectedOptions = fg.get('selectedOptions')?.value || [];
-
     const productWithSelection = {
-      ...product,
-      selectedOptions: selectedOptions
+      _id: fg.get('_id')?.value,
+      name: fg.get('name')?.value,
+      options: fg.get('options')?.value,      
+      selectedOptions: fg.get('selectedOptions')?.value ?? []
     };
 
-    console.log(JSON.stringify(productWithSelection));
 
     const dialogRef = this.dialog.open(
       AddUpdateOptionsToOrderDialogComponent,
