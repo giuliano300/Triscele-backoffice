@@ -24,13 +24,15 @@ export class OptionsComponent {
 
   Options: Options[] = [];
 
-  displayedColumns: string[] = ['name', 'layer', 'optionType', 'edit', 'delete'];
+  displayedColumns: string[] = ['name', 'layer', 'optionType', 'duplicate', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Options>(this.Options);
 
   OptionTypeLabels = OptionTypeLabels;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  firstLoading = false;
   
   constructor(
       private router: Router,
@@ -53,6 +55,7 @@ export class OptionsComponent {
         this.Options = data.map(c => ({
             ...c, 
             action: {
+                duplicate: 'ri-file-copy-line',
                 edit: 'ri-edit-line',
                 delete: 'ri-delete-bin-line'
             }
@@ -62,6 +65,15 @@ export class OptionsComponent {
       }
     });
   }
+
+    DuplicateItem(item: Options) {
+      this.firstLoading = true;
+      this.OptionsService.duplicateOption(item._id).subscribe(() => {
+        this.getOptions();
+        this.firstLoading = false;
+      });
+    }
+  
 
   OpenPopUp(item?:Options){
     const dialogRef = this.dialog.open(AddUpdateProductsOptionsDialogComponent, {

@@ -695,14 +695,14 @@ export class AddOrderComponent {
 
   openConfigurator(productId: string) {
 
-    console.log("ID PASSATO:", productId);
-    console.log("FORM IDS:", this.productsForm.controls.map(c => c.get('_id')?.value));
+    //console.log("ID PASSATO:", productId);
+    //console.log("FORM IDS:", this.productsForm.controls.map(c => c.get('_id')?.value));
 
     const fg = this.productsForm.controls.find(
       (c: AbstractControl) => c.get('_id')?.value === productId
     ) as FormGroup;
 
-    console.log("fg:" + fg);
+    //console.log("fg:" + fg);
     if (!fg) return;
 
     const productWithSelection = {

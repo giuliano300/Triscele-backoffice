@@ -41,4 +41,8 @@ export class OptionsService {
       return this.http.put<boolean>(this.apiUrl + "/" + c._id, c);
     }
 
+    duplicateOption(id: string):Observable<Options>{
+      return this.http.post<Options>(this.apiUrl + "/" + id + "/duplicate", null);
+    }
+
 }

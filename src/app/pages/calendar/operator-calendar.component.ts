@@ -281,7 +281,7 @@ async applyEventsToCalendar() {
 
 
   openNewEditDeleteAttendance(id?: string) {
-
+    
     const a = this.attendanceService.getAttendance(id!).subscribe((data: any) =>{
       const dialogRef = this.dialog.open(AddUpdateDeleteAttendanceDialogComponent, {
         width: '550px',

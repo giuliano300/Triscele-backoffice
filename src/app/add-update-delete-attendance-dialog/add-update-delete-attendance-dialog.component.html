@@ -19,12 +19,56 @@
             <input matInput formControlName="exitTime" type="time">
           </mat-form-field>        
         </div>
+        <div class="col-sm-12" *ngIf="addBreaks">
+            <div class="top-list">
+              <h2>Aggiungi pausa</h2>
+              <span class="material-symbols-outlined" (click)="closeBreak()" matTooltip="Chiudi" matTooltipPosition="above">
+                 close
+              </span>
+            </div>
+            <div class="breaks-list list-white text-end" formGroupName="breakForm">
+              <mat-form-field class="w-100 mb-5">
+                <i-feather name="clock"></i-feather>
+                <mat-label>Orario di inizio</mat-label>
+                <input matInput formControlName="startTime" type="time" />
+              </mat-form-field>
+              <mat-form-field class="w-100 mb-5">
+                <i-feather name="clock"></i-feather>
+                <mat-label>Orario di fine</mat-label>
+                <input matInput formControlName="endTime" type="time" />
+              </mat-form-field>
+              <button mat-flat-button class="btn" (click)="saveBreak()">
+                Salva pausa
+              </button>
+            </div>
+        </div>
+        <div class="col-sm-12" *ngIf="!addBreaks">
+            <div class="top-list">
+              <h2>Pause effettuate </h2>
+              <span class="material-symbols-outlined" (click)="addBreak()" matTooltip="Aggiungi pausa" matTooltipPosition="above"> add </span>
+            </div>
+            <div class="breaks-list">
+              <div *ngIf="attendance">
+                <div class="break-item" *ngFor="let b of attendance!.breaks; let i = index">
+                  <span class="break-index">#{{ i + 1 }}</span>
+                  <span class="break-time">
+                    {{ b.start }} – {{ b.end ? b.end : 'in corso' }} &nbsp;
+                    <span class="ri-delete-bin-line delete" *ngIf="b.end" (click)="deleteBreak(b)" matTooltip="Elimina pausa" matTooltipPosition="above"></span>
+                  </span>
+                </div>
+              </div>
+
+              <div class="break-item center" *ngIf="attendance!.breaks.length === 0">
+                <span>Nessuna pausa ancora effettuata</span>
+              </div>
+            </div>
+        </div>
         <div class="col-sm-12">
           <label class="label d-block fw-medium mb-10">Note</label>
           <mat-form-field class="w-100">
             <i-feather name="file-text"></i-feather>
             <mat-label>Note</mat-label>
-            <textarea matInput formControlName="notes" style="min-height: 200px;"></textarea>
+            <textarea matInput formControlName="notes" style="min-height: 80px;"></textarea>
           </mat-form-field>
         </div>
       </div>

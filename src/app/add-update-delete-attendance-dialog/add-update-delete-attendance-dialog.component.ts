@@ -8,8 +8,9 @@ import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { AttendanceService } from '../services/Attendance.service';
-import { Attendance } from '../interfaces/attendance';
+import { Attendance, Break } from '../interfaces/attendance';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-add-update-delete-attendance-dialog-dialog',
@@ -17,18 +18,19 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
   styleUrls: ['./add-update-delete-attendance-dialog.component.scss'],
   standalone:true,
   imports: [
-    MatDialogModule, 
-    MatCardContent, 
-    MatCard, 
-    MatFormField, 
+    MatDialogModule,
+    MatCardContent,
+    MatCard,
+    MatFormField,
     MatFormFieldModule,
-    FeathericonsModule, 
+    FeathericonsModule,
     MatInputModule,
     MatIconModule,
-    MatLabel, 
+    MatLabel,
     CommonModule,
-    ReactiveFormsModule
-  ]
+    ReactiveFormsModule,
+    MatTooltip
+]
 })
 export class AddUpdateDeleteAttendanceDialogComponent {
   
@@ -37,6 +39,10 @@ export class AddUpdateDeleteAttendanceDialogComponent {
   form: FormGroup;
 
   isUpdate: boolean = false;
+
+  attendance: Attendance | undefined;
+
+  addBreaks: boolean = false;
 
   constructor(public dialogRef: MatDialogRef<AddUpdateDeleteAttendanceDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data:  any,
@@ -47,7 +53,12 @@ export class AddUpdateDeleteAttendanceDialogComponent {
     this.form = this.fb.group({
       entryTime: ['', Validators.required],
       exitTime: [''],
-      notes: ['']
+      notes: [''],
+
+      breakForm: this.fb.group({
+        startTime: [''],
+        endTime: ['']
+      })
     });
   }
 
@@ -67,6 +78,7 @@ export class AddUpdateDeleteAttendanceDialogComponent {
 
     if(this.data.id){
       this.attendanceService.getAttendance(this.data.id).subscribe((data: Attendance) => {
+        this.attendance = data;
         this.form.patchValue({
           entryTime: data.entryTime,
           exitTime: data.exitTime,
@@ -74,6 +86,52 @@ export class AddUpdateDeleteAttendanceDialogComponent {
         });
       })
     }
+  }
+
+  closeBreak(){
+    this.addBreaks = false;
+  }
+
+  addBreak(){
+    this.addBreaks = true;
+  }
+
+  deleteBreak(b: any){
+    this.attendanceService
+      .removeBreak(this.attendance!._id!, b)
+      .subscribe((updated: Attendance) => {
+
+        this.attendance = updated;
+
+      });
+  }
+
+  saveBreak() {
+    const breakData = this.form.get('breakForm')?.value;
+
+    if (!breakData.startTime || !breakData.endTime)
+      return;
+
+    console.log(breakData);
+
+    // qui puoi salvarla o pusharla nella lista
+    this.addBreaks = false;
+
+    this.form.get('breakForm')?.reset();
+
+    const breakItem: Break = {
+      start:breakData.startTime,
+      end:breakData.endTime
+    } 
+
+    this.attendanceService.addBreak(this.attendance!._id!, breakItem)
+      .subscribe((updated: Attendance) => {
+
+       this.attendance = updated;
+
+       this.addBreaks = false;
+       this.form.get('breakForm')?.reset();
+    });      
   }
 
   onSave() {

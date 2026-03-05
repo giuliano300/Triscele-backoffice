@@ -17,3 +17,81 @@
   display: flex;
   gap: 8px; // spaziatura tra i pulsanti Chiudi e Salva
 }
+
+.breaks-list {
+  padding: 15px;
+  height: 140px;
+  overflow-y: auto;
+  background-color: #f5f7fa;
+  border:solid 1px #f5f7fa;
+  margin-bottom: 20px;
+  border-radius: 20px;
+}
+
+.top-list{
+  display: flex;
+  justify-content: space-between;
+
+  span{
+    margin-top: -2px;
+    color: #1976d2;
+
+    &:hover{
+      color: #d26319;
+      cursor: pointer;
+    }
+  }
+  h2{
+    font-size: 15px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+}
+
+.center{
+  justify-content: center!important;
+  margin-top: 35px;
+}
+
+.breaks-list h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.list-white{
+  background-color: var(--whiteColor);
+  height: 230px;
+  overflow: hidden;
+
+  .btn{
+    margin-bottom: 0;
+  }
+}
+
+.break-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.break-index {
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.break-time {
+  font-family: monospace;
+}
+
+.delete{
+  cursor: pointer;
+
+  &:hover{
+    color: var(--dangerColor);
+  }
+}

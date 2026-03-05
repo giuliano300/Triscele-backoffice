@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { API_URL } from '../../main';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Attendance } from '../interfaces/attendance';
+import { Attendance, Break } from '../interfaces/attendance';
 
 @Injectable({
   providedIn: 'root'
@@ -41,4 +41,11 @@ export class AttendanceService {
       return this.http.get<Attendance>(this.apiUrl + "/today/" + operatorId);
     }
 
+    removeBreak(id: string, breakItem: Break):Observable<Attendance> {
+      return this.http.delete<Attendance>(this.apiUrl + "/" + id + "/break", { body: breakItem });
+    }
+
+    addBreak(id: string, breakItem: Break):Observable<Attendance> {
+      return this.http.post<Attendance>(this.apiUrl + "/" + id + "/break", breakItem);
+    }
 }
