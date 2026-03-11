@@ -190,16 +190,18 @@ export class AbsenceComponent {
 
   getType(p: PermissionHoliday): string {
     let title = 'Ferie';
-    if(p.type == absenceType.permesso)
-       title = 'Permesso';
-    if(p.type == absenceType.assenza_ingiustificata)
-        title = 'Assenza ingiustificata';
+
+    if (p.type == absenceType.permesso)
+      title = 'Permesso';
+
+    if (p.type == absenceType.assenza_ingiustificata)
+      title = 'Assenza ingiustificata';
 
     if (p.type !== 1 && p.startHour && p.endHour && p.startDate && p.endDate) {
+
       const startDate = new Date(p.startDate);
       const endDate = new Date(p.endDate);
 
-      // Usa la data in formato YYYY-MM-DD
       const startIso = startDate.toISOString().split('T')[0];
       const endIso = endDate.toISOString().split('T')[0];
 
@@ -207,12 +209,22 @@ export class AbsenceComponent {
       const end = new Date(`${endIso}T${p.endHour}`);
 
       const diffMs = end.getTime() - start.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
 
-      title += ` (${diffHours.toFixed(2)}h)`;
-    }
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-    return title;
+      let time = '';
+
+      if (hours > 0)
+        time += `${hours}h `;
+
+      if (minutes > 0)
+        time += `${minutes}min`;
+
+      if (time)
+        title += ` (${time.trim()})`;}
+
+      return title;
   }
 
   getAcceptedStatus(e: PermissionHoliday) {

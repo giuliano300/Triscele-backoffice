@@ -197,7 +197,19 @@ export class MiniCalendarComponent implements OnInit {
 
         const late = ev.calculatedDelay ?? 0;
         if (late > 0) {
-          text += `\nRitardo\n${late} min`;
+
+          const hours = Math.floor(late / 60);
+          const minutes = late % 60;
+
+          let delayText = '';
+
+          if (hours > 0)
+            delayText += `${hours}h `;
+
+          if (minutes > 0)
+            delayText += `${minutes}min`;
+
+          text += `\nRitardo\n${delayText.trim()}`;
         }
 
         return text;
