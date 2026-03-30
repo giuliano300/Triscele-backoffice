@@ -78,6 +78,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(JSON.stringify(this.data));
     
     const p: ProductViewModel = JSON.parse(JSON.stringify(this.data));
     this.title += ": " + p.name;
@@ -85,18 +86,95 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     // Opzioni di primo livello
     this.masterOptions = p.options.filter(a => !a.parent) || [];
 
-    //console.log(JSON.stringify(p.selectedOptions));
+    console.log(JSON.stringify(this.masterOptions));
 
     // Crea il form ricorsivo
     
     this.form = this.createFormGroupForOptions(this.masterOptions, p.selectedOptions);
 
-    //console.log("SELECTED OPTIONS IN MODIFICA:", JSON.stringify(p.selectedOptions));
+    setTimeout(() => {
+      this.initGroupSelection(this.masterOptions, this.form, p.selectedOptions);
+    });
   }
 
   getStockTypeLabel(value: string): string {
     const item = this.stockTypes.find(x => x.value === value);
     return item ? item.label : value;
+  }
+
+  setGroup(optionNode: any, selectedChild: any): void {
+    if (!optionNode || !selectedChild) return;
+
+    const id = optionNode.option._id;
+
+    const findOption = (options: any[]): any => {
+
+      for (const o of options) {
+
+        // 🔹 match root
+        if (o.option._id?.toString() === selectedChild._id?.toString())
+          return o.option;
+
+        // 🔹 match dentro children del group
+        const children = o.option.children || [];
+
+        const foundInChildren = children.find((c: any) =>
+          c._id?.toString() === selectedChild._id?.toString()
+        );
+
+        if (foundInChildren) return foundInChildren;
+
+        // 🔹 ricorsione su children già trasformati
+        if (o.children?.length) {
+          const found = findOption(o.children);
+          if (found) return found;
+        }
+      }
+
+      return null;
+    };
+
+    const fullOption = findOption(this.data.options);
+
+    console.log(JSON.stringify(fullOption));
+
+    if (!fullOption) return;
+
+    // 🔥 COSTRUISCI NODO COMPLETO
+    const buildNode = (opt: any): any => {
+
+      const node: any = {
+        option: opt,
+        children: []
+      };
+
+      // 🔽 figli da parent (vecchia logica)
+      const children = this.data.options.filter(o =>
+        o.parent?._id === opt._id
+      );
+
+      if (children.length > 0) {
+        node.children = children.map(c => buildNode(c));
+      }
+
+      return node;
+    };
+
+    const rootNode = buildNode(fullOption);
+
+    const childrenKey = id + '_children';
+
+    const childForm = this.createFormGroupForOptions([rootNode]);
+
+    if (this.form.contains(childrenKey)) {
+      this.form.setControl(childrenKey, childForm);
+    } else {
+      this.form.addControl(childrenKey, childForm);
+    }
+
+    optionNode.children = [rootNode];
+
+    this.cdr.detectChanges();
   }
 
   // --- CREA FORM RICORSIVO ---
@@ -200,6 +278,34 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
 
       group[id] = productsArray;
     }    
+    // =========================
+    // GROUP
+    // =========================
+    else if (type === OptionType.group) {
+
+       group[id] = new FormControl(null);
+
+      const children = optionNode.option.children || [];
+
+      if (children.length > 0) {
+
+        const fullChildren = this.data.options.filter(opt =>
+          children.some((c: any) => c._id === opt._id)
+        );
+
+        optionNode.children = fullChildren.map(opt => ({
+          option: opt,
+          children: []
+        }));
+
+        group[id + '_children'] =
+          this.createFormGroupForOptions(
+            optionNode.children,
+            selected?.children
+          );
+      }
+    }
+
     // =========================
     // NON SELECT
     // =========================
@@ -338,5 +444,52 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
     if (!childrenControl) return [];
     // Trasformiamo il FormGroup dei figli in array di oggetti
     return optionNode.children || [];
+  }
+
+  initGroupSelection(options: any[], form: FormGroup, selectedOptions: any): void {
+
+    if (!options || !selectedOptions) return;
+
+    options.forEach(optionNode => {
+
+      const id = optionNode.option._id;
+      const type = optionNode.option.optionType;
+
+      let selected = null;
+
+      if (Array.isArray(selectedOptions)) {
+        selected = selectedOptions.find((s: any) => s._id === id);
+      } else if (selectedOptions && selectedOptions._id === id) {
+        selected = selectedOptions;
+      }
+
+      // 🔥 GROUP FIX
+      if (type === OptionType.group && selected?.value) {
+
+        const selectedChild = selected.value;
+
+        // 🔥 trova l'oggetto reale dentro la select
+        const realChild = optionNode.option.children.find(
+          (c: any) => c._id === selectedChild._id
+        );
+
+        if (realChild) {
+          form.get(id)?.setValue(realChild);
+
+          // chiama la tua logica
+          this.setGroup(optionNode, realChild);
+        }
+        // scatena la ricorsione
+        this.setGroup(optionNode, selectedChild);
+      }
+
+      // 🔁 ricorsione figli
+      const childForm = form.get(id + '_children') as FormGroup;
+
+      if (optionNode.children?.length && childForm) {
+        this.initGroupSelection(optionNode.children, childForm, selected?.children);
+      }
+
+    });
   }
 }

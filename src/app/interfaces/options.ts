@@ -7,4 +7,5 @@ export interface Options {
     layer: string;
     optionType: OptionType; 
     products?: ProductUp[];
+    children?: Options[];
 }

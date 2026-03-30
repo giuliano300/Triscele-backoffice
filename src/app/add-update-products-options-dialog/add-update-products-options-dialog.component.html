@@ -49,6 +49,29 @@
             </mat-autocomplete>
           </mat-form-field>
         </div>
+        <div class="col-sm-12" *ngIf="isGroup">
+          <label class="label d-block fw-medium mb-10">Seleziona una opzione</label>
+
+          <mat-form-field class="w-100 mt-2">
+            <i-feather name="tag"></i-feather>
+
+            <input
+              matInput
+              placeholder="Cerca opzione"
+              [formControl]="optionCtrl"
+              [matAutocomplete]="autoOption"
+            >
+
+            <mat-autocomplete 
+              #autoOption="matAutocomplete" 
+              (optionSelected)="addOptionToChildren($event.option.value)"
+            >
+              <mat-option *ngFor="let o of filteredOptions | async" [value]="o">
+                {{ o.name }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>        
         <div formArrayName="products" class="ctn-products">
           <div *ngFor="let group of productsForm.controls; let i = index" [formGroupName]="i" class="row g-3">
             
@@ -99,7 +122,28 @@
           </div>
 
         </div>
+        <div formArrayName="children" class="ctn-products" *ngIf="isGroup">
+          <div *ngFor="let group of childrenForm.controls; let i = index" [formGroupName]="i" class="row g-3">
 
+            <div class="col-lg-11">
+              <label class="label d-block fw-medium mb-10" *ngIf="i === 0">Nome della opzione</label>
+              <mat-form-field class="w-100">
+                 <i-feather name="tag"></i-feather>
+                <mat-label>Nome opzione</mat-label>
+                <input matInput formControlName="name"  [disabled]="true">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-1">
+              <span [ngClass]="i === 0 ? 'subtotal' : 'subtotal no-margin-top'">
+                <span class="delete" (click)="childrenForm.removeAt(i)">
+                  <i class="ri-delete-bin-line"></i>
+                </span>
+              </span>
+            </div>
+
+          </div>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>

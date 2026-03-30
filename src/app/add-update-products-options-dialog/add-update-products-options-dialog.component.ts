@@ -48,8 +48,13 @@ export class AddUpdateProductsOptionsDialogComponent {
   optionForm: FormGroup;
 
   selectedProducts: any[] = [];
-  productCtrl = new FormControl('');
+  productCtrl = new FormControl<string | ProductViewModel>('');  
+
   filteredProducts!: Observable<any[]>;
+
+  optionCtrl = new FormControl<string | Options>(''); 
+  
+  filteredOptions!: Observable<Options[]>;
 
   products: ProductViewModel[] = [];
 
@@ -59,6 +64,7 @@ export class AddUpdateProductsOptionsDialogComponent {
 
   isSelect: boolean = false;
   isMultiProduct: boolean = false;
+  isGroup: boolean = false;
 
   productOptionsValue: ProductUp[] = [];
 
@@ -75,7 +81,8 @@ export class AddUpdateProductsOptionsDialogComponent {
       name: ['', Validators.required],
       layer: [''],
       optionType: [0, Validators.required],
-      products: this.fb.array([])
+      products: this.fb.array([]),
+      children: this.fb.array([])
     });
   }
 
@@ -85,6 +92,10 @@ export class AddUpdateProductsOptionsDialogComponent {
 
   get productsForm() {
     return this.optionForm.get('products') as FormArray;
+  }
+
+  get childrenForm() {
+    return this.optionForm.get('children') as FormArray;
   }
     
   selectProduct(product: any) {
@@ -98,6 +109,37 @@ export class AddUpdateProductsOptionsDialogComponent {
     if (index >= 0) {
       this.selectedProducts.splice(index, 1);
     }
+  }
+
+  addOptionToChildren(option: Options) {
+
+    const exists = this.childrenForm.controls.some(ctrl => {
+      const group = ctrl as FormGroup;
+      return group.get('_id')?.value === option._id;
+    });
+
+    if (exists) {
+      this.dialog.open(AlertDialogComponent, {
+        data: {
+          title: "Opzione già inserita",
+          message: "Hai già inserito questa opzione."
+        },
+        width: '500px'
+      });
+
+      this.optionCtrl.setValue('');
+      return;
+    }
+
+    const group = this.fb.group({
+      _id: [option._id],
+      name: [option.name],
+      optionType: [option.optionType], 
+      products: [option.products || []],
+      children: [option.children || []]
+    });
+    this.childrenForm.push(group);
+    this.optionCtrl.setValue('');
   }
 
   ngOnInit(): void {
@@ -114,6 +156,10 @@ export class AddUpdateProductsOptionsDialogComponent {
       if(this.data.optionType == OptionType.multiproduct)
         this.isMultiProduct = true;
 
+      if(this.data.optionType == OptionType.group)
+        this.isGroup = true;
+
+
       this.data.products!.forEach((product) => {
         const group = this.fb.group({
           _id: [product._id],
@@ -127,17 +173,53 @@ export class AddUpdateProductsOptionsDialogComponent {
         this.productsForm.push(group);    
       });
 
+
+      if (this.data.children && this.data.children.length) {
+
+          this.data.children.forEach((child: any) => {
+
+            const group = this.fb.group({
+              _id: [child._id],
+              name: [child.name]
+            });
+
+            this.childrenForm.push(group);
+
+          });
+
+        }
     }
 
+    this.filteredOptions = this.optionCtrl.valueChanges.pipe(
+      debounceTime(300),
+      switchMap((value: string | Options | null) => {
+
+        if (!value) return of([] as Options[]); // 👈 FIX
+
+        const search = typeof value === 'string' ? value : value.name;
+
+        if (search.length >= 2)
+          return this.optionsService.getOptionsByName(search);
+        else
+          return of([] as Options[]);
+      })
+    );      
+    
     this.filteredProducts = this.productCtrl.valueChanges.pipe(
-      debounceTime(300), 
-      switchMap(value => {
-        if (value && value.length >= 2) 
-          return this.productService.getProductsByName(value); 
-        else 
-          return of([]); 
+      debounceTime(300),
+      switchMap((value: string | ProductViewModel | null) => {
+
+        if (!value) return of([]); // 👈 FIX
+
+        const search = typeof value === 'string' ? value : value.name;
+
+        if (search!.length >= 2)
+          return this.productService.getProductsByName(search!);
+        else
+          return of([]);
       })
     );
+
   }
 
   onSave() {
@@ -205,9 +287,12 @@ export class AddUpdateProductsOptionsDialogComponent {
   changeType(c:any){
     this.isSelect = false;
     this.isMultiProduct = false;
+    this.isGroup = false;
     if(c.value == OptionType.select)
       this.isSelect = true;
     if(c.value == OptionType.multiproduct)
       this.isMultiProduct = true;
+    if(c.value == OptionType.group)
+      this.isGroup = true;
   }
 }

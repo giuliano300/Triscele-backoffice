@@ -335,6 +335,7 @@ export class AddOrderComponent {
     this.filteredProducts = this.productCtrl.valueChanges.pipe(
       debounceTime(300), 
       switchMap(value => {
+        console.log(value);
         if (value && value.length >= 2) 
           return this.productService.getProductsByName(value); 
         else 
@@ -502,7 +503,8 @@ export class AddOrderComponent {
     return total;
   }
   
-  addProductToList(product: ProductViewModel){
+  addProductToList(product: any){
+    //console.log(JSON.stringify(product));
     const exists = this.productsForm.controls.some(ctrl => {
       const group = ctrl as FormGroup;
       const id = group.get('_id')?.value;

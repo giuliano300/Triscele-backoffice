@@ -432,6 +432,8 @@ export class AddProductComponent {
       this.productOptions.push(result);
 
     this.getOptions(this.productOptions);
+
+    console.log(this.productOptions);
   }
 
   addOption(){
@@ -441,11 +443,13 @@ export class AddProductComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
+      //console.log(result);
       if (result) 
         this.addOrUpdateOptions(result);
       else 
         console.log("Close");
-    });  }
+    });  
+  }
 
 
   UpdateOption(item: ProductOptions){

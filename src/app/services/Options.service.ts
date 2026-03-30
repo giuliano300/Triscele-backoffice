@@ -25,6 +25,10 @@ export class OptionsService {
       return this.http.get<Options>(this.apiUrl + "/" + id);
     }
 
+    getOptionsByName(name: string): Observable<Options[]>{
+      return this.http.get<Options[]>(this.apiUrl + `/search?name=${name}`);
+    }
+
     delete(id: string):Observable<boolean>{
       const token = localStorage.getItem('authToken'); 
         const headers = new HttpHeaders({

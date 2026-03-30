@@ -84,6 +84,26 @@
           </div>
         </div>
 
+        <!-- GROUP -->
+        <div class="row" *ngSwitchCase="OptionType.group">
+          <div class="col-sm-12">
+            <mat-form-field class="w-100">
+              <i-feather name="list"></i-feather>
+
+              <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
+
+              <mat-select
+                [formControlName]="o.option._id"
+                (selectionChange)="setGroup(o, $event.value)">
+
+                <mat-option *ngFor="let c of o.option.children" [value]="c">
+                  {{ c.name }}
+                </mat-option>
+
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
           <!--text-->
           <mat-form-field class="w-100" *ngSwitchCase="OptionType.text">
             <i-feather name="file"></i-feather>
