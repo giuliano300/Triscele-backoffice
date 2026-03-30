@@ -84,7 +84,7 @@ export class OptionsComponent {
     dialogRef.afterClosed().subscribe((result: Options) => {
       if (result) 
       {
-        console.log(JSON.stringify(result));
+        //console.log(JSON.stringify(result));
         if(!item)
           this.OptionsService.setOptions(result)
             .subscribe((data: Options) => {

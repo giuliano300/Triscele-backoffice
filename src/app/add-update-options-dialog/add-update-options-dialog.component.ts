@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatOption } from "@angular/material/core";
+import {  Observable } from 'rxjs';
 import { Options } from '../interfaces/options';
 import { OptionsService } from '../services/Options.service';
 import { MatSelect } from '@angular/material/select';
@@ -71,7 +72,6 @@ ngOnInit(): void {
   this.optionService.getOptions()
     .subscribe(data => {
       this.options = data || [];
-      //console.log(data)
 
       if (this.data) {
         const foundOption = this.options.find(o =>

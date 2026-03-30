@@ -144,6 +144,7 @@ export class AddUpdateProductsOptionsDialogComponent {
 
   ngOnInit(): void {
     if(this.data){
+      console.log(this.data);
       this.title = "Modifica opzione prodotti";
       this.optionForm.patchValue({
         name: this.data.name,
@@ -180,7 +181,10 @@ export class AddUpdateProductsOptionsDialogComponent {
 
             const group = this.fb.group({
               _id: [child._id],
-              name: [child.name]
+              name: [child.name],
+              optionType: [child.optionType],
+              products: [child.products || []],
+              children: [child.children || []]
             });
 
             this.childrenForm.push(group);

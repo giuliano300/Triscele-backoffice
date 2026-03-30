@@ -51,6 +51,23 @@ export function generateOptionText(option: any): string[] {
     });
   }
 
+  if (option.value && typeof option.value !== 'object') {
+
+    let valueFormatted = option.value;
+
+    // 📅 DATE
+    if (option.optionType === 4) { // date
+      valueFormatted = new Date(option.value).toLocaleDateString();
+    }
+
+    // 🎨 COLOR
+    if (option.optionType === 5) { // color
+      valueFormatted = option.value; // oppure puoi fare mapping colori
+    }
+
+    lines.push(`- ${optionName}: ${valueFormatted}`);
+  }
+
   // 🟡 FIGLI
   if (Array.isArray(option.children) && option.children.length > 0) {
     option.children.forEach((child: any) => {
