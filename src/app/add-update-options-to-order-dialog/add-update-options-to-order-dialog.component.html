@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>{{ title }}</h1>
 
 <form [formGroup]="form">
-  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block custom-card">
     <mat-card-content>
       <ng-container
         *ngTemplateOutlet="renderOption; context: { options: masterOptions, parentForm: form }">
@@ -19,7 +19,7 @@
   <div class="ctn-options">
     <div class="row g-3" *ngFor="let o of options">
       <div class="col-sm-12" [formGroup]="parentForm">
-        <label class="d-block option-bg">Opzione: <span>{{ o.option.name | titlecase }}</span></label>
+        <label class="d-block option-bg"><span>{{ o.option.name | titlecase }}</span></label>
 
         <ng-container [ngSwitch]="o.option.optionType">
 
@@ -63,7 +63,7 @@
           </div>        
         <!--select-->
         <div class="row" *ngSwitchCase="OptionType.select">
-          <div class="col-sm-8">
+          <div class="col-sm-10">
               <mat-form-field class="w-100">
                 <i-feather name="list"></i-feather>
                 <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
@@ -74,7 +74,7 @@
                 </mat-select>
               </mat-form-field>
           </div>
-          <div class="col-sm-4">
+          <div class="col-sm-2">
             <!--quantità select-->
             <mat-form-field class="w-80" *ngSwitchCase="OptionType.select">
               <i-feather name="layers"></i-feather>

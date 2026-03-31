@@ -570,3 +570,26 @@ h5{
 .custom-error {
     margin-top: -6px;
 }
+
+.custom-dialog .mat-mdc-dialog-inner-container {
+  height: 100%;
+}
+
+.custom-dialog .mat-mdc-dialog-surface {
+  max-height: 98vh;
+  overflow: hidden;
+}
+
+.custom-dialog .mat-mdc-dialog-content,
+.custom-dialog form {
+  overflow-y: auto;
+}
+
+.custom-dialog form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-dialog form::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}

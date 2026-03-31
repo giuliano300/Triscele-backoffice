@@ -720,7 +720,8 @@ export class AddOrderComponent {
       {
         data: productWithSelection,
         width: '80vw',
-        maxWidth: '1000px'
+        maxWidth: '1000px',
+        panelClass: 'custom-dialog'
       }
     );
 

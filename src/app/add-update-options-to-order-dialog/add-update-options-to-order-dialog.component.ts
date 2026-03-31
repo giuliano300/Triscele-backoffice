@@ -66,6 +66,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     { value: 'sq. in.', label: 'in²' },
   ];
 
+  selectedMap = new Map<string, any>();
 
   constructor(
     public dialogRef: MatDialogRef<AddUpdateOptionsToOrderDialogComponent>,
@@ -78,7 +79,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(JSON.stringify(this.data));
+    //console.log(JSON.stringify(this.data));
     
     const p: ProductViewModel = JSON.parse(JSON.stringify(this.data));
     this.title += ": " + p.name;
@@ -86,10 +87,14 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     // Opzioni di primo livello
     this.masterOptions = p.options.filter(a => !a.parent) || [];
 
-    console.log(JSON.stringify(this.masterOptions));
+    //console.log(JSON.stringify(this.masterOptions));
 
     // Crea il form ricorsivo
     
+    this.selectedMap = this.buildSelectedMap(p.selectedOptions);
+
+    console.log(this.selectedMap);
+
     this.form = this.createFormGroupForOptions(this.masterOptions, p.selectedOptions);
 
     setTimeout(() => {
@@ -136,26 +141,34 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
 
     const fullOption = findOption(this.data.options);
 
-    console.log(JSON.stringify(fullOption));
+    //console.log(JSON.stringify(fullOption));
 
     if (!fullOption) return;
 
     // 🔥 COSTRUISCI NODO COMPLETO
-    const buildNode = (opt: any): any => {
+    const buildNode = (opt: any, visited = new Set<string>()): any => {
+
+      if (!opt?._id) return null;
+
+      if (visited.has(opt._id)) {
+        return null; // blocca loop
+      }
+
+      visited.add(opt._id);
 
       const node: any = {
         option: opt,
         children: []
       };
 
-      // 🔽 figli da parent (vecchia logica)
       const children = this.data.options.filter(o =>
-        o.parent?._id === opt._id
+        o.parent?._id === opt._id &&
+        o._id !== opt._id
       );
 
-      if (children.length > 0) {
-        node.children = children.map(c => buildNode(c));
-      }
+      node.children = children
+        .map(c => buildNode(c, new Set(visited)))
+        .filter(Boolean);
 
       return node;
     };
@@ -165,6 +178,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     const childrenKey = id + '_children';
 
     const childForm = this.createFormGroupForOptions([rootNode]);
+
 
     if (this.form.contains(childrenKey)) {
       this.form.setControl(childrenKey, childForm);
@@ -176,6 +190,38 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
 
     this.cdr.detectChanges();
   }
+
+  private buildSelectedMap(tree: any): Map<string, any> {
+
+  const map = new Map<string, any>();
+
+  const walk = (node: any) => {
+
+    if (!node) return;
+
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+
+    if (node._id) {
+      map.set(node._id, node);
+    }
+
+    // 🔥 importantissimo
+    if (node.value) {
+      walk(node.value);
+    }
+
+    if (node.children) {
+      walk(node.children);
+    }
+  };
+
+  walk(tree);
+
+  return map;
+}
 
   // --- CREA FORM RICORSIVO ---
 createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
@@ -204,18 +250,27 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
     // =========================
     if (type === OptionType.select) {
 
+      const selectedDeep = this.findSelectedNodeDeep(selectedOptions, id);
+
+      //console.log(selectedOptions);
+
       let matchedProduct = null;
 
       // 🔵 MODIFICA
-      if (selected?.selectedProduct?._id) {
+      if (selectedDeep?.selectedProduct?._id) {
 
         matchedProduct =
           optionNode.option.products.find(
-            (p: any) => p._id === selected.selectedProduct._id
+            (p: any) => p._id === selectedDeep.selectedProduct._id
           ) || null;
 
+
+        if (!matchedProduct && selectedDeep.selectedProduct) {
+          matchedProduct = selectedDeep.selectedProduct;
+        }
+
         qtaValue =
-          selected.selectedProduct?.qta ?? 1;
+          selectedDeep.selectedProduct?.qta ?? 1;
 
         initialValue = matchedProduct;        
       }
@@ -231,9 +286,7 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
           1;
       }
 
-      initialValue = matchedProduct
-        ? { ...matchedProduct }
-        : null;
+      initialValue = matchedProduct || null;
 
       optionNode.selectedUnit =
         this.getStockTypeLabel(matchedProduct?.stock_type) || 'Quantità';
@@ -250,10 +303,11 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
       if (children.length > 0) {
         optionNode.children = children;
 
+        const selectedDeep = this.selectedMap.get(id);
         group[id + '_children'] =
           this.createFormGroupForOptions(
             children,
-            selected?.children   // 🔥 PASSIAMO SOLO IL RAMO CORRETTO
+            selectedDeep?.children   // 🔥 PASSIAMO SOLO IL RAMO CORRETTO
           );
       }
 
@@ -277,6 +331,25 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
       });
 
       group[id] = productsArray;
+
+     const children = this.data.options.filter(opt =>
+        opt.parent?._id === id
+      );
+
+      if (children.length > 0) {
+
+        optionNode.children = children.map(c => ({
+          option: c.option,
+          children: []
+        }));
+
+        const selectedDeep = this.selectedMap.get(id);
+        group[id + '_children'] =
+          this.createFormGroupForOptions(
+            optionNode.children,
+            selectedDeep?.children
+          );
+      }
     }    
     // =========================
     // GROUP
@@ -298,10 +371,12 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
           children: []
         }));
 
+        const selectedDeep = this.selectedMap.get(id);
+
         group[id + '_children'] =
           this.createFormGroupForOptions(
             optionNode.children,
-            selected?.children
+            selectedDeep?.children
           );
       }
     }
@@ -319,10 +394,12 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
       group[id] = new FormControl(initialValue);
 
       if (optionNode.children?.length > 0) {
+        const selectedDeep = this.selectedMap.get(id);
+
         group[id + '_children'] =
           this.createFormGroupForOptions(
             optionNode.children,
-            selected?.children
+            selectedDeep?.children
           );
       }
     }
@@ -330,7 +407,36 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
   });
 
   return new FormGroup(group);
-}
+  }
+
+  private findSelectedNodeDeep(tree: any, id: string): any {
+
+    if (!tree) return null;
+
+    if (Array.isArray(tree)) {
+      for (const node of tree) {
+        const found = this.findSelectedNodeDeep(node, id);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    if (tree._id === id) return tree;
+
+    // 🔥 CERCA ANCHE DENTRO value (fondamentale per GROUP)
+    if (tree.value) {
+      const found = this.findSelectedNodeDeep(tree.value, id);
+      if (found) return found;
+    }
+
+    if (tree.children) {
+      return this.findSelectedNodeDeep(tree.children, id);
+    }
+
+    return null;
+  }
+
+
   // --- COMPARA OGGETTI PER SELECT ---
   compareProducts(p1: any, p2: any): boolean {
     return p1 && p2 ? p1._id === p2._id : p1 === p2;
@@ -487,7 +593,9 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
       const childForm = form.get(id + '_children') as FormGroup;
 
       if (optionNode.children?.length && childForm) {
-        this.initGroupSelection(optionNode.children, childForm, selected?.children);
+        const selectedDeep = this.selectedMap.get(id);
+
+        this.initGroupSelection(optionNode.children, childForm, selectedDeep?.children);
       }
 
     });
