@@ -19,4 +19,5 @@ export interface Product {
   options: ProductOptions[];
   purchasePackage?: string;
   isNew?: boolean;
+  selectedOptions?: any[];
 }

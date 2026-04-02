@@ -79,7 +79,7 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    //console.log(JSON.stringify(this.data));
+    console.log(JSON.stringify(this.data));
     
     const p: ProductViewModel = JSON.parse(JSON.stringify(this.data));
     this.title += ": " + p.name;
@@ -93,13 +93,66 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
     
     this.selectedMap = this.buildSelectedMap(p.selectedOptions);
 
-    console.log(this.selectedMap);
+    this.applySelectionsToOptions(this.masterOptions, p.selectedOptions);
+
+    //console.log(this.selectedMap);
 
     this.form = this.createFormGroupForOptions(this.masterOptions, p.selectedOptions);
 
-    setTimeout(() => {
-      this.initGroupSelection(this.masterOptions, this.form, p.selectedOptions);
-    });
+    this.initGroupSelection(this.masterOptions, this.form, p.selectedOptions);
+  }
+
+  applySelectionsToOptions(options: any[], selectedOptions: any): void {
+
+  if (!options || !selectedOptions) return;
+
+  options.forEach(optionNode => {
+
+    const id = optionNode.option._id;
+
+    const selected = Array.isArray(selectedOptions)
+      ? selectedOptions.find((s: any) => s._id === id)
+      : selectedOptions;
+
+    if (!selected) return;
+
+    // 🔥 GROUP → costruisci figli subito
+    if (optionNode.option.optionType === OptionType.group && selected.value) {
+
+      const selectedChild = selected.value;
+
+      const fullOption = this.data.options.find(o =>
+        o.option?._id === selectedChild._id ||
+        o._id === selectedChild._id
+      );
+
+      if (!fullOption) return;
+
+      const children = this.data.options.filter(o =>
+        o.parent?._id === selectedChild._id
+      );
+
+      optionNode.children = children.map(c => ({
+        option: c.option || c,
+        children: []
+      }));
+    }
+    
+
+    // 🔁 ricorsione
+    if (optionNode.children?.length && selected.children) {
+      this.applySelectionsToOptions(optionNode.children, selected.children);
+    }
+
+  });
+}
+
+  hasControl(form: FormGroup, id: string): boolean {
+    return !!form?.get(id);
+  }
+
+  getArray(form: FormGroup, id: string): FormArray {
+    return form.get(id) as FormArray;
   }
 
   getStockTypeLabel(value: string): string {
@@ -177,13 +230,25 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
 
     const childrenKey = id + '_children';
 
-    const childForm = this.createFormGroupForOptions([rootNode]);
+    const childForm = this.createFormGroupForOptions(
+      [rootNode],
+      (this.data as any).selectedOptions
+    );
 
+    this.initGroupSelection(
+      [rootNode],
+      childForm,
+      (this.data as any).selectedOptions
+    );
+    
+    const parentForm = this.findParentFormByOptionId(this.form, id);
 
-    if (this.form.contains(childrenKey)) {
-      this.form.setControl(childrenKey, childForm);
+    if (!parentForm) return;
+
+    if (parentForm.contains(childrenKey)) {
+      parentForm.setControl(childrenKey, childForm);
     } else {
-      this.form.addControl(childrenKey, childForm);
+      parentForm.addControl(childrenKey, childForm);
     }
 
     optionNode.children = [rootNode];
@@ -224,189 +289,164 @@ export class AddUpdateOptionsToOrderDialogComponent implements OnInit {
 }
 
   // --- CREA FORM RICORSIVO ---
-createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
+  createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
 
-  const group: Record<string, AbstractControl> = {};
+    const group: Record<string, AbstractControl> = {};
 
-  options.forEach(optionNode => {
+    options.forEach(optionNode => {
 
-    const id = optionNode.option._id;
-    const type = optionNode.option.optionType;
+      const id = optionNode.option._id;
+      const type = optionNode.option.optionType;
 
-    // 🔎 trova il nodo selected corretto (NON flat!)
-    let selected = null;
+      const childrenKey = id + '_children';
 
-    if (Array.isArray(selectedOptions)) {
-      selected = selectedOptions.find((s: any) => s._id === id);
-    } else if (selectedOptions && selectedOptions._id === id) {
-      selected = selectedOptions;
-    }
+      // 🔥 crea SEMPRE il contenitore figli
+      group[childrenKey] = this.fb.group({});
 
-    let initialValue: any = null;
-    let qtaValue: number = 1;
+      let selected = null;
 
-    // =========================
-    // SELECT
-    // =========================
-    if (type === OptionType.select) {
+      if (Array.isArray(selectedOptions)) {
+        selected = selectedOptions.find((s: any) => s._id === id);
+      } else if (selectedOptions && selectedOptions._id === id) {
+        selected = selectedOptions;
+      }
 
-      const selectedDeep = this.findSelectedNodeDeep(selectedOptions, id);
+      let initialValue: any = null;
+      let qtaValue: number = 1;
 
-      //console.log(selectedOptions);
+      // =========================
+      // SELECT
+      // =========================
+      if (type === OptionType.select) {
 
-      let matchedProduct = null;
+        const selectedDeep = this.findSelectedNodeDeep(selectedOptions, id);
 
-      // 🔵 MODIFICA
-      if (selectedDeep?.selectedProduct?._id) {
+        let matchedProduct = null;
 
-        matchedProduct =
-          optionNode.option.products.find(
-            (p: any) => p._id === selectedDeep.selectedProduct._id
-          ) || null;
+        if (selectedDeep?.selectedProduct?._id) {
 
+          matchedProduct =
+            optionNode.option.products.find(
+              (p: any) => p._id === selectedDeep.selectedProduct._id
+            ) || selectedDeep.selectedProduct;
 
-        if (!matchedProduct && selectedDeep.selectedProduct) {
-          matchedProduct = selectedDeep.selectedProduct;
+          qtaValue = selectedDeep.selectedProduct?.qta ?? 1;
+
+        } else {
+
+          matchedProduct =
+            optionNode.option.products.find((p: any) => p.selected) || null;
+
+          qtaValue = matchedProduct?.quantity ?? 1;
         }
 
-        qtaValue =
-          selectedDeep.selectedProduct?.qta ?? 1;
+        initialValue = matchedProduct || null;
 
-        initialValue = matchedProduct;        
+        optionNode.selectedUnit =
+          this.getStockTypeLabel(matchedProduct?.stock_type) || 'Quantità';
+
+        group[id] = new FormControl(initialValue);
+        group['qta_' + id] = new FormControl(qtaValue);
+
+        // 🔥 CHILDREN SEMPRE CALCOLATI
+        const children = this.data.options.filter(opt =>
+          opt.parent?._id === id &&
+          (!opt.parentProduct || opt.parentProduct._id === matchedProduct?._id)
+        );
+
+        optionNode.children = children || [];
+
+        const selectedDeepMap = this.selectedMap.get(id);
+
+        group[childrenKey] = this.createFormGroupForOptions(
+          optionNode.children,
+          selectedDeepMap?.children
+        );
       }
 
-      // 🟢 INSERIMENTO
+      // =========================
+      // MULTIPRODUCT
+      // =========================
+      else if (type === OptionType.multiproduct) {
+
+        const productsArray = new FormArray<FormGroup>([]);
+
+        optionNode.option.products.forEach((p: any) => {
+          productsArray.push(
+            this.fb.group({
+              _id: [p._id],
+              name: [p.name],
+              price: [p.price],
+              quantity: [p.quantity ?? 1]
+            })
+          );
+        });
+
+        group[id] = productsArray;
+
+        const children = this.data.options.filter(opt =>
+          opt.parent?._id === id
+        );
+
+        optionNode.children = children || [];
+
+        const selectedDeepMap = this.selectedMap.get(id);
+
+        group[childrenKey] = this.createFormGroupForOptions(
+          optionNode.children,
+          selectedDeepMap?.children
+        );
+      }
+
+      // =========================
+      // GROUP
+      // =========================
+      else if (type === OptionType.group) {
+
+        group[id] = new FormControl(null);
+
+        // 🔥 FIX: figli da parent, NON da option.children
+        const children = this.data.options.filter(opt =>
+          opt.parent?._id === id
+        );
+
+        optionNode.children = children || [];
+
+        const selectedDeepMap = this.selectedMap.get(id);
+
+        group[childrenKey] = this.createFormGroupForOptions(
+          optionNode.children,
+          selectedDeepMap?.children
+        );
+      }
+
+      // =========================
+      // ALTRI TIPI
+      // =========================
       else {
 
-        matchedProduct =
-          optionNode.option.products.find((p: any) => p.selected) || null;
+        initialValue =
+          selected?.value ??
+          optionNode.value ??
+          null;
 
-        qtaValue =
-          matchedProduct?.quantity ??
-          1;
-      }
+        group[id] = new FormControl(initialValue);
 
-      initialValue = matchedProduct || null;
+        const selectedDeepMap = this.selectedMap.get(id);
 
-      optionNode.selectedUnit =
-        this.getStockTypeLabel(matchedProduct?.stock_type) || 'Quantità';
-
-      group[id] = new FormControl(initialValue);
-      group['qta_' + id] = new FormControl(qtaValue);
-
-      // ===== CHILDREN =====
-      const children = this.data.options.filter(opt =>
-        opt.parent?._id === id &&
-        (!opt.parentProduct || opt.parentProduct._id === matchedProduct?._id)
-      );
-
-      if (children.length > 0) {
-        optionNode.children = children;
-
-        const selectedDeep = this.selectedMap.get(id);
-        group[id + '_children'] =
-          this.createFormGroupForOptions(
-            children,
-            selectedDeep?.children   // 🔥 PASSIAMO SOLO IL RAMO CORRETTO
-          );
-      }
-
-    }
-    // =========================
-    // MULTIPRODOTTO
-    // =========================
-    else if (type === OptionType.multiproduct) {
-
-      const productsArray = new FormArray<FormGroup>([]);
-
-      optionNode.option.products.forEach((p: any) => {
-        productsArray.push(
-          this.fb.group({
-            _id: [p._id], 
-            name: [p.name],
-            price: [p.price],
-            quantity: [p.quantity ?? 1]
-          })
+        group[childrenKey] = this.createFormGroupForOptions(
+          optionNode.children || [],
+          selectedDeepMap?.children
         );
-      });
-
-      group[id] = productsArray;
-
-     const children = this.data.options.filter(opt =>
-        opt.parent?._id === id
-      );
-
-      if (children.length > 0) {
-
-        optionNode.children = children.map(c => ({
-          option: c.option,
-          children: []
-        }));
-
-        const selectedDeep = this.selectedMap.get(id);
-        group[id + '_children'] =
-          this.createFormGroupForOptions(
-            optionNode.children,
-            selectedDeep?.children
-          );
       }
-    }    
-    // =========================
-    // GROUP
-    // =========================
-    else if (type === OptionType.group) {
 
-       group[id] = new FormControl(null);
+    });
 
-      const children = optionNode.option.children || [];
+    const fg = new FormGroup(group);
 
-      if (children.length > 0) {
+    console.log('📦 FORM GROUP CONTROLS:', Object.keys(fg.controls));
 
-        const fullChildren = this.data.options.filter(opt =>
-          children.some((c: any) => c._id === opt._id)
-        );
-
-        optionNode.children = fullChildren.map(opt => ({
-          option: opt,
-          children: []
-        }));
-
-        const selectedDeep = this.selectedMap.get(id);
-
-        group[id + '_children'] =
-          this.createFormGroupForOptions(
-            optionNode.children,
-            selectedDeep?.children
-          );
-      }
-    }
-
-    // =========================
-    // NON SELECT
-    // =========================
-    else {
-
-      initialValue =
-        selected?.value ??
-        optionNode.value ??
-        null;
-
-      group[id] = new FormControl(initialValue);
-
-      if (optionNode.children?.length > 0) {
-        const selectedDeep = this.selectedMap.get(id);
-
-        group[id + '_children'] =
-          this.createFormGroupForOptions(
-            optionNode.children,
-            selectedDeep?.children
-          );
-      }
-    }
-
-  });
-
-  return new FormGroup(group);
+    return fg;
   }
 
   private findSelectedNodeDeep(tree: any, id: string): any {
@@ -462,12 +502,23 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
     const childrenKey = optionNode.option._id + '_children';
 
     if (optionNode.children.length > 0) {
-      const childForm = this.createFormGroupForOptions(optionNode.children);
-      if (this.form.contains(childrenKey)) {
-        this.form.setControl(childrenKey, childForm);
-      } else {
-        this.form.addControl(childrenKey, childForm);
-      }
+      const selectedDeep = this.selectedMap.get(optionNode.option._id);
+
+      const childForm = this.createFormGroupForOptions(
+        optionNode.children,
+        selectedDeep?.children
+      );
+   
+    const parentForm = this.findParentFormByOptionId(this.form, optionNode.option._id);
+
+    if (!parentForm) return;
+
+    if (parentForm.contains(childrenKey)) {
+      parentForm.setControl(childrenKey, childForm);
+    } else {
+      parentForm.addControl(childrenKey, childForm);
+    }
+      
     } else {
       if (this.form.contains(childrenKey)) {
         this.form.removeControl(childrenKey);
@@ -569,35 +620,130 @@ createFormGroupForOptions(options: any[], selectedOptions?: any): FormGroup {
         selected = selectedOptions;
       }
 
-      // 🔥 GROUP FIX
+      // =========================
+      // GROUP
+      // =========================
       if (type === OptionType.group && selected?.value) {
 
         const selectedChild = selected.value;
 
-        // 🔥 trova l'oggetto reale dentro la select
         const realChild = optionNode.option.children.find(
           (c: any) => c._id === selectedChild._id
         );
 
         if (realChild) {
+
           form.get(id)?.setValue(realChild);
 
-          // chiama la tua logica
           this.setGroup(optionNode, realChild);
+
+          setTimeout(() => {
+
+            const parentForm = this.findParentFormByOptionId(this.form, id);
+            const childForm = parentForm?.get(id + '_children') as FormGroup;
+
+            const selectedDeep = this.selectedMap.get(id);
+
+            if (!childForm || !selectedDeep) return;
+
+            // 🔥 CASO CHILDREN (select annidate)
+            if (Array.isArray(selectedDeep.children)) {
+
+              selectedDeep.children.forEach((child: any) => {
+
+                const ctrl = childForm.get(child._id);
+                if (!ctrl) return;
+
+                const optionNodeChild = optionNode.children.find((c: any) =>
+                  c.option._id === child._id
+                );
+
+                const realProduct =
+                  optionNodeChild?.option?.products?.find((p: any) =>
+                    p._id === child?.selectedProduct?._id
+                  );
+
+                if (realProduct) {
+                  ctrl.setValue(realProduct);
+                }
+              });
+            }
+
+            // 🔥 CASO INPUT (tipo "ciao")
+            if (!Array.isArray(selectedDeep.children) && selectedDeep.value !== undefined) {
+
+              const ctrl = childForm.get(selectedDeep._id);
+
+              if (ctrl) {
+                ctrl.setValue(selectedDeep.value);
+              }
+            }
+
+            this.cdr.detectChanges();
+
+          });
         }
-        // scatena la ricorsione
-        this.setGroup(optionNode, selectedChild);
       }
 
-      // 🔁 ricorsione figli
+      // =========================
+      // INPUT / TEXT / ETC
+      // =========================
+      if (
+        type !== OptionType.group &&
+        type !== OptionType.select &&
+        type !== OptionType.multiproduct
+      ) {
+        if (selected?.value !== undefined) {
+          const ctrl = form.get(id);
+          if (ctrl) {
+            ctrl.setValue(selected.value);
+          }
+        }
+      }
+
+      // =========================
+      // RICORSIONE
+      // =========================
       const childForm = form.get(id + '_children') as FormGroup;
 
       if (optionNode.children?.length && childForm) {
+
         const selectedDeep = this.selectedMap.get(id);
 
-        this.initGroupSelection(optionNode.children, childForm, selectedDeep?.children);
+        this.initGroupSelection(
+          optionNode.children,
+          childForm,
+          selectedDeep?.children
+        );
       }
 
     });
+  }
+
+  findParentFormByOptionId(form: FormGroup, optionId: string): FormGroup | null {
+
+    // 👉 se il form contiene il control principale, è quello giusto
+    if (form.contains(optionId)) return form;
+
+    for (const key of Object.keys(form.controls)) {
+
+      const ctrl = form.get(key);
+
+      if (ctrl instanceof FormGroup) {
+        const found = this.findParentFormByOptionId(ctrl, optionId);
+        if (found) return found;
+      }
+
+      if (ctrl instanceof FormArray) {
+        for (const c of ctrl.controls) {
+          if (c instanceof FormGroup) {
+            const found = this.findParentFormByOptionId(c, optionId);
+            if (found) return found;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }

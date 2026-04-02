@@ -18,132 +18,137 @@
 <ng-template #renderOption let-options="options" let-parentForm="parentForm">
   <div class="ctn-options">
     <div class="row g-3" *ngFor="let o of options">
-      <div class="col-sm-12" [formGroup]="parentForm">
-        <label class="d-block option-bg"><span>{{ o.option.name | titlecase }}</span></label>
+      <div class="col-sm-12">
+        <ng-container [formGroup]="parentForm">
+          <label class="d-block option-bg"><span>{{ o.option.name | titlecase }}</span></label>
 
-        <ng-container [ngSwitch]="o.option.optionType">
+          <ng-container *ngIf="parentForm.get(o.option._id)" [ngSwitch]="o.option.optionType">
 
-        <!-- MULTIPRODUCT -->
-        <div *ngSwitchCase="OptionType.multiproduct"
-            [formArrayName]="o.option._id">
+          <!-- MULTIPRODUCT -->
+          <div *ngSwitchCase="OptionType.multiproduct"
+              [formArrayName]="o.option._id">
 
-          <div *ngFor="let ctrl of parentForm.get(o.option._id).controls; let i = index"
-              [formGroupName]="i"
-              class="row">
+            <div *ngFor="let ctrl of parentForm.get(o.option._id).controls; let i = index"
+                [formGroupName]="i"
+                class="row">
 
-            <div class="col-sm-8">
-              <mat-form-field class="w-100">
-                <i-feather name="list"></i-feather>
-                <mat-label>Nome</mat-label>
-                <input matInput formControlName="name" readonly>
-              </mat-form-field>
+              <div class="col-sm-8">
+                <mat-form-field class="w-100">
+                  <i-feather name="list"></i-feather>
+                  <mat-label>Nome</mat-label>
+                  <input matInput formControlName="name" readonly>
+                </mat-form-field>
+              </div>
+
+              <div class="col-sm-2">
+                <mat-form-field class="w-100">
+                  <i-feather name="layers"></i-feather>
+                  <mat-label>Quantità</mat-label>
+                  <input matInput type="number" formControlName="quantity" readonly>
+                </mat-form-field>
+              </div>
+
+              <div class="col-sm-2">
+                <mat-form-field class="w-100">
+                <span class="material-symbols-outlined in-mat">
+                  euro
+                </span>                
+                <mat-label>Prezzo</mat-label>
+                  <input matInput type="number" formControlName="price" readonly>
+                </mat-form-field>
+              </div>
+
+
             </div>
 
+            </div>        
+          <!--select-->
+          <div class="row" *ngSwitchCase="OptionType.select">
+            <div class="col-sm-10">
+                <mat-form-field class="w-100">
+                  <i-feather name="list"></i-feather>
+                  <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
+                  <mat-select [formControlName]="o.option._id" required="required"
+                              [compareWith]="compareProducts"
+                              (selectionChange)="setSubOption(o, $event.value)">
+                    <mat-option *ngFor="let p of o.option.products" [value]="p">{{ p.name }} (+{{p.price}}€)</mat-option>
+                  </mat-select>
+                </mat-form-field>
+            </div>
             <div class="col-sm-2">
-              <mat-form-field class="w-100">
+              <!--quantità select-->
+              <mat-form-field class="w-80" *ngSwitchCase="OptionType.select">
                 <i-feather name="layers"></i-feather>
-                <mat-label>Quantità</mat-label>
-                <input matInput type="number" formControlName="quantity" readonly>
+                <mat-label>{{ o.selectedUnit || "Quantità" }}</mat-label>
+                <input matInput type="number" [formControlName]="'qta_' + o.option._id">
               </mat-form-field>
             </div>
-
-            <div class="col-sm-2">
-              <mat-form-field class="w-100">
-              <span class="material-symbols-outlined in-mat">
-                euro
-              </span>                
-              <mat-label>Prezzo</mat-label>
-                <input matInput type="number" formControlName="price" readonly>
-              </mat-form-field>
-            </div>
-
-
           </div>
 
-          </div>        
-        <!--select-->
-        <div class="row" *ngSwitchCase="OptionType.select">
-          <div class="col-sm-10">
+          <!-- GROUP -->
+          <div class="row" *ngSwitchCase="OptionType.group">
+            <div class="col-sm-12">
               <mat-form-field class="w-100">
                 <i-feather name="list"></i-feather>
+
                 <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-                <mat-select [formControlName]="o.option._id" required="required"
-                            [compareWith]="compareProducts"
-                            (selectionChange)="setSubOption(o, $event.value)">
-                  <mat-option *ngFor="let p of o.option.products" [value]="p">{{ p.name }} (+{{p.price}}€)</mat-option>
+
+                <mat-select
+                  [formControlName]="o.option._id"
+                  (selectionChange)="setGroup(o, $event.value)">
+
+                  <mat-option *ngFor="let c of o.option.children" [value]="c">
+                    {{ c.name }}
+                  </mat-option>
+
                 </mat-select>
               </mat-form-field>
+            </div>
           </div>
-          <div class="col-sm-2">
-            <!--quantità select-->
-            <mat-form-field class="w-80" *ngSwitchCase="OptionType.select">
-              <i-feather name="layers"></i-feather>
-              <mat-label>{{ o.selectedUnit || "Quantità" }}</mat-label>
-              <input matInput type="number" [formControlName]="'qta_' + o.option._id">
+            <!--text-->
+            <mat-form-field class="w-100" *ngSwitchCase="OptionType.text">
+              <i-feather name="file"></i-feather>
+              <mat-label>{{ o.option.layer ?? o.option.name | titlecase }} </mat-label>
+              <input matInput type="text" [formControlName]="o.option._id">
             </mat-form-field>
-          </div>
-        </div>
 
-        <!-- GROUP -->
-        <div class="row" *ngSwitchCase="OptionType.group">
-          <div class="col-sm-12">
-            <mat-form-field class="w-100">
-              <i-feather name="list"></i-feather>
-
+            <!--textarea-->
+            <mat-form-field class="w-100" *ngSwitchCase="OptionType.textarea">
+              <i-feather name="file"></i-feather>
               <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-
-              <mat-select
-                [formControlName]="o.option._id"
-                (selectionChange)="setGroup(o, $event.value)">
-
-                <mat-option *ngFor="let c of o.option.children" [value]="c">
-                  {{ c.name }}
-                </mat-option>
-
-              </mat-select>
+              <textarea matInput 
+              [formControlName]="o.option._id"           
+              style="height: 80px;"></textarea>
             </mat-form-field>
-          </div>
-        </div>
-          <!--text-->
-          <mat-form-field class="w-100" *ngSwitchCase="OptionType.text">
-            <i-feather name="file"></i-feather>
-            <mat-label>{{ o.option.layer ?? o.option.name | titlecase }} </mat-label>
-            <input matInput type="text" [formControlName]="o.option._id">
-          </mat-form-field>
 
-          <!--textarea-->
-          <mat-form-field class="w-100" *ngSwitchCase="OptionType.textarea">
-            <i-feather name="file"></i-feather>
-            <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <textarea matInput 
-            [formControlName]="o.option._id"           
-            style="height: 80px;"></textarea>
-          </mat-form-field>
+            <mat-form-field class="w-100" *ngSwitchCase="OptionType.color">
+              <i-feather name="circle"></i-feather>
+              <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
+              <input matInput type="color" 
+              [formControlName]="o.option._id">
+            </mat-form-field>
 
-          <mat-form-field class="w-100" *ngSwitchCase="OptionType.color">
-            <i-feather name="circle"></i-feather>
-            <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <input matInput type="color" 
-            [formControlName]="o.option._id">
-          </mat-form-field>
+            <!--Data-->
+            <mat-form-field class="w-100" *ngSwitchCase="OptionType.date">
+              <i-feather name="calendar"></i-feather>
+              <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
+              <input matInput [matDatepicker]="picker" 
+              [formControlName]="o.option._id">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
 
-          <!--Data-->
-          <mat-form-field class="w-100" *ngSwitchCase="OptionType.date">
-            <i-feather name="calendar"></i-feather>
-            <mat-label>{{ o.option.layer ?? o.option.name | titlecase }}</mat-label>
-            <input matInput [matDatepicker]="picker" 
-            [formControlName]="o.option._id">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-
+          </ng-container>
         </ng-container>
       </div>
 
       <!-- RICORSIONE FIGLI -->
       <div class="col-sm-12" *ngIf="parentForm.get(o.option._id + '_children') as childForm">
-        <ng-container *ngTemplateOutlet="renderOption; context: { options: o.children, parentForm: childForm }">
-        </ng-container>
+        <div [formGroup]="childForm">
+          <ng-container 
+            *ngTemplateOutlet="renderOption; context: { options: o.children, parentForm: childForm }">
+          </ng-container>
+        </div>
       </div>
     </div>
   </div>
