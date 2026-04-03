@@ -710,10 +710,12 @@ export class AddOrderComponent {
     const productWithSelection = {
       _id: fg.get('_id')?.value,
       name: fg.get('name')?.value,
-      options: fg.get('options')?.value,      
+      options: fg.get('options')?.value ?? [],      
       selectedOptions: fg.get('selectedOptions')?.value ?? []
     };
 
+    if(productWithSelection.options.length === 0 && productWithSelection.selectedOptions.length === 0)
+      return;
 
     const dialogRef = this.dialog.open(
       AddUpdateOptionsToOrderDialogComponent,
