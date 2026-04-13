@@ -277,6 +277,7 @@ export class UtilsService {
     let breakDelay = 0;
     let exitExtra = 0;
     let earlyExitDelay = 0;
+    let entryAdvance = 0;
 
     // =========================
     // INGRESSO
@@ -286,6 +287,8 @@ export class UtilsService {
 
     if (actualStart > scheduledStart) {
       entryDelay = actualStart - scheduledStart;
+    } else if (actualStart < scheduledStart) {
+      entryAdvance = scheduledStart - actualStart;
     }
 
     // =========================
@@ -323,10 +326,11 @@ export class UtilsService {
     // COMPENSAZIONE
     // =========================
     const permissionMinutes = event.permissionMinutes ?? 0;
-    const totalDelay = entryDelay + breakDelay;
-    const compensatedDelay = Math.max(0, totalDelay - exitExtra);
+    const totalDelay = entryDelay + breakDelay + earlyExitDelay;
+    
+    const totalCompensation = exitExtra + entryAdvance + permissionMinutes;
 
-    const result = compensatedDelay + earlyExitDelay - permissionMinutes;
+    const result = Math.max(0, totalDelay - totalCompensation);
 
     return isDashboard ? result : Math.max(0, result);
   }
