@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
 import { MatBadgeModule } from '@angular/material/badge';
 import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
 import { ToastrService } from 'ngx-toastr';
-import { SocketService } from '../../services/socket.service';
+import { NotificationStateService } from '../../services/notification-state.service';
 import { interval, Subscription } from 'rxjs';
 
 
@@ -40,7 +40,7 @@ export class SidebarComponent {
         private toggleService: ToggleService,
         private authService: AuthService,
         private permissionHolidayService: PermissionHolidayService,
-        private socketService: SocketService
+        private notificationStateService: NotificationStateService
     ) {
         this.toggleService.isToggled$.subscribe(isToggled => {
             this.isToggled = isToggled;
@@ -115,7 +115,7 @@ export class SidebarComponent {
             this.countPending();
         });
 
-        this.socketService.absenceCounter$.subscribe(value => {
+        this.notificationStateService.absenceCounter$.subscribe(value => {
             this.count = value;
         });
 
@@ -124,7 +124,7 @@ export class SidebarComponent {
     countPending(){
         this.permissionHolidayService.countPending().subscribe((d: number) =>{
             this.count = d;
-            this.socketService.setInitialCounter(d);
+            this.notificationStateService.setInitialCounter(d);
         })
     }
 

@@ -129,27 +129,44 @@ export class AbsenceComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
+        const previousData = this.dataSource.data;
         const payload = {
           ...item, // CLONE
           accepted: approve,
           operatorId: ((item.operatorId as unknown) as Operators)?._id ?? ''
         };
 
+        // Aggiorna subito la tabella: il salvataggio sul server e' veloce, mentre
+        // il successivo ricaricamento completo puo' restare in attesa dietro IIS.
+        this.dataSource.data = previousData.map(permissionHoliday =>
+          permissionHoliday._id === item._id
+            ? { ...permissionHoliday, accepted: approve }
+            : permissionHoliday
+        );
+
         this.permissionHolidayService.approveOrNotPermissionHoliday(payload)
-          .subscribe((data: any) => {
-            if(data){
-              if(data.success)
-              {
-                this.getpPermissionHoliday();
+          .subscribe({
+            next: (data: any) => {
+              if (data?.success) {
                 this.permissionHolidayService.notifyPendingChanged();
-              }
-              else
-              {
+                this.getpPermissionHoliday();
+              } else {
+                this.dataSource.data = previousData;
                 this.dialog.open(AlertDialogComponent, {
                    width: '500px',
                    data:{title: 'Errore nel salvataggio', message: data.msg}
-                })
+                });
               }
+            },
+            error: () => {
+              this.dataSource.data = previousData;
+              this.dialog.open(AlertDialogComponent, {
+                width: '500px',
+                data: {
+                  title: 'Errore nel salvataggio',
+                  message: 'La richiesta non e\' stata aggiornata. Riprova.'
+                }
+              });
             }
           });
       } 
@@ -170,10 +187,27 @@ export class AbsenceComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
+        const previousData = this.dataSource.data;
+        this.dataSource.data = previousData.filter(permissionHoliday => permissionHoliday._id !== item._id);
+
         this.permissionHolidayService.delete(item._id)
-          .subscribe((data: boolean) => {
-            if(data){
-              this.getpPermissionHoliday();
+          .subscribe({
+            next: (data: boolean) => {
+              if (data) {
+                this.getpPermissionHoliday();
+              } else {
+                this.dataSource.data = previousData;
+              }
+            },
+            error: () => {
+              this.dataSource.data = previousData;
+              this.dialog.open(AlertDialogComponent, {
+                width: '500px',
+                data: {
+                  title: 'Errore nell\'eliminazione',
+                  message: 'La richiesta non e\' stata eliminata. Riprova.'
+                }
+              });
             }
           });
       } 

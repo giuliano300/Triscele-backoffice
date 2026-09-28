@@ -16,11 +16,18 @@ export class PermissionHolidayService {
     constructor(private http: HttpClient) {}
 
     getPermissionHolidays(operatorId?: string): Observable<PermissionHoliday[]>{
-      let o = "";
-      if(operatorId)
-        o = "?operatorId=" + operatorId;
+      const query = new URLSearchParams();
+      if (operatorId) {
+        query.set('operatorId', operatorId);
+      }
+      query.set('_ts', Date.now().toString());
 
-      return this.http.get<PermissionHoliday[]>(this.apiUrl + o);
+      return this.http.get<PermissionHoliday[]>(`${this.apiUrl}?${query.toString()}`, {
+        headers: new HttpHeaders({
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        })
+      });
     }
 
     getPermissionHoliday(id: string): Observable<PermissionHoliday>{

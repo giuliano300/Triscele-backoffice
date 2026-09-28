@@ -38,7 +38,6 @@
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/signalr/jquery.signalR.js",
               "node_modules/pdfmake/build/pdfmake.min.js",
               "node_modules/pdfmake/build/vfs_fonts.js"
             ]          },
@@ -103,7 +102,6 @@
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/signalr/jquery.signalR.js",
               "node_modules/pdfmake/build/pdfmake.min.js",
               "node_modules/pdfmake/build/vfs_fonts.js"
             ]

@@ -17,7 +17,7 @@ import { ProductMovements } from '../../interfaces/productMovements';
 import { ProductMovementsService } from '../../services/Product-movements.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PermissionHolidayService } from '../../services/PermissionHoliday.service';
-import { SocketService } from '../../services/socket.service';
+import { NotificationStateService } from '../../services/notification-state.service';
 import { NotificationsService } from '../../services/Notifications.service';
 import { Notifications } from '../../interfaces/notifications';
 
@@ -62,7 +62,7 @@ export class DashboardComponent {
       private productService: ProductService,
       private productMovementsService: ProductMovementsService,
       private permissionHolidayService: PermissionHolidayService,
-      private socketService: SocketService,
+      private notificationStateService: NotificationStateService,
       private notificationsService: NotificationsService,
       @Inject(PLATFORM_ID) private platformId: any) {
         this.isBrowser = isPlatformBrowser(this.platformId);
@@ -83,13 +83,13 @@ export class DashboardComponent {
     this.loadStats();
     this.countPending();
     this.findLowStock();
-    this.socketService.absenceCounter$.subscribe(value => {
+    this.notificationStateService.absenceCounter$.subscribe(value => {
         this.absence = value;
     });
     this.notificationsService.getAdminNotRead().subscribe((data: Notifications[]) => {
         this.notifications = data;
         //console.log(this.notifications);
-        this.socketService.setInitialCounter(data.length);
+        this.notificationStateService.setInitialCounter(data.length);
       
         data.forEach(notification => {
           let type:'info' | 'error' = 'info';
@@ -108,12 +108,12 @@ export class DashboardComponent {
           
           if(notification.event == "confirmAbsence")
           {
-              message = this.socketService.buildMessage(notification.payload.p);
+              message = this.notificationStateService.buildMessage(notification.payload.p);
               title = notification.payload.p.accepted ? 'Richiesta accettata' : 'Richiesta rifiutata';
               type = notification.payload.p.accepted ? 'info' : 'error';
           }
           
-          this.socketService.notify(message, title, type, notification._id);
+          this.notificationStateService.notify(message, title, type, notification._id);
         });
       });
    }
