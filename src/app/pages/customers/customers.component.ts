@@ -17,25 +17,30 @@ import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { UtilsService } from '../../services/utils.service';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-customers',
   imports: [
-    MatCardModule, 
-    MatButtonModule, 
-    MatMenuModule, 
-    MatPaginatorModule, 
-    MatTableModule, 
-    MatCheckboxModule, 
-    FeathericonsModule, 
-    MatFormField, 
+    MatCardModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatCheckboxModule,
+    FeathericonsModule,
+    MatFormField,
     MatLabel,
     CommonModule,
     ReactiveFormsModule,
     MatInputModule,
     MatSelect,
-    MatSelectModule
-  ],
+    MatSelectModule,
+    MatTooltip,
+    MatTooltipModule,
+    MatProgressBar
+],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss'
 })
@@ -45,7 +50,7 @@ export class CustomersComponent {
 
   province: string[] = [];
 
-  displayedColumns: string[] = ['businessName', 'vatNumber', 'email', 'pwd', 'mobile', 'province', 'edit', 'delete'];
+  displayedColumns: string[] = ['businessName', 'vatNumber', 'email', 'mobile', 'province', 'edit', 'delete'];
 
   dataSource = new MatTableDataSource<Customers>(this.customers);
 
@@ -53,6 +58,8 @@ export class CustomersComponent {
   
   form!: FormGroup;
   
+  firstLoading: boolean = true;
+
   constructor(
       private fb: FormBuilder,
       private router: Router,
@@ -66,7 +73,7 @@ export class CustomersComponent {
       name: [],
       province: []
      });
-      this.getCustomers();
+     this.getCustomers();
      this.province = this.utilsService.getProvinceItaliane();
   }
 
@@ -95,6 +102,7 @@ export class CustomersComponent {
         }));;
         this.dataSource = new MatTableDataSource<Customers>(this.customers);
         this.dataSource.paginator = this.paginator;
+        this.firstLoading = false;
       }
     });
   }
@@ -106,6 +114,7 @@ export class CustomersComponent {
   }
 
   remove(){
+    this.firstLoading = true;
     this.form.patchValue({
       name: [],
       province: []

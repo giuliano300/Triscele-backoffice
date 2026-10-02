@@ -476,3 +476,18 @@
     }
 }
 
+
+
+.business-name {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.txt-180{
+    min-width: 180px;
+}
+.txt-200{
+    min-width: 200px;
+}
