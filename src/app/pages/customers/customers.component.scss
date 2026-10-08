@@ -491,3 +491,48 @@
 .txt-200{
     min-width: 200px;
 }
+
+.bulk-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-weight: 500;
+
+    .bulk-delete {
+        border-radius: 6px;
+        padding: 10px 18px;
+        color: var(--whiteColor) !important;
+        background-color: var(--dangerColor);
+
+        i {
+            margin-right: 6px;
+        }
+    }
+}
+
+.select-column {
+    width: 56px;
+    min-width: 56px;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    text-align: center !important;
+}
+
+@media (max-width: 991px) {
+    .bulk-actions {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+
+        .bulk-delete {
+            width: 100%;
+        }
+    }
+}
+
+::ng-deep .mat-mdc-paginator-navigation-first,
+::ng-deep .mat-mdc-paginator-navigation-last {
+    display: inline-flex !important;
+}

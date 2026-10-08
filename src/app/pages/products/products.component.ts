@@ -36,12 +36,15 @@ import { AddDuplicateProductComponent } from '../../add-duplicate-product-dialog
 import { ToastrService } from 'ngx-toastr';
 import { ProductsState } from '../../interfaces/products-state';
 
+import { getItalianPaginatorIntl } from '../../../../src/paginator-it';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+
 export interface AlertMessage {
   id: number;
   description: string;
 }
 
-const PRODUCTS_STATE_KEY = 'products_state';
+const PRODUCTS_STATE_KEY = 'triscele:backoffice:products:list-state:v1';
 
 @Component({
   selector: 'app-products',
@@ -65,6 +68,12 @@ const PRODUCTS_STATE_KEY = 'products_state';
     MatTooltipModule,
     MatProgressBar
 ],
+  providers: [
+    {
+      provide: MatPaginatorIntl,
+      useValue: getItalianPaginatorIntl()
+    }
+  ],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss'
 })
@@ -232,7 +241,7 @@ export class ProductsComponent {
   }
 
   remove(){
-    sessionStorage.removeItem('products_state');
+    sessionStorage.removeItem(PRODUCTS_STATE_KEY);
     
     this.form.patchValue({
       categoryId: [],
@@ -251,6 +260,8 @@ export class ProductsComponent {
   getProducts() 
   {
     const { categoryId, supplierId, name } = this.form.value;
+
+    //console.log('Filters:', { categoryId, supplierId, name });
 
     this.firstLoading = true;
     const params = new URLSearchParams();

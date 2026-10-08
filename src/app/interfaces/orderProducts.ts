@@ -10,6 +10,7 @@ export interface OrderProducts {
   discountPercentage: number;
   discountPercentage2: number;
   total: number;
+  totalPrice?: number;
   isSubs:boolean;
   note?:string;
   parentId?:string;

@@ -70,6 +70,111 @@
         </mat-card>
     </div>
 </div>
+<div class="row dashboard-documents-row">
+    <div class="col-xxxl-6">
+        <mat-card class="trinta-card recent-documents-card mb-25 bg-white border-none d-block">
+            <mat-card-header>
+                <mat-card-title>
+                    <h5 class="mt-0 mb-0 pl-0">Preventivi aperti</h5>
+                </mat-card-title>
+                <button mat-button type="button" class="view-all" (click)="showAllOpenQuotes()">
+                    Vedi tutti
+                </button>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="documents-loading" *ngIf="openQuotesLoading">
+                    <i class="ri-refresh-line rotate"></i>
+                </div>
+                <div class="documents-message error" *ngIf="!openQuotesLoading && openQuotesError">
+                    Impossibile caricare i preventivi.
+                    <button mat-button type="button" (click)="loadOpenQuotes()">Riprova</button>
+                </div>
+                <div class="documents-message" *ngIf="!openQuotesLoading && !openQuotesError && openQuotes.length === 0">
+                    Nessun preventivo aperto.
+                </div>
+                <div class="documents-list" *ngIf="!openQuotesLoading && !openQuotesError && openQuotes.length > 0">
+                    <div class="documents-header quote-grid">
+                        <span>Preventivo</span>
+                        <span>Cliente</span>
+                        <span>Data</span>
+                        <span>Importo</span>
+                        <span>Stato</span>
+                        <span></span>
+                    </div>
+                    <div class="document-row quote-grid" *ngFor="let quote of openQuotes">
+                        <span class="document-number document-field" data-label="Preventivo">
+                            Preventivo-{{ formatDocumentNumber(quote.quoteNumber) }}
+                        </span>
+                        <span class="document-field text-truncate" data-label="Cliente" [matTooltip]="quote.customer">
+                            {{ quote.customer }}
+                        </span>
+                        <span class="document-field" data-label="Data">{{ quote.date | date:'dd/MM/yyyy' }}</span>
+                        <span class="document-field" data-label="Importo">
+                            {{ quote.totalPrice != null ? (quote.totalPrice | currency:'EUR':'symbol':'1.2-2':'it-IT') : '-' }}
+                        </span>
+                        <span class="document-field" data-label="Stato"><span class="status-badge open">Aperto</span></span>
+                        <button mat-button type="button" class="open-document" (click)="openQuote(quote.id)">
+                            Apri
+                        </button>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <div class="col-xxxl-6">
+        <mat-card class="trinta-card recent-documents-card mb-25 bg-white border-none d-block">
+            <mat-card-header>
+                <mat-card-title>
+                    <h5 class="mt-0 mb-0 pl-0">Ultimi contratti approvati</h5>
+                </mat-card-title>
+                <button mat-button type="button" class="view-all" (click)="showAllApprovedOrders()">
+                    Vedi tutti
+                </button>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="documents-loading" *ngIf="approvedOrdersLoading">
+                    <i class="ri-refresh-line rotate"></i>
+                </div>
+                <div class="documents-message error" *ngIf="!approvedOrdersLoading && approvedOrdersError">
+                    Impossibile caricare i contratti.
+                    <button mat-button type="button" (click)="loadRecentApprovedOrders()">Riprova</button>
+                </div>
+                <div class="documents-message" *ngIf="!approvedOrdersLoading && !approvedOrdersError && recentApprovedOrders.length === 0">
+                    Nessun contratto approvato.
+                </div>
+                <div class="documents-list" *ngIf="!approvedOrdersLoading && !approvedOrdersError && recentApprovedOrders.length > 0">
+                    <div class="documents-header order-grid">
+                        <span>Ordine</span>
+                        <span>Cliente</span>
+                        <span>Approvazione</span>
+                        <span>Importo</span>
+                        <span>Agente</span>
+                        <span></span>
+                    </div>
+                    <div class="document-row order-grid" *ngFor="let order of recentApprovedOrders">
+                        <span class="document-number document-field" data-label="Ordine">
+                            Ordine-{{ formatDocumentNumber(order.orderNumber) }}
+                        </span>
+                        <span class="document-field text-truncate" data-label="Cliente" [matTooltip]="order.customer">
+                            {{ order.customer }}
+                        </span>
+                        <span class="document-field" data-label="Approvazione">{{ order.approvedAt | date:'dd/MM/yyyy' }}</span>
+                        <span class="document-field" data-label="Importo">
+                            {{ order.totalPrice != null ? (order.totalPrice | currency:'EUR':'symbol':'1.2-2':'it-IT') : '-' }}
+                        </span>
+                        <span class="document-field text-truncate" data-label="Agente" [matTooltip]="order.agent">
+                            {{ order.agent }}
+                        </span>
+                        <button mat-button type="button" class="open-document" (click)="openOrder(order.id)">
+                            Apri
+                        </button>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
 <div class="row">
     <div class="col-xxxl-6">
         <mat-card class="trinta-card balance-overview-card mb-25 bg-white border-none d-block" style="min-height: 500px;">
@@ -118,7 +223,7 @@
                             <h6 class="mt-0 mb-0" #el1 class="truncate"
                                 (mouseenter)="element.showTooltip = el1.scrollWidth > el1.clientWidth"
                                 [matTooltip]="element.showTooltip ? element.supplier.businessName : ''" matTooltipPosition="right"
-                                >{{element.supplier.businessName}}</h6>
+                                >{{ element.supplier?.businessName || '-' }}</h6>
                             </td>
                         </ng-container>
 
@@ -131,7 +236,7 @@
                                         class="truncate"
                                         (mouseenter)="element.showTooltip = el.scrollWidth > el.clientWidth"
                                         [matTooltip]="element.showTooltip ? element.category.name : ''" matTooltipPosition="right">
-                                        {{element.category.name}}
+                                        {{ element.category?.name || '-' }}
                                     </h6>
                                 </div>
                             </td>

@@ -84,6 +84,25 @@ export  function calculateFinalPrice(basePrice: number, quantity: number, discou
   return (basePrice + optionsPrice) * quantity - discount;
 }
 
+export function getOrderProductTotal(product: any): number {
+  const totalPrice = Number(product?.totalPrice);
+  if (Number.isFinite(totalPrice) && totalPrice > 0) {
+    return totalPrice;
+  }
+
+  const legacyTotal = Number(product?.total);
+  if (Number.isFinite(legacyTotal) && legacyTotal > 0) {
+    return legacyTotal;
+  }
+
+  return calculateFinalPrice(
+    Number(product?.price) || 0,
+    Number(product?.quantity) || 0,
+    Number(product?.discount) || 0,
+    product?.selectedOptions || []
+  );
+}
+
 export function sumSelectedOptionsPrice(selectedOptions: any[]): number {
   if(!selectedOptions) return 0;
   let total = 0;

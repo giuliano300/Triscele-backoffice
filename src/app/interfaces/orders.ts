@@ -8,6 +8,8 @@ import { Sectors } from './sectors';
 
 export interface Order {
   _id?: string; 
+  orderNumber?: number;
+  quoteNumber?: number;
   customerId: Customers;
   operatorId?: Operators;
   sectorId?: Sectors;

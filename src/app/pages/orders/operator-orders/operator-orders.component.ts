@@ -322,8 +322,13 @@ export class OperatorOrdersComponent {
   DownloadDocOperator(item: Order) {
     const form = item;
     const products = item.orderProducts;
+    const orderNumber = form.orderNumber !== undefined
+      ? String(form.orderNumber).padStart(3, '0')
+      : (form._id ?? 'Senza-numero');
+    const documentName = `Ordine-${orderNumber}`;
 
     const docDefinition = {
+      pageOrientation: 'landscape',
       pageSize: 'A4',
       pageMargins: [40, 60, 40, 60],
       defaultStyle: {
@@ -342,7 +347,7 @@ export class OperatorOrdersComponent {
             },
             {
               stack: [
-                { text: `Ordine N. ${form._id}`, style: 'subheader', alignment: 'right' },
+                { text: documentName, style: 'subheader', alignment: 'right' },
                 { text: `Consegna prevista: ${new Date(form.expectedDelivery).toLocaleDateString()}`, style: 'smallInfo', alignment: 'right', margin: [0, 10, 0, 10] }
               ]
             }
@@ -404,17 +409,16 @@ export class OperatorOrdersComponent {
           margin: [0, 0, 0, 20]
         } : {},
 
-        // Tabella prodotti (solo nome e quantità)
+        // Tabella prodotti per l'operatore, senza informazioni economiche
         {
           style: 'section',
           table: {
             headerRows: 1,
-            widths: ['*', 'auto'],
+            widths: ['*', 80],
             body: [
-              // Header della tabella: "Prodotto" e "Quantità"
               [
                 { text: 'Prodotto', style: 'tableHeader', margin: [5, 5, 5, 5] },
-                { text: 'Quantità', style: 'tableHeader', margin: [5, 5, 5, 5] }
+                { text: 'Q.tà', style: 'tableHeader', margin: [5, 5, 5, 5] }
               ],
               ...products
                 .filter(p => !p.isSubs) // Filtra i prodotti non "subs" (sottoprodotti)
@@ -426,7 +430,7 @@ export class OperatorOrdersComponent {
                   return [
                     {
                       stack: [
-                        { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
+                        { text: p.name, fontSize: 9, bold: true, margin: [3, 3, 3, 2] },
                         ...(optionTexts.length
                           ? [{ text: optionTexts.join('\n'), fontSize: 9, color: '#666', margin: [10, 0, 0, 5], lineHeight: 1.2 }]
                           : []),
@@ -494,7 +498,7 @@ export class OperatorOrdersComponent {
         date: { fontSize: 11, color: '#777' },
         smallInfo: { fontSize: 11, color: '#333', bold: true },
         section: { margin: [0, 5, 0, 5] },
-        tableHeader: { bold: true, fillColor: '#eeeeee' }
+        tableHeader: { bold: true, fillColor: '#eeeeee', fontSize: 8, color: '#333333' }
       }
     };
 

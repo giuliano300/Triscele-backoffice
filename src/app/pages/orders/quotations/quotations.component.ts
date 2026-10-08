@@ -28,7 +28,7 @@ import { OperatorService } from '../../../services/Operator.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { OrderStatus } from '../../../enum/enum';
 import { ConvertToOrderDialogComponent } from '../../../convert-to-order-dialog/convert-to-order-dialog.component';
-import { clause, generateOptionText } from '../../../../main';
+import { clause, generateOptionText, getOrderProductTotal } from '../../../../main';
 
 declare const pdfMake: any;
 
@@ -297,8 +297,13 @@ export class QuotationsComponent {
   DownloadDoc(item: Order) {
     const form = item;
     const products = item.orderProducts;
+    const quoteNumber = form.quoteNumber !== undefined
+      ? String(form.quoteNumber).padStart(3, '0')
+      : (form._id ?? 'Senza-numero');
+    const documentName = `Preventivo-${quoteNumber}`;
 
     const docDefinition = {
+      pageOrientation: 'landscape',
       pageSize: 'A4',
       pageMargins: [40, 60, 40, 60],
       defaultStyle: {
@@ -312,12 +317,12 @@ export class QuotationsComponent {
             {
               stack: [
                 { text: 'Triscele Srl', style: 'header' },
-                { text: `Data ordine: ${new Date(form.insertDate).toLocaleDateString()}`, style: 'smallInfo', alignment: 'left', margin: [0, 10, 0, 10] }
+                { text: `Data preventivo: ${new Date(form.insertDate).toLocaleDateString()}`, style: 'smallInfo', alignment: 'left', margin: [0, 10, 0, 10] }
               ]
             },
             {
               stack: [
-                { text: `Ordine N. ${form._id}`, style: 'subheader', alignment: 'right' },
+                { text: documentName, style: 'subheader', alignment: 'right' },
                 { text: `Consegna prevista: ${new Date(form.expectedDelivery).toLocaleDateString()}`, style: 'smallInfo', alignment: 'right', margin: [0, 10, 0, 10] }
               ]
             }
@@ -384,9 +389,9 @@ export class QuotationsComponent {
           style: 'section',
           table: {
             headerRows: 1,
-            widths: ['*', 'auto', 'auto', 'auto'],
+            widths: [140, '*', '*', '*', '*', '*', '*'],
             body: [
-              ['Prodotto', 'Quantità', 'Prezzo', 'Totale'].map(h => ({
+              ['Prodotto', 'Q.tà', 'Prezzo', 'Sconto €', 'Sconto 1 %', 'Sconto 2 %', 'Totale'].map(h => ({
                 text: h, style: 'tableHeader', margin: [5, 5, 5, 5]
               })),
               ...products
@@ -399,7 +404,7 @@ export class QuotationsComponent {
                   return [
                     {
                       stack: [
-                        { text: p.name, fontSize: 11, bold: true, margin: [5, 5, 5, 2] },
+                        { text: p.name, fontSize: 9, bold: true, margin: [3, 3, 3, 2] },
                         ...(optionTexts.length
                           ? [{ text: optionTexts.join('\n'), fontSize: 9, color: '#666', margin: [10, 0, 0, 5], lineHeight: 1.2 }]
                           : []),
@@ -415,7 +420,10 @@ export class QuotationsComponent {
                     },
                     { text: p.quantity.toString(), margin: [5, 5, 5, 5], alignment: 'center' },
                     { text: `€${p.price.toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' },
-                    { text: `€${((p.price * p.quantity) - (p.discount || 0)).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
+                    { text: p.discount ? `€${p.discount.toFixed(2)}` : '-', margin: [5, 5, 5, 5], alignment: 'right' },
+                    { text: `${p.discountPercentage || 0}%`, margin: [5, 5, 5, 5], alignment: 'right' },
+                    { text: `${p.discountPercentage2 || 0}%`, margin: [5, 5, 5, 5], alignment: 'right' },
+                    { text: `€${getOrderProductTotal(p).toFixed(2)}`, margin: [5, 5, 5, 5], alignment: 'right' }
                   ];
                 })
             ]
@@ -442,7 +450,7 @@ export class QuotationsComponent {
             body: [[
               {
                 stack: [
-                  { text: 'Note ordine', bold: true, margin: [0, 0, 0, 5] },
+                  { text: 'Note preventivo', bold: true, margin: [0, 0, 0, 5] },
                   { text: form.note, fontSize: 10, lineHeight: 1.3, margin: [0, 2, 0, 0] }
                 ],
                 fillColor: '#f3f3f3',
@@ -477,12 +485,12 @@ export class QuotationsComponent {
         date: { fontSize: 11, color: '#777' },
         smallInfo: { fontSize: 11, color: '#333', bold: true },
         section: { margin: [0, 5, 0, 5] },
-        tableHeader: { bold: true, fillColor: '#eeeeee' },
+        tableHeader: { bold: true, fillColor: '#eeeeee', fontSize: 8, color: '#333333' },
         total: { fontSize: 12, bold: true, alignment: 'right', color: '#222', margin: [0, 2, 0, 30] }
       }
     };
 
-    pdfMake.createPdf(docDefinition).open();
+    pdfMake.createPdf(docDefinition).download(`${documentName}.pdf`);
   }
 
   DeleteItem(item: Order) {

@@ -24,7 +24,7 @@ import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { UtilsService } from '../../../services/utils.service';
 import { OrderProducts } from '../../../interfaces/orderProducts';
-import { debounceTime, Observable, of, switchMap } from 'rxjs';
+import { debounceTime, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Order } from '../../../interfaces/orders';
@@ -41,6 +41,7 @@ import { Product } from '../../../interfaces/products';
 import { MatTooltip } from '@angular/material/tooltip';
 import { mapToProduct } from '../../../mapping/mapping';
 import { calculateFinalPrice, sumSelectedOptionsPrice } from '../../../../main';
+import { Customers } from '../../../interfaces/customers';
 
 registerLocaleData(localeIt);
 
@@ -100,7 +101,6 @@ export class AddOrderComponent {
 
   id: string | null = null;
 
-  customers: any[] = [];
   operators: any[] = [];
   sectors: any[] = [];
 
@@ -286,6 +286,8 @@ export class AddOrderComponent {
   selectedProducts: any[] = [];
   productCtrl = new FormControl('');
   filteredProducts!: Observable<any[]>;
+  customerCtrl = new FormControl<Customers | string>('');
+  filteredCustomers!: Observable<Customers[]>;
 
   groupTotals: number[] = [];
 
@@ -343,15 +345,30 @@ export class AddOrderComponent {
       })
     );
 
+    this.filteredCustomers = this.customerCtrl.valueChanges.pipe(
+      debounceTime(300),
+      switchMap(value => {
+        const search = typeof value === 'string' ? value.trim() : '';
+        if (typeof value === 'string') {
+          this.productForm.get('customerId')?.setValue('');
+        }
+        return search.length >= 2
+          ? this.customerService
+              .getCustomers(`?name=${encodeURIComponent(search)}`)
+              .pipe(
+                map(customers => customers.filter(
+                  customer => Boolean(customer.businessName?.trim())
+                ))
+              )
+          : of([]);
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
     const token = localStorage.getItem('authToken');
     if (!token) {
       this.router.navigate(['/']);
     }
-
-    // carica clienti
-    this.customerService.getCustomers('').subscribe((data: any[]) => {
-      this.customers = data;
-    });
 
     // carica agenti
     this.agentService.getAgents().subscribe((data: any[]) => {
@@ -410,6 +427,7 @@ export class AddOrderComponent {
               note: data.note,
               customerNote: data.customerNote
             });
+            this.customerCtrl.setValue(data.customerId, { emitEvent: false });
             data.orderProducts.forEach(product => {
               const group = this.fb.group({
                 _id: [product._id],
@@ -607,8 +625,18 @@ export class AddOrderComponent {
       }
   }
 
-  setShippingValues(event: any){
-    const c = this.customers.find(c => c._id === event.value);
+  displayCustomer(customer: Customers | string | null): string {
+    if (!customer || typeof customer === 'string') return customer ?? '';
+
+    return customer.businessName ?? '';
+  }
+
+  selectCustomer(customer: Customers): void {
+    this.productForm.patchValue({ customerId: customer._id });
+    this.setShippingValues(customer);
+  }
+
+  setShippingValues(c: Customers): void {
     this.productForm.patchValue({
       shippingAddress:c.address,
       shippingZipcode: c.zipCode,
@@ -621,6 +649,15 @@ export class AddOrderComponent {
       shippingCity: c.city,
       customerNote: c.customerNote
     })
+    const agentName = c.agentName?.toLowerCase();
+    let agent = agentName
+      ? this.agents.find(a => a.name.toLowerCase() === agentName)
+      : undefined;
+    console.log("AGENTE TROVATO:", agent);
+    if(agent)
+      this.productForm.patchValue({
+        agentId: agent._id
+      })
   }
 
   onSubmit() {
@@ -655,14 +692,16 @@ export class AddOrderComponent {
       formData.operatorId = formData.operatorId ?? undefined;
 
       formData.origin = "1";
-      formData.orderProducts = this.productsForm.value.map((p: any) => ({
+      const calculatedTotalPrice = this.getFinalPrice();
+      formData.orderProducts = this.productsForm.value.map((p: any, index: number) => ({
         ...p,
+        totalPrice: this.groupTotals[index] ?? 0,
         selectedOptions: Array.isArray(p.selectedOptions)
           ? p.selectedOptions
           : []
       }));
 
-      formData.totalPrice = this.getFinalPrice();
+      formData.totalPrice = calculatedTotalPrice;
 
       //CAMPI SE E' PREVENTIVO
       if(this.state)

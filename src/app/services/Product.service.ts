@@ -15,6 +15,8 @@ export class ProductService {
     constructor(private http: HttpClient) {}
 
     getProducts(query: string = ''): Observable<ProductViewModel[]>{
+
+      console.log('ProductService.getProducts called with query:', query); // Debugging log
       const token = localStorage.getItem('authToken'); 
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`

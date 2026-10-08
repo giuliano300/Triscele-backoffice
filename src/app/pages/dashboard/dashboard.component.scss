@@ -421,3 +421,150 @@ h5{
 .no-scroll-x{
     overflow-x: hidden!important;
 }
+
+.dashboard-documents-row {
+    align-items: stretch;
+}
+
+.recent-documents-card {
+    min-height: 315px;
+
+    mat-card-header {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 18px;
+    }
+
+    .view-all {
+        color: var(--primaryColor);
+        font-size: 13px;
+        min-width: auto;
+        padding: 0 4px;
+    }
+}
+
+.documents-loading,
+.documents-message {
+    align-items: center;
+    color: #818093;
+    display: flex;
+    justify-content: center;
+    min-height: 205px;
+    text-align: center;
+
+    &.error {
+        color: var(--dangerColor);
+        flex-direction: column;
+    }
+}
+
+.documents-loading {
+    color: var(--primaryColor);
+    font-size: 28px;
+}
+
+.documents-header,
+.document-row {
+    align-items: center;
+    column-gap: 12px;
+    display: grid;
+
+    &.quote-grid,
+    &.order-grid {
+        grid-template-columns: 1.25fr 1.5fr 0.9fr 1fr 0.8fr 52px;
+    }
+}
+
+.documents-header {
+    border-bottom: 2px solid #edeff5;
+    color: var(--darkColor);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 10px 10px;
+}
+
+.document-row {
+    border-bottom: 1px solid #edeff5;
+    font-size: 13px;
+    min-height: 46px;
+    padding: 8px 10px;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.document-number {
+    color: var(--primaryColor);
+    font-weight: 600;
+}
+
+.document-field {
+    min-width: 0;
+}
+
+.text-truncate {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-badge {
+    border-radius: 12px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+
+    &.open {
+        background: rgba(255, 165, 0, 0.14);
+        color: #b56f00;
+    }
+}
+
+.open-document {
+    color: var(--primaryColor);
+    font-size: 12px;
+    min-width: auto;
+    padding: 0;
+}
+
+@media (max-width: 767px) {
+    .recent-documents-card {
+        min-height: auto;
+    }
+
+    .documents-header {
+        display: none;
+    }
+
+    .document-row {
+        border: 1px solid #edeff5;
+        border-radius: 7px;
+        display: flex !important;
+        flex-direction: column;
+        gap: 7px;
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+
+    .document-field {
+        display: flex;
+        justify-content: space-between;
+        white-space: normal;
+        width: 100%;
+
+        &::before {
+            color: #818093;
+            content: attr(data-label);
+            font-weight: 500;
+            margin-right: 14px;
+        }
+    }
+
+    .open-document {
+        align-self: flex-end;
+    }
+}

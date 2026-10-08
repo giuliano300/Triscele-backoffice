@@ -14,12 +14,27 @@
           <label class="label d-block fw-medium mb-10">Cliente</label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
-            <mat-label>Seleziona un cliente</mat-label>
-            <mat-select formControlName="customerId" (selectionChange)="setShippingValues($event)">
-              <mat-option *ngFor="let c of customers" [value]="c._id" >
+            <mat-label>Cerca cliente</mat-label>
+            <input
+              matInput
+              type="text"
+              placeholder="Nome o ragione sociale"
+              [formControl]="customerCtrl"
+              [matAutocomplete]="customerAuto"
+            >
+            <mat-autocomplete
+              #customerAuto="matAutocomplete"
+              [displayWith]="displayCustomer"
+              (optionSelected)="selectCustomer($event.option.value)"
+            >
+              <mat-option *ngFor="let c of filteredCustomers | async" [value]="c">
                 {{ c.businessName }}
               </mat-option>
-            </mat-select>
+              <mat-option disabled *ngIf="customerCtrl.value && (filteredCustomers | async)?.length === 0">
+                Nessun cliente trovato
+              </mat-option>
+            </mat-autocomplete>
+            <mat-hint align="end">Digita almeno 2 caratteri</mat-hint>
           </mat-form-field>        
        </div>
 

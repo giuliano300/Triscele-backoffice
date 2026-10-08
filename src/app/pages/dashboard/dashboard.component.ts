@@ -7,7 +7,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { isPlatformBrowser, NgIf } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { StatsService } from '../../services/stats.service';
 import { ProductService } from '../../services/Product.service';
 import { ProductViewModel } from '../../classess/productViewModel';
@@ -21,6 +21,25 @@ import { NotificationStateService } from '../../services/notification-state.serv
 import { NotificationsService } from '../../services/Notifications.service';
 import { Notifications } from '../../interfaces/notifications';
 
+interface DashboardQuote {
+  id: string;
+  quoteNumber?: number;
+  customer: string;
+  date: string;
+  totalPrice?: number;
+  status: null;
+}
+
+interface DashboardApprovedOrder {
+  id: string;
+  orderNumber?: number;
+  customer: string;
+  approvedAt: string;
+  totalPrice?: number;
+  agent: string;
+  status?: { name: string; color: string };
+}
+
 @Component({
   selector: 'app-dashboard',
   imports: [
@@ -31,7 +50,7 @@ import { Notifications } from '../../interfaces/notifications';
     MatTableModule, 
     MatCheckboxModule, 
     MatTooltipModule, 
-    NgIf,
+    CommonModule,
     MatSortModule
   ],
   templateUrl: './dashboard.component.html',
@@ -77,12 +96,20 @@ export class DashboardComponent {
 
     loaded: boolean = false;
     notifications: Notifications[] = [];
+    openQuotes: DashboardQuote[] = [];
+    recentApprovedOrders: DashboardApprovedOrder[] = [];
+    openQuotesLoading = true;
+    approvedOrdersLoading = true;
+    openQuotesError = false;
+    approvedOrdersError = false;
 
 
    ngOnInit(): void {
     this.loadStats();
     this.countPending();
     this.findLowStock();
+    this.loadOpenQuotes();
+    this.loadRecentApprovedOrders();
     this.notificationStateService.absenceCounter$.subscribe(value => {
         this.absence = value;
     });
@@ -116,6 +143,58 @@ export class DashboardComponent {
           this.notificationStateService.notify(message, title, type, notification._id);
         });
       });
+   }
+
+   loadOpenQuotes(): void {
+    this.openQuotesLoading = true;
+    this.openQuotesError = false;
+    this.statsService.getOpenQuotes(5).subscribe({
+      next: data => {
+        this.openQuotes = data;
+        this.openQuotesLoading = false;
+      },
+      error: () => {
+        this.openQuotes = [];
+        this.openQuotesError = true;
+        this.openQuotesLoading = false;
+      }
+    });
+   }
+
+   loadRecentApprovedOrders(): void {
+    this.approvedOrdersLoading = true;
+    this.approvedOrdersError = false;
+    this.statsService.getRecentApprovedOrders(5).subscribe({
+      next: data => {
+        this.recentApprovedOrders = data;
+        this.approvedOrdersLoading = false;
+      },
+      error: () => {
+        this.recentApprovedOrders = [];
+        this.approvedOrdersError = true;
+        this.approvedOrdersLoading = false;
+      }
+    });
+   }
+
+   formatDocumentNumber(value?: number): string {
+    return value !== undefined ? String(value).padStart(3, '0') : '-';
+   }
+
+   openQuote(id: string): void {
+    this.router.navigate(['/order/add', id], { queryParams: { state: 11 } });
+   }
+
+   openOrder(id: string): void {
+    this.router.navigate(['/order/add', id]);
+   }
+
+   showAllOpenQuotes(): void {
+    this.router.navigate(['/quotations']);
+   }
+
+   showAllApprovedOrders(): void {
+    this.router.navigate(['/orders']);
    }
 
    countPending(){

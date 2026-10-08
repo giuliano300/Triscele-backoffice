@@ -15,4 +15,12 @@ export class StatsService {
     const url = year ? `${this.apiUrl}?year=${year}` : this.apiUrl;
     return this.http.get(url);
   }
+
+  getOpenQuotes(limit = 5): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/dashboard/open-quotes?limit=${limit}`);
+  }
+
+  getRecentApprovedOrders(limit = 5): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/dashboard/recent-approved-orders?limit=${limit}`);
+  }
 }

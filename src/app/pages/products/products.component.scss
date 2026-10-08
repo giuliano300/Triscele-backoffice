@@ -591,3 +591,17 @@
     transform: translateY(0);
   }
 }
+
+
+::ng-deep .mat-mdc-paginator-navigation-first,
+::ng-deep .mat-mdc-paginator-navigation-last {
+    display: inline-flex !important;
+}
+
+.truncated-cell-text {
+    display: block;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
