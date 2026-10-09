@@ -340,6 +340,29 @@
     width: 90px!important;
 }
 
+.compact-party-column {
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
+    box-sizing: border-box;
+}
+
+.truncated-party-text {
+    display: block;
+    width: 190px;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mat-column-operatorId,
+.mat-column-shippingBusinessName {
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
+}
+
 
 .remove {
     width: 100%;
@@ -395,6 +418,12 @@
 
 
 @media (max-width: 991px) {
+
+  .compact-party-column,
+  .truncated-party-text {
+    width: 100%;
+    max-width: 100%;
+  }
 
   .mini{
     max-width: 100%!important;

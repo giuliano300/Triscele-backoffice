@@ -65,9 +65,15 @@
         <table mat-table [dataSource]="dataSource" matSort>
 
           <ng-container matColumnDef="shippingBusinessName">
-            <th mat-header-cell *matHeaderCellDef class="pl-0"> Cliente </th>
-            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Cliente">
-              <h6 class="mt-0 mb-0">{{element.shippingBusinessName}}</h6>
+            <th mat-header-cell *matHeaderCellDef class="pl-0 compact-party-column"> Cliente </th>
+            <td mat-cell *matCellDef="let element" class="pl-0 compact-party-column" data-label="Cliente">
+              <h6
+                #customerNameElement
+                class="mt-0 mb-0 truncated-party-text"
+                [matTooltip]="element.shippingBusinessName || ''"
+                [matTooltipDisabled]="customerNameElement.scrollWidth <= customerNameElement.clientWidth"
+                matTooltipPosition="above"
+              >{{ element.shippingBusinessName || '-' }}</h6>
             </td>
           </ng-container>
 
