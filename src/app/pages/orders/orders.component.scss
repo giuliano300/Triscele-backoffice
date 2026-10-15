@@ -133,6 +133,61 @@
         }
     }
 }
+
+:host ::ng-deep .mat-mdc-card.trinta-card .mat-mdc-card-content .mat-mdc-form-field {
+    .mat-mdc-form-field-hint-wrapper,
+    .mat-mdc-form-field-error-wrapper {
+        padding-top: 0;
+        padding-right: 0;
+        padding-left: 0;
+    }
+}
+
+.filters .filter-content .row {
+    row-gap: 18px;
+}
+
+.bulk-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-weight: 500;
+
+    .bulk-delete {
+        border-radius: 6px;
+        padding: 10px 18px;
+        color: var(--whiteColor) !important;
+        background-color: var(--dangerColor);
+
+        i { margin-right: 6px; }
+    }
+}
+
+.select-column {
+    width: 56px;
+    min-width: 56px;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    .mat-mdc-checkbox {
+        display: inline-flex;
+        vertical-align: middle;
+    }
+}
+
+@media (max-width: 991px) {
+    .bulk-actions {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+
+        .bulk-delete { width: 100%; }
+    }
+}
 ::ng-deep {
     .trinta-card {
         &.to-do-list-card {
@@ -358,9 +413,39 @@
 
 .mat-column-operatorId,
 .mat-column-shippingBusinessName {
-    width: 200px !important;
-    min-width: 200px !important;
-    max-width: 200px !important;
+    width: 130px !important;
+    min-width: 130px !important;
+    max-width: 130px !important;
+}
+
+@media (min-width: 992px) {
+    .trinta-card.to-do-list-card .to-do-list-table .mat-mdc-table {
+        table-layout: fixed;
+
+        .mat-mdc-header-cell,
+        .mat-mdc-cell {
+            min-width: 0;
+            padding-left: 6px !important;
+            padding-right: 6px !important;
+        }
+
+        .mat-column-select { width: 42px; }
+        .mat-column-orderNumber { width: 88px; }
+        .mat-column-shippingBusinessName,
+        .mat-column-operatorId { width: 130px !important; }
+        .mat-column-orderProducts { width: 150px !important; }
+        .mat-column-insertDate { width: 86px; }
+        .mat-column-totalPrice { width: 76px; }
+        .mat-column-status { width: 105px; }
+        .mat-column-xml,
+        .mat-column-edit,
+        .mat-column-downloadCustomer,
+        .mat-column-downloadOperator,
+        .mat-column-history,
+        .mat-column-delete { width: 48px !important; min-width: 48px !important; }
+
+        .truncated-party-text { width: 120px; max-width: 120px; }
+    }
 }
 
 

@@ -400,7 +400,7 @@ export class ProductsComponent {
         }
 
         this.productMovementsService.setProductMovements(result)
-          .subscribe((data: ProductMovements) => {
+          .subscribe({ next: (data: ProductMovements) => {
             if (data) {
               this.getProducts();
               this.findLowStock();
@@ -412,7 +412,7 @@ export class ProductsComponent {
 
               this.toastr.info(description);
             }
-          });
+          }, error: (error) => this.toastr.error(error?.error?.message || 'Impossibile registrare il movimento') });
       } else {
         console.log("Close");
       }
@@ -436,7 +436,7 @@ export class ProductsComponent {
         }
 
         this.productMovementsService.setProductMovements(result)
-          .subscribe((data: ProductMovements) => {
+          .subscribe({ next: (data: ProductMovements) => {
             if (data) {
               this.getProducts();
               this.findLowStock();
@@ -449,7 +449,7 @@ export class ProductsComponent {
 
               this.toastr.info(description);
             }
-          });
+          }, error: (error) => this.toastr.error(error?.error?.message || 'Impossibile registrare il movimento') });
       } else {
         console.log("Close");
       }

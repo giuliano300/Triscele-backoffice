@@ -50,6 +50,7 @@ export class AddGeneralMovementComponent {
   stock_type: string = "";
 
   movementType: any[] = MovementType
+  stockError = '';
 
   selectedProducts: any[] = [];
   productCtrl = new FormControl('');
@@ -65,7 +66,7 @@ export class AddGeneralMovementComponent {
   ) {
     this.form = this.fb.group({
       movementType: [null, Validators.required],
-      stock: [null, Validators.required],
+      stock: [null, [Validators.required, Validators.min(0.000001)]],
       productId: [null, Validators.required],
       supplierCode: [''],
       supplierId: [''],
@@ -103,6 +104,7 @@ export class AddGeneralMovementComponent {
       supplierId: this.product?.supplierId,
       supplierName: this.product?.supplierName
     });
+    this.stockError = '';
   }
   
 
@@ -121,9 +123,20 @@ export class AddGeneralMovementComponent {
     this.form.patchValue({
       //productId: this.data.id!
     });
+    this.form.valueChanges.subscribe(() => this.stockError = '');
   }
 
   onSave() {
+    const requestedStock = Number(this.form.get('stock')?.value);
+    const isOutgoingMovement = Number(this.form.get('movementType')?.value) === MovementType[1].id;
+    const availableStock = Number(this.product?.stock ?? 0);
+
+    if (isOutgoingMovement && requestedStock > availableStock) {
+      this.stockError = 'Scarico non disponibile: quantità superiore alla giacenza.';
+      return;
+    }
+
+    this.stockError = '';
     if (this.form.valid) {
       const result: ProductMovements = {
         ...this.form.value,

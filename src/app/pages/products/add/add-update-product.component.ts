@@ -159,6 +159,15 @@ export class AddProductComponent {
 
         this.productService.getProduct(this.id)
           .subscribe((data: ProductViewModel) => {
+            if (!data.categoryId) {
+              this.dialog.open(AlertDialogComponent, {
+                width: '500px',
+                data: {
+                  title: 'Categoria mancante',
+                  message: 'Questo prodotto non ha una categoria assegnata. Seleziona una categoria e salva per completare la correzione.'
+                }
+              });
+            }
             this.productForm.patchValue({
               name: data.name,
               categoryId: data.categoryId,

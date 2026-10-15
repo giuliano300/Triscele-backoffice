@@ -2,9 +2,8 @@ import { Component, LOCALE_ID, ViewChild } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { FeathericonsModule } from "../../../icons/feathericons/feathericons.module";
-import { MatSelect } from "@angular/material/select";
 import { MatNativeDateModule, MatOptionModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, DateAdapter  } from "@angular/material/core";
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { Customers } from '../../../interfaces/customers';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -30,6 +29,9 @@ import { OrderStatus } from '../../../enum/enum';
 import { ConvertToOrderDialogComponent } from '../../../convert-to-order-dialog/convert-to-order-dialog.component';
 import { clause, generateOptionText, getOrderProductTotal } from '../../../../main';
 import { MatTooltip } from '@angular/material/tooltip';
+import { SelectionModel } from '@angular/cdk/collections';
+import { catchError, debounceTime, forkJoin, map, Observable, of, shareReplay, switchMap } from 'rxjs';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 declare const pdfMake: any;
 
@@ -58,7 +60,6 @@ export const MY_DATE_FORMATS = {
     MatCheckboxModule,
     FeathericonsModule,
     MatLabel,
-    MatSelect,
     MatOptionModule,
     MatFormField,
     CommonModule,
@@ -72,6 +73,7 @@ export const MY_DATE_FORMATS = {
     MatNativeDateModule,
     MatProgressBarModule,
     MatTooltip
+    , MatAutocompleteModule
 ],
   templateUrl: './quotations.component.html',
   styleUrl: './quotations.component.scss',
@@ -100,6 +102,8 @@ export class QuotationsComponent {
   @ViewChild(MatSort) sort!: MatSort;
 
   customers: Customers[] = [];
+  customerCtrl = new FormControl<string | Customers>('');
+  filteredCustomers!: Observable<Customers[]>;
 
   operators: Operators[] = [];
 
@@ -112,6 +116,7 @@ export class QuotationsComponent {
   pageIndex = 0;
 
   displayedColumns: string[] = [
+    'select',
     'shippingBusinessName',
     'orderProducts',
     'insertDate',
@@ -122,6 +127,8 @@ export class QuotationsComponent {
     'download',
     'delete'
   ];
+
+  selection = new SelectionModel<Order>(true, []);
 
   OrderStatusLabels: Record<number, string> = {
     1: 'Completato',
@@ -158,6 +165,22 @@ export class QuotationsComponent {
     }
 
   ngOnInit(): void {
+    this.filteredCustomers = this.customerCtrl.valueChanges.pipe(
+      debounceTime(300),
+      switchMap(value => {
+        const search = typeof value === 'string' ? value.trim() : '';
+        if (typeof value === 'string') {
+          this.form.get('customerId')?.setValue(null, { emitEvent: false });
+        }
+        return search.length >= 2
+          ? this.customerService.getCustomers(`?name=${encodeURIComponent(search)}`).pipe(
+              map(customers => customers.filter(customer => Boolean(customer.businessName?.trim())))
+            )
+          : of([]);
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
     const isOperator = localStorage.getItem('isOperator') === 'true';
     if(isOperator)
       this.IsOperatorView = true;
@@ -171,6 +194,14 @@ export class QuotationsComponent {
       .subscribe((data: Operators[]) => {
         this.operators = data;
     });
+  }
+
+  displayCustomer(customer: Customers | string | null): string {
+    return typeof customer === 'object' && customer ? customer.businessName ?? '' : customer ?? '';
+  }
+
+  selectCustomer(customer: Customers): void {
+    this.form.get('customerId')?.setValue(customer._id);
   }
 
 
@@ -245,6 +276,7 @@ export class QuotationsComponent {
 
           this.dataSource = new MatTableDataSource<Order>(this.orders);
           this.dataSource.sort = this.sort;
+          this.selection.clear();
            this.firstLoading = false;
       });
   }
@@ -324,8 +356,7 @@ export class QuotationsComponent {
             },
             {
               stack: [
-                { text: documentName, style: 'subheader', alignment: 'right' },
-                { text: `Consegna prevista: ${new Date(form.expectedDelivery).toLocaleDateString()}`, style: 'smallInfo', alignment: 'right', margin: [0, 10, 0, 10] }
+                { text: documentName, style: 'subheader', alignment: 'right' }
               ]
             }
           ]
@@ -514,6 +545,58 @@ export class QuotationsComponent {
     });
   }
 
+  deleteSelected(): void {
+    const selectedQuotes = [...this.selection.selected];
+    if (selectedQuotes.length === 0) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '500px',
+      data: {
+        title: 'CONFERMA ELIMINAZIONE MULTIPLA',
+        description: `Sei sicuro di voler eliminare i ${selectedQuotes.length} preventivi selezionati?`,
+        confirm: 'Cancella selezionati'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.firstLoading = true;
+      forkJoin(selectedQuotes.map(quote =>
+        this.orderService.delete(quote._id!).pipe(catchError(() => of(false)))
+      )).subscribe(() => {
+        this.selection.clear();
+        this.getOrders(
+          this.form.value.customerId,
+          this.toIsoDate(this.form.value.dateRange?.start),
+          this.toIsoDate(this.form.value.dateRange?.end),
+          this.paginator?.pageIndex ?? 0,
+          this.paginator?.pageSize ?? this.pageSize
+        );
+      });
+    });
+  }
+
+  isAllSelected(): boolean {
+    return this.orders.length > 0 && this.orders.every(row => this.selection.isSelected(row));
+  }
+
+  masterToggle(): void {
+    if (this.isAllSelected()) this.selection.clear();
+    else this.orders.forEach(row => this.selection.select(row));
+  }
+
+  checkboxLabel(row?: Order): string {
+    if (!row) return this.isAllSelected() ? 'Deseleziona tutti i preventivi' : 'Seleziona tutti i preventivi';
+    return `${this.selection.isSelected(row) ? 'Deseleziona' : 'Seleziona'} preventivo`;
+  }
+
+  private toIsoDate(value: Date | string | null | undefined): string {
+    if (!value) return '';
+    const date = new Date(value);
+    date.setHours(12, 0, 0, 0);
+    return date.toISOString();
+  }
+
   ConvertItem(item: Order) {
     const dialogRef = this.dialog.open(ConvertToOrderDialogComponent, {
       data: item.sectorId?._id,
@@ -528,7 +611,9 @@ export class QuotationsComponent {
           orderId: item._id,
           status: result.status,
           sectorId: result.sectorId,
-          operatorId: result.operatorId ?? undefined
+          operatorId: result.operatorId ?? undefined,
+          insertDate: result.insertDate,
+          expectedDelivery: result.expectedDelivery
         };
         this.orderService.convertToOrder(c).subscribe((result: any) => {
           this.getOrders();

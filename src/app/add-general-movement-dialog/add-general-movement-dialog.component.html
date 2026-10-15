@@ -41,6 +41,7 @@
             <mat-label>{{stock_type}}</mat-label>
             <input matInput formControlName="stock" type="number">
           </mat-form-field>
+          <div *ngIf="stockError" class="alert alert-danger py-2 mb-0" role="alert">{{ stockError }}</div>
         </div>
       </div>
     </mat-card-content>

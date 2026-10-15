@@ -1,0 +1,21 @@
+:host ::ng-deep .mat-mdc-dialog-actions {
+    padding: 8px 24px 16px;
+
+    .btn {
+        min-width: auto;
+        margin: -10px 0 15px 10px;
+        padding: 8px 25px;
+        border-radius: 5px !important;
+        color: var(--whiteColor);
+        background: var(--primaryColor);
+        font-family: 'Poppins' !important;
+    }
+
+    .btn.back {
+        background: var(--bodyColor) !important;
+    }
+}
+
+.scialb {
+    margin-top: -10px !important;
+}

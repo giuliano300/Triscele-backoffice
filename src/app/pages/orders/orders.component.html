@@ -16,16 +16,23 @@
               <form [formGroup]="form">
                   <div class="container">
                       <div class="row">
-                          <div class="col-lg-2">
+                          <div class="col-lg-3">
                               <mat-form-field>
                                   <i-feather name="users"></i-feather>
-                                  <mat-label>Filtra per cliente</mat-label>
-                                  <mat-select formControlName="customerId">
-                                      <mat-option *ngFor="let option of customers" [value]="option._id">
-                                      {{ option.businessName }}
+                                  <mat-label>Cerca cliente</mat-label>
+                                  <input matInput type="text" placeholder="Nome o ragione sociale"
+                                    [formControl]="customerCtrl" [matAutocomplete]="customerAuto">
+                                  <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer"
+                                    (optionSelected)="selectCustomer($event.option.value)">
+                                      <mat-option *ngFor="let customer of filteredCustomers | async" [value]="customer">
+                                          {{ customer.businessName }}
                                       </mat-option>
-                                  </mat-select>
-                              </mat-form-field>                        
+                                      <mat-option disabled *ngIf="customerCtrl.value && (filteredCustomers | async)?.length === 0">
+                                          Nessun cliente trovato
+                                      </mat-option>
+                                  </mat-autocomplete>
+                                  <mat-hint align="end">Digita almeno 2 caratteri</mat-hint>
+                              </mat-form-field>
                           </div>
                           <div class="col-lg-3">
                               <mat-form-field>
@@ -38,7 +45,38 @@
                                   </mat-select>
                               </mat-form-field>                        
                           </div>
-                          <div class="col-lg-2">
+                          <div class="col-lg-3">
+                              <mat-form-field>
+                                  <i-feather name="flag"></i-feather>
+                                  <mat-label>Filtra per settore</mat-label>
+                                  <mat-select formControlName="sectorId">
+                                      <mat-option *ngFor="let sector of sectors" [value]="sector._id">
+                                          {{ sector.name }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>
+                          </div>
+                          <div class="col-lg-3">
+                              <mat-form-field>
+                                  <i-feather name="map-pin"></i-feather>
+                                  <mat-label>Filtra per provincia</mat-label>
+                                  <mat-select formControlName="province">
+                                      <mat-option *ngFor="let province of provinces" [value]="province">
+                                          {{ province }}
+                                      </mat-option>
+                                  </mat-select>
+                              </mat-form-field>
+                          </div>
+                          <div class="col-lg-3">
+                            <mat-form-field appearance="fill">
+                              <i-feather name="calendar"></i-feather>
+                              <mat-label>Consegna prevista</mat-label>
+                              <input matInput [matDatepicker]="expectedDeliveryPicker" formControlName="expectedDelivery" readonly>
+                              <mat-datepicker-toggle matSuffix [for]="expectedDeliveryPicker"></mat-datepicker-toggle>
+                              <mat-datepicker #expectedDeliveryPicker></mat-datepicker>
+                            </mat-form-field>
+                          </div>
+                          <div class="col-lg-3">
                               <mat-form-field>
                                   <i-feather name="bar-chart-2"></i-feather>
                                   <mat-label>Stato</mat-label>
@@ -52,7 +90,7 @@
                           <div class="col-lg-3">
                             <mat-form-field appearance="fill">
                               <i-feather name="calendar"></i-feather>
-                              <mat-label>Seleziona intervallo</mat-label>
+                              <mat-label>Data ordini</mat-label>
                               <div formGroupName="dateRange">
                                 <mat-date-range-input [rangePicker]="picker">
                                   <input matStartDate formControlName="start" placeholder="Da">
@@ -82,9 +120,42 @@
 </mat-card>
 <mat-card class="trinta-card to-do-list-card mb-25 bg-white border-none d-block">
   <mat-card-content>
+    <div class="bulk-actions" *ngIf="selection.hasValue()">
+      <span>{{ selection.selected.length }} ordini selezionati</span>
+      <button type="button" mat-button class="bulk-delete" (click)="deleteSelected()">
+        <i class="ri-delete-bin-line"></i>
+        Elimina selezionati
+      </button>
+    </div>
     <div class="to-do-list-table">
       <div class="table-responsive">
         <table mat-table [dataSource]="dataSource" matSort>
+
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef class="select-column">
+              <mat-checkbox
+                (change)="masterToggle()"
+                [checked]="isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let element" class="select-column" data-label="Seleziona">
+              <mat-checkbox
+                (click)="$event.stopPropagation()"
+                (change)="selection.toggle(element)"
+                [checked]="selection.isSelected(element)"
+                [aria-label]="checkboxLabel(element)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="orderNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0"> Numero ordine </th>
+            <td mat-cell *matCellDef="let element" class="pl-0" data-label="Numero ordine">
+              <h6 class="mt-0 mb-0">{{ element.orderNumber ? ('Ordine-' + ('' + element.orderNumber).padStart(3, '0')) : '-' }}</h6>
+            </td>
+          </ng-container>
 
           <ng-container matColumnDef="operatorId">
             <th mat-header-cell *matHeaderCellDef class="pl-0 compact-party-column"> Operatore </th>
@@ -100,7 +171,7 @@
           </ng-container>
 
           <ng-container matColumnDef="shippingBusinessName">
-            <th mat-header-cell *matHeaderCellDef class="pl-0 compact-party-column"> Cliente </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="pl-0 compact-party-column"> Cliente </th>
             <td mat-cell *matCellDef="let element" class="pl-0 compact-party-column" data-label="Cliente">
               <h6
                 #customerNameElement

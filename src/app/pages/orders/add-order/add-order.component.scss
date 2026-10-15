@@ -80,6 +80,10 @@
   width: 100%;
 }
 
+.required-marker {
+  color: var(--dangerColor);
+}
+
 mat-chip {
   background-color: #e0e0e0;
   margin: 2px;

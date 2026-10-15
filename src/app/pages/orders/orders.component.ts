@@ -4,7 +4,7 @@ import { MatFormField, MatLabel } from "@angular/material/form-field";
 import { FeathericonsModule } from "../../icons/feathericons/feathericons.module";
 import { MatSelect } from "@angular/material/select";
 import { MatNativeDateModule, MatOptionModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, DateAdapter  } from "@angular/material/core";
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import { Customers } from '../../interfaces/customers';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -25,15 +25,22 @@ import localeIt from '@angular/common/locales/it';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Operators } from '../../interfaces/operators';
 import { OperatorService } from '../../services/Operator.service';
+import { SectorService } from '../../services/Sector.service';
+import { Sectors } from '../../interfaces/sectors';
+import { UtilsService } from '../../services/utils.service';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { OrderChangeStateComponent } from '../../order-change-state-dialog/order-change-state-dialog.component';
 import { OrderStateService } from '../../services/OrderState.service';
 import { OrderState } from '../../interfaces/order-state';
 import { calculateFinalPrice, clause, generateOptionText, getOrderProductTotal } from '../../../main';
 import { MatTooltip } from "@angular/material/tooltip";
-import { finalize, tap } from 'rxjs';
+import { debounceTime, finalize, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
+import { SelectionModel } from '@angular/cdk/collections';
+import { catchError, forkJoin } from 'rxjs';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 declare const pdfMake: any;
+const ORDERS_PAGE_SIZE_KEY = 'triscele:backoffice:orders:page-size';
 
 registerLocaleData(localeIt);
 
@@ -74,6 +81,7 @@ export const MY_DATE_FORMATS = {
     MatNativeDateModule,
     MatProgressBarModule,
     MatTooltip
+    , MatAutocompleteModule
 ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.scss',
@@ -102,25 +110,32 @@ export class OrdersComponent {
   @ViewChild(MatSort) sort!: MatSort;
 
   customers: Customers[] = [];
+  customerCtrl = new FormControl<string | Customers>('');
+  filteredCustomers!: Observable<Customers[]>;
 
   operators: Operators[] = [];
+  sectors: Sectors[] = [];
+  provinces: string[] = [];
 
   orderState: OrderState[] = [];
 
   firstLoading: boolean = false;
 
   totalItems = 0;
-  pageSize = 20;
+  pageSize = Number(sessionStorage.getItem(ORDERS_PAGE_SIZE_KEY)) || 20;
   pageIndex = 0;
+  sortField = '';
+  sortDirection = '';
 
   displayedColumns: string[] = [
-    'operatorId',
+    'select',
+    'orderNumber',
     'shippingBusinessName',
     'orderProducts',
     'insertDate',
     'totalPrice',
-    'paymentMethod',
     'status',
+    'operatorId',
     'xml',
     'edit',
     'downloadCustomer',
@@ -128,30 +143,54 @@ export class OrdersComponent {
     'delete'
   ];
 
+  selection = new SelectionModel<Order>(true, []);
+
  constructor(
       private router: Router,
       private fb: FormBuilder,
       private orderService: OrderService,
       private customerService: CustomerService,
       private operatorService: OperatorService,
+      private sectorService: SectorService,
+      private utilsService: UtilsService,
       private orderStateService: OrderStateService,
       private adapter: DateAdapter<any>,
       private dialog: MatDialog
     ) 
     { 
       this.adapter.setLocale('it-IT');
+      this.provinces = this.utilsService.getProvinceItaliane();
       this.form = this.fb.group({
         customerId: [],
         operatorId: [],
+        sectorId: [],
+        province: [],
         status: [],
         dateRange: this.fb.group({
             start: [null],
             end: [null]
-          })      
+          }),
+        expectedDelivery: [null]
         });
     }
 
   ngOnInit(): void {
+    this.filteredCustomers = this.customerCtrl.valueChanges.pipe(
+      debounceTime(300),
+      switchMap(value => {
+        const search = typeof value === 'string' ? value.trim() : '';
+        if (typeof value === 'string') {
+          this.form.get('customerId')?.setValue(null, { emitEvent: false });
+        }
+        return search.length >= 2
+          ? this.customerService.getCustomers(`?name=${encodeURIComponent(search)}`).pipe(
+              map(customers => customers.filter(customer => Boolean(customer.businessName?.trim())))
+            )
+          : of([]);
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
     this.customerService.getCustomers('')
       .subscribe((data: Customers[]) => {
         this.customers = data;
@@ -162,10 +201,23 @@ export class OrdersComponent {
         this.operators = data;
     });
 
+    this.sectorService.getSectors()
+      .subscribe((data: Sectors[]) => {
+        this.sectors = data;
+      });
+
     this.orderStateService.getOrderStates()
       .subscribe((data: OrderState[]) => {
         this.orderState = data;
     });
+  }
+
+  displayCustomer(customer: Customers | string | null): string {
+    return typeof customer === 'object' && customer ? customer.businessName ?? '' : customer ?? '';
+  }
+
+  selectCustomer(customer: Customers): void {
+    this.form.get('customerId')?.setValue(customer._id);
   }
 
 
@@ -175,6 +227,7 @@ export class OrdersComponent {
 
     // Evento cambio pagina
     this.paginator.page.subscribe(() => {
+      sessionStorage.setItem(ORDERS_PAGE_SIZE_KEY, String(this.paginator.pageSize));
       const dateRange = this.form.value.dateRange;
 
       const { start, end } = dateRange || {};
@@ -197,31 +250,46 @@ export class OrdersComponent {
       this.getOrders(
         this.form.value.customerId,
         this.form.value.operatorId,
+        this.form.value.sectorId,
+        this.form.value.province,
         this.form.value.status,
         s,
         e,
+        this.form.value.expectedDelivery ? this.toIsoDate(this.form.value.expectedDelivery) : '',
         this.paginator.pageIndex,
         this.paginator.pageSize
       );
     });
+
+    this.sort.sortChange.subscribe(sort => {
+      this.sortField = sort.active;
+      this.sortDirection = sort.direction;
+      this.paginator.pageIndex = 0;
+      this.onSubmit();
+    });
   }
 
-  getOrders(customerId?: string, operatorId?: string, status?: string, start?: string, end?: string, pageIndex: number = 0, pageSize: number = 20) {
+  getOrders(customerId?: string, operatorId?: string, sectorId?: string, province?: string, status?: string, start?: string, end?: string, expectedDelivery?: string, pageIndex: number = 0, pageSize: number = 20) {
     let query = '';
-    let sectorId = '';
 
     this.firstLoading = true;
     
-    if (customerId || operatorId || sectorId || status || start || end || pageIndex || pageSize) {
+    if (customerId || operatorId || sectorId || province || status || start || end || pageIndex || pageSize) {
       const params = new URLSearchParams();
       params.append('page', (pageIndex + 1).toString()); 
       params.append('limit', pageSize.toString());
       if (customerId) params.append('customerId', customerId);
       if (operatorId) params.append('operatorId', operatorId);
       if (sectorId) params.append('sectorId', sectorId);
+      if (province) params.append('province', province);
       if (status) params.append('status', status.toString());
       if (start) params.append('start', start);
       if (end) params.append('end', end);
+      if (expectedDelivery) params.append('expectedDelivery', expectedDelivery);
+      if (this.sortField && this.sortDirection) {
+        params.append('sortField', this.sortField);
+        params.append('sortDirection', this.sortDirection);
+      }
       params.append('admin', 'true');
       query = `?${params.toString()}`;
     }
@@ -249,6 +317,7 @@ export class OrdersComponent {
 
           this.dataSource = new MatTableDataSource<Order>(this.orders);
           this.dataSource.sort = this.sort;
+          this.selection.clear();
       });
   }
 
@@ -261,7 +330,7 @@ export class OrdersComponent {
   }
 
   onSubmit(){
-    const { customerId, operatorId, status, dateRange } = this.form.value;
+    const { customerId, operatorId, sectorId, province, status, dateRange } = this.form.value;
     const { start, end } = dateRange || {};
 
     let s = '';
@@ -279,7 +348,7 @@ export class OrdersComponent {
       e = endFixed.toISOString();
     }
     
-    this.getOrders(customerId, operatorId, status, s, e);
+    this.getOrders(customerId, operatorId, sectorId, province, status, s, e, this.toIsoDate(this.form.value.expectedDelivery));
   }
 
   remove(){
@@ -287,12 +356,58 @@ export class OrdersComponent {
     this.form.patchValue({
       customerId: [],
       operatorId: [],
+      sectorId: [],
+      province: [],
       status: [],
       dateRange: {
         start: null,
         end: null
+      },
+      expectedDelivery: null
+    });
+  }
+
+  deleteSelected(): void {
+    const selectedOrders = [...this.selection.selected];
+    if (selectedOrders.length === 0) return;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '500px',
+      data: {
+        title: 'CONFERMA ELIMINAZIONE MULTIPLA',
+        description: `Sei sicuro di voler eliminare i ${selectedOrders.length} ordini selezionati?`,
+        confirm: 'Cancella selezionati'
       }
     });
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+      this.firstLoading = true;
+      forkJoin(selectedOrders.map(order => this.orderService.delete(order._id!).pipe(catchError(() => of(false)))))
+        .subscribe(() => {
+          this.selection.clear();
+          this.onSubmit();
+        });
+    });
+  }
+
+  isAllSelected(): boolean {
+    return this.orders.length > 0 && this.orders.every(row => this.selection.isSelected(row));
+  }
+
+  masterToggle(): void {
+    if (this.isAllSelected()) this.selection.clear();
+    else this.orders.forEach(row => this.selection.select(row));
+  }
+
+  checkboxLabel(row?: Order): string {
+    if (!row) return this.isAllSelected() ? 'Deseleziona tutti gli ordini' : 'Seleziona tutti gli ordini';
+    return `${this.selection.isSelected(row) ? 'Deseleziona' : 'Seleziona'} ordine`;
+  }
+
+  private toIsoDate(value: Date | string | null | undefined): string {
+    if (!value) return '';
+    const date = new Date(value);
+    date.setHours(12, 0, 0, 0);
+    return date.toISOString();
   }
 
   getTableNote(note:string){
@@ -504,7 +619,7 @@ export class OrdersComponent {
       }
     };
 
-    pdfMake.createPdf(docDefinition).open();
+    pdfMake.createPdf(docDefinition).download(`${documentName}.pdf`);
   }
   
   DownloadDocOperator(item: Order) {
@@ -690,7 +805,7 @@ export class OrdersComponent {
       }
     };
 
-    pdfMake.createPdf(docDefinition).open();
+    pdfMake.createPdf(docDefinition).download(`${documentName}-operatore.pdf`);
   }
 
   DeleteItem(item: Order) {

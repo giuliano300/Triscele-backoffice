@@ -1,0 +1,35 @@
+<h1 mat-dialog-title>{{ isEdit ? 'Modifica metodo di pagamento' : 'Aggiungi metodo di pagamento' }}</h1>
+<form [formGroup]="form">
+  <mat-card class="trinta-card mb-10 bg-white border-none d-block">
+    <mat-card-content>
+      <div class="row g-3">
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Metodo di pagamento</label>
+          <mat-form-field class="w-100">
+            <i-feather name="credit-card"></i-feather>
+            <mat-label>Inserisci il metodo di pagamento</mat-label>
+            <input matInput formControlName="name" autocomplete="off" maxlength="80">
+            <mat-error *ngIf="form.controls.name.invalid" class="scialb">
+              Il nome è obbligatorio
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-12">
+          <label class="label d-block fw-medium mb-10">Ordine di visualizzazione</label>
+          <mat-form-field class="w-100">
+            <i-feather name="list"></i-feather>
+            <mat-label>Inserisci l'ordine</mat-label>
+            <input matInput type="number" min="0" formControlName="position">
+          </mat-form-field>
+        </div>
+        <div class="col-sm-12">
+          <mat-checkbox formControlName="enabled">Metodo attivo</mat-checkbox>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
+<mat-dialog-actions>
+  <button mat-button (click)="close()" class="btn back">Chiudi</button>
+  <button mat-flat-button (click)="save()" class="btn" [disabled]="form.invalid">Salva</button>
+</mat-dialog-actions>

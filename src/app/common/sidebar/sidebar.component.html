@@ -246,6 +246,11 @@
                         </span>
                     </a>                
 
+                    <a routerLink="/payment-methods" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin || isOfficeOperator">
+                        <i-feather name="credit-card"></i-feather>
+                        <span class="title">Metodi di pagamento</span>
+                    </a>
+
                     <a routerLink="/allowed-ip" class="sidebar-menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="isVisibleAdmin || isOfficeOperator">
                         <i-feather name="check"></i-feather>
                         <span class="title">

@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ProductViewModel } from '../../../classess/productViewModel';
 import { CustomerService } from '../../../services/Customer.service';
 import { OperatorService } from '../../../services/Operator.service';
-import { OptionType, OrderStatus, PaymentMethod } from '../../../enum/enum';
+import { OptionType, OrderStatus } from '../../../enum/enum';
 import {  MatDatepickerModule } from "@angular/material/datepicker";
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import localeIt from '@angular/common/locales/it';
@@ -42,6 +42,8 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { mapToProduct } from '../../../mapping/mapping';
 import { calculateFinalPrice, sumSelectedOptionsPrice } from '../../../../main';
 import { Customers } from '../../../interfaces/customers';
+import { PaymentMethodService } from '../../../services/PaymentMethod.service';
+import { PaymentMethodOption } from '../../../interfaces/payment-method';
 
 registerLocaleData(localeIt);
 
@@ -104,7 +106,7 @@ export class AddOrderComponent {
   operators: any[] = [];
   sectors: any[] = [];
 
-  paymentMethods = Object.values(PaymentMethod);
+  paymentMethods: PaymentMethodOption[] = [];
  
   agents: Agents[] = [];
 
@@ -133,7 +135,8 @@ export class AddOrderComponent {
     private orderService: OrderService,
     private sectorService: SectorService,
     private agentService: AgentService,
-    private orderStateService: OrderStateService
+    private orderStateService: OrderStateService,
+    private paymentMethodService: PaymentMethodService
   ) {
     this.adapter.setLocale('it-IT');
     this.productForm = this.fb.group({
@@ -294,7 +297,6 @@ export class AddOrderComponent {
   private _filter(value: string): any[] {
     const filterValue = value.toLowerCase();
     return this.products
-      .filter(p => !this.selectedProducts.includes(p)) // escludi già scelti
       .filter(p => p.name!.toLowerCase().includes(filterValue));
   }
 
@@ -326,6 +328,13 @@ export class AddOrderComponent {
         this.state = Number(params['state']);
         this.title = "Aggiungi preventivo";
         this.isOrder = false;
+        if (this.state === 11) {
+          this.productForm.get('insertDate')?.clearValidators();
+          this.productForm.get('expectedDelivery')?.clearValidators();
+          this.productForm.patchValue({ insertDate: null, expectedDelivery: null });
+          this.productForm.get('insertDate')?.updateValueAndValidity();
+          this.productForm.get('expectedDelivery')?.updateValueAndValidity();
+        }
       }
       else
       {
@@ -385,6 +394,10 @@ export class AddOrderComponent {
         this.orderState = data;
     });
 
+    this.paymentMethodService.getPaymentMethods().subscribe(methods => {
+      this.paymentMethods = methods;
+    });
+
     this.route.paramMap.subscribe(params => {
       this.id = params.get('id');
 
@@ -398,23 +411,28 @@ export class AddOrderComponent {
 
             //console.log(JSON.stringify(data.orderProducts));
 
-            const [year, month, day] = data.insertDate.substring(0, 10).split('-').map(Number);
+            const [year, month, day] = data.insertDate
+              ? data.insertDate.substring(0, 10).split('-').map(Number)
+              : [NaN, NaN, NaN];
+            const expectedDate = data.expectedDelivery
+              ? new Date(data.expectedDelivery.substring(0, 10))
+              : null;
 
-            const [yearEx, monthEx, dayEx] = data.expectedDelivery.substring(0, 10).split('-').map(Number);
-
-             this.operatorService.getOperators(data.sectorId?._id!.toString()).subscribe((data: any[]) => {
-              this.operators = data;
-            });
+            if (data.sectorId?._id) {
+              this.operatorService.getOperators(data.sectorId._id.toString()).subscribe((data: any[]) => {
+                this.operators = data;
+              });
+            }
 
             this.productForm.patchValue({
-              customerId: data.customerId._id.toString(),
+              customerId: data.customerId?._id?.toString() ?? '',
               operatorId: data.operatorId ?  data.operatorId?._id!.toString() : '',
-              sectorId: data.sectorId?._id!.toString(),
+              sectorId: data.sectorId?._id?.toString() ?? '',
               agentId: data.agentId,
               paymentMethod: data.paymentMethod,
               status: data.status ?  data.status?._id!.toString() : '',
-              insertDate: new Date(year, month - 1, day),
-              expectedDelivery: new Date(yearEx, monthEx - 1, dayEx),
+              insertDate: Number.isNaN(year) ? null : new Date(year, month - 1, day),
+              expectedDelivery: expectedDate,
               shippingAddress: data.shippingAddress,
               shippingZipcode: data.shippingZipcode,
               shippingName: data.shippingName,
@@ -427,9 +445,17 @@ export class AddOrderComponent {
               note: data.note,
               customerNote: data.customerNote
             });
-            this.customerCtrl.setValue(data.customerId, { emitEvent: false });
+            this.customerCtrl.setValue(data.customerId ?? '', { emitEvent: false });
+            const parentLines = new Map<string, string>();
             data.orderProducts.forEach(product => {
+              const lineId = this.createLineId();
+              const parentLineId = product.isSubs && product.parentId
+                ? parentLines.get(String(product.parentId)) ?? null
+                : null;
+              if (!product.isSubs) parentLines.set(String(product._id), lineId);
               const group = this.fb.group({
+                lineId: [lineId],
+                parentLineId: [parentLineId],
                 _id: [product._id],
                 name: [product.name],
                 quantity: [product.quantity || 1],
@@ -522,26 +548,11 @@ export class AddOrderComponent {
   }
   
   addProductToList(product: any){
-    //console.log(JSON.stringify(product));
-    const exists = this.productsForm.controls.some(ctrl => {
-      const group = ctrl as FormGroup;
-      const id = group.get('_id')?.value;
-      const parentId = group.get('parentId')?.value;
-
-      return id === product.id && (parentId === null || parentId === undefined);
-    });
-
-    if(exists){
-      const dialogRef = this.dialog.open(AlertDialogComponent, {
-        data: {title:"Prodotto già inserito", message: "Attenzione, hai già inserito questo prodotto nell'ordine."},
-        width: '500px'
-      });
-      this.productCtrl.setValue('');
-      return;
-    }
-
-    if (!exists) {
+    {
+      const lineId = this.createLineId();
       const group = this.fb.group({
+        lineId: [lineId],
+        parentLineId: [null],
         _id: [product.id],
         name: [product.name],
         quantity: [1],
@@ -563,6 +574,8 @@ export class AddOrderComponent {
         for(var i = 0; i < product.subProducts.length; i++)
         {
             const group = this.fb.group({
+              lineId: [this.createLineId()],
+              parentLineId: [lineId],
               _id: [product.subProducts[i].productId],
               name: [product.subProducts[i].name],
               quantity: [product.subProducts[i].quantity],
@@ -583,9 +596,9 @@ export class AddOrderComponent {
       this.syncDiscount(group);
 
       Promise.resolve().then(() => {
-        this.openConfigurator(product.id!);
+        this.openConfigurator(lineId);
       });    
-  }    
+    }
     
     this.productCtrl.setValue('');
     
@@ -604,6 +617,7 @@ export class AddOrderComponent {
     if (!item) return; // sicurezza
 
     const parentId = item.value.parentId;
+    const lineId = item.value.lineId;
     const _id = item.value._id;
 
     // Rimuovi l’elemento principale
@@ -614,7 +628,7 @@ export class AddOrderComponent {
     if(parentId == null)
       for (let i = this.productsForm.length - 1; i >= 0; i--) {
         const elem = this.productsForm.at(i).value;
-        if (elem.parentId === _id)
+        if (elem.parentLineId === lineId || (!elem.parentLineId && elem.parentId === _id))
           this.productsForm.removeAt(i);
       }
     else
@@ -663,15 +677,10 @@ export class AddOrderComponent {
   onSubmit() {
     let navigation = "/orders";
 
-    const d: Date = this.productForm.value.insertDate;
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-
-    const dEx: Date = this.productForm.value.expectedDelivery;
-    const yyyyEx = dEx.getFullYear();
-    const mmEx = String(dEx.getMonth() + 1).padStart(2, '0');
-    const ddEx = String(dEx.getDate()).padStart(2, '0');
+    const insertDate = this.formatDate(this.productForm.value.insertDate ?? new Date());
+    const expectedDelivery = this.productForm.value.expectedDelivery
+      ? this.formatDate(this.productForm.value.expectedDelivery)
+      : undefined;
 
     
     for (const name in this.productForm.controls) {
@@ -684,8 +693,8 @@ export class AddOrderComponent {
     if (this.productForm.valid) {
       const formData: Order = {
         ...this.productForm.value,
-        insertDate: `${yyyy}-${mm}-${dd}`,
-        expectedDelivery: `${yyyyEx}-${mmEx}-${ddEx}` 
+        insertDate,
+        expectedDelivery
       };
 
       formData.agentId = formData.agentId ?? '';
@@ -734,13 +743,13 @@ export class AddOrderComponent {
     }
   }
 
-  openConfigurator(productId: string) {
+  openConfigurator(lineId: string) {
 
     //console.log("ID PASSATO:", productId);
     //console.log("FORM IDS:", this.productsForm.controls.map(c => c.get('_id')?.value));
 
     const fg = this.productsForm.controls.find(
-      (c: AbstractControl) => c.get('_id')?.value === productId
+      (c: AbstractControl) => c.get('lineId')?.value === lineId
     ) as FormGroup;
 
     //console.log("fg:" + fg);
@@ -773,6 +782,18 @@ export class AddOrderComponent {
         this.getFinalPrice();
       }
     });
+  }
+
+  private createLineId(): string {
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  private formatDate(value: Date | string): string {
+    const date = new Date(value);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   addOrUpdateProductOptions(product: Product, result: ConfigProductToOrder[]) {

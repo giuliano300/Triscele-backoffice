@@ -13,10 +13,13 @@ import { MovementType, OrderStatus } from '../enum/enum';
 import { ProductViewModel } from '../classess/productViewModel';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
+import { MatDatepickerModule, MatDatepickerToggle } from '@angular/material/datepicker';
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { SectorService } from '../services/Sector.service';
 import { OperatorService } from '../services/Operator.service';
 import { OrderStateService } from '../services/OrderState.service';
 import { OrderState } from '../interfaces/order-state';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'app-convert-to-order-dialog',
@@ -36,8 +39,12 @@ import { OrderState } from '../interfaces/order-state';
     CommonModule,
     ReactiveFormsModule,
     MatOption,
-    MatSelect
-  ]
+    MatSelect,
+    MatDatepickerModule,
+    MatDatepickerToggle,
+    MatNativeDateModule
+  ],
+  providers: [provideNativeDateAdapter()]
 })
 export class ConvertToOrderDialogComponent {
   
@@ -59,12 +66,16 @@ export class ConvertToOrderDialogComponent {
     private sectorService: SectorService,
     private operatorService: OperatorService,
     private orderStateService: OrderStateService,
+    private adapter: DateAdapter<Date>,
     private fb: FormBuilder
   ) {
+    this.adapter.setLocale('it-IT');
     this.form = this.fb.group({
       status: [OrderStatus.IN_LAVORAZIONE, Validators.required],
       sectorId: [data, Validators.required],
-      operatorId: [null]
+      operatorId: [null],
+      insertDate: [new Date(), Validators.required],
+      expectedDelivery: [new Date(), Validators.required]
     });
   }
   

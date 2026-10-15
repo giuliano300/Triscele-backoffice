@@ -18,6 +18,7 @@ import { SectorsComponent } from './pages/sectors/sectors.component';
 import { QuotationsComponent } from './pages/orders/quotations/quotations.component';
 import { AgentsComponent } from './pages/agents/agents.component';
 import { OrderStateComponent } from './pages/order-state/order-state.component';
+import { PaymentMethodsComponent } from './pages/payment-methods/payment-methods.component';
 import { OperatorOrdersComponent } from './pages/orders/operator-orders/operator-orders.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { RoleGuard } from './authGuard/AuthGuard';
@@ -186,6 +187,10 @@ export const routes: Routes = [
             { path: 'order-state', component: OrderStateComponent,
                 canActivate: [RoleGuard],
                 data: { roles: ['admin', 'operatore']  }
+            },
+            { path: 'payment-methods', component: PaymentMethodsComponent,
+                canActivate: [RoleGuard],
+                data: { roles: ['admin', 'operatore'] }
             },
             { path: 'change-password', component: ChangePasswordComponent,
                 canActivate: [RoleGuard],

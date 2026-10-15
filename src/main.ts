@@ -9,7 +9,7 @@ import { provideToastr } from 'ngx-toastr';
 
 // Definisci l'URL globale dell'API
 // Configurazione temporanea per la verifica locale dell'importazione SQL -> Mongo.
-export const API_URL = 'https://backendtriscele.tendaggimania.com/';
+export const API_URL = 'http://localhost:3001/';
 export const TOKEN_KEY = 'a-string-secret-at-least-256-bits-long';
 export const exceedsLimit = 3;
 export const maxLenghtUploadFile = 10;

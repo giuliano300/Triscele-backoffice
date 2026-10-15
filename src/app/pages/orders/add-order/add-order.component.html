@@ -11,7 +11,7 @@
 
          <!-- Cliente -->
        <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Cliente</label>
+          <label class="label d-block fw-medium mb-10">Cliente <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
             <mat-label>Cerca cliente</mat-label>
@@ -39,7 +39,7 @@
        </div>
 
        <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Settore</label>
+          <label class="label d-block fw-medium mb-10">Settore <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="flag"></i-feather>
             <mat-label>Seleziona un settore</mat-label>
@@ -65,7 +65,7 @@
           </mat-form-field>        
        </div>
 
-       <div class="col-sm-4">
+       <div class="col-sm-4" *ngIf="isOrder">
           <label class="label d-block fw-medium mb-10">Agente</label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
@@ -78,8 +78,8 @@
           </mat-form-field>        
        </div>
 
-       <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Data di inserimento</label>
+       <div class="col-sm-4" *ngIf="isOrder">
+          <label class="label d-block fw-medium mb-10">Data di inserimento <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="calendar"></i-feather>
             <mat-label>Data di inserimento</mat-label>
@@ -89,8 +89,8 @@
           </mat-form-field>
        </div>
 
-       <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Consegna prevista</label>
+       <div class="col-sm-4" *ngIf="isOrder">
+          <label class="label d-block fw-medium mb-10">Consegna prevista <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="calendar"></i-feather>
             <mat-label>Consegna prevista</mat-label>
@@ -114,13 +114,13 @@
        </div>
 
        <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Tipo pagamento</label>
+          <label class="label d-block fw-medium mb-10">Tipo pagamento <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="credit-card"></i-feather>
             <mat-label>Seleziona un tipo di pagamento</mat-label>
             <mat-select formControlName="paymentMethod">
-              <mat-option *ngFor="let method of paymentMethods" [value]="method">
-                {{ method | titlecase }}
+              <mat-option *ngFor="let method of paymentMethods" [value]="method.name">
+                {{ method.name }}
               </mat-option>
             </mat-select>
           </mat-form-field>        
@@ -147,7 +147,7 @@
     <mat-card-content>
       <div class="row g-3">
         <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Nome</label>
+          <label class="label d-block fw-medium mb-10">Nome <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
             <mat-label>Nome</mat-label>
@@ -156,7 +156,7 @@
         </div>
       
         <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Cognome</label>
+          <label class="label d-block fw-medium mb-10">Cognome <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
             <mat-label>Cognome</mat-label>
@@ -165,7 +165,7 @@
         </div>
       
         <div class="col-sm-4">
-          <label class="label d-block fw-medium mb-10">Ragione sociale</label>
+          <label class="label d-block fw-medium mb-10">Ragione sociale <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="user"></i-feather>
             <mat-label>Ragione sociale</mat-label>
@@ -174,7 +174,7 @@
         </div>
       
         <div class="col-sm-6">
-          <label class="label d-block fw-medium mb-10">Cellulare</label>
+          <label class="label d-block fw-medium mb-10">Cellulare <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="phone"></i-feather>
             <mat-label>Cellulare</mat-label>
@@ -183,7 +183,7 @@
         </div>
       
         <div class="col-sm-6">
-          <label class="label d-block fw-medium mb-10">Email</label>
+          <label class="label d-block fw-medium mb-10">Email <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="mail"></i-feather>
             <mat-label>Email</mat-label>
@@ -192,7 +192,7 @@
         </div>
 
         <div class="col-sm-5">
-          <label class="label d-block fw-medium mb-10">Indirizzo</label>
+          <label class="label d-block fw-medium mb-10">Indirizzo <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="map"></i-feather>
             <mat-label>indirizzo di spedizione</mat-label>
@@ -202,7 +202,7 @@
 
         <!-- Codice interno -->
         <div class="col-sm-2">
-          <label class="label d-block fw-medium mb-10">CAP</label>
+          <label class="label d-block fw-medium mb-10">CAP <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="map-pin"></i-feather>
             <mat-label>Cap</mat-label>
@@ -212,7 +212,7 @@
 
         <!-- Soglia -->
         <div class="col-sm-2">
-          <label class="label d-block fw-medium mb-10">Provincia</label>
+          <label class="label d-block fw-medium mb-10">Provincia <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="map-pin"></i-feather>
             <mat-label>Provincia</mat-label>
@@ -225,7 +225,7 @@
         </div>
         
         <div class="col-sm-3">
-          <label class="label d-block fw-medium mb-10">Comune</label>
+          <label class="label d-block fw-medium mb-10">Comune <span class="required-marker">*</span></label>
           <mat-form-field class="w-100">
             <i-feather name="map"></i-feather>
             <mat-label>Comune</mat-label>
@@ -333,7 +333,7 @@
         </div>
         <div class="col-sm-1">
           <label *ngIf="i === 0" class="label d-block fw-medium mb-10 text-end sub">Configura</label>
-          <span class="config" (click)="openConfigurator(group.value._id)" *ngIf="group.get('options')!.value.length > 0" matTooltip="configura il prodotto">
+          <span class="config" (click)="openConfigurator(group.get('lineId')?.value)" *ngIf="group.get('options')!.value.length > 0" matTooltip="configura il prodotto">
             <i class="ri-settings-line"></i>
           </span>
           <span class="config-disabled" *ngIf="group.get('options')!.value.length === 0" matTooltip="il prodotto non contiene opzioni">

@@ -15,6 +15,24 @@
             </mat-select>
           </mat-form-field>        
         </div>
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Data ordine</label>
+          <mat-form-field class="w-100">
+            <i-feather name="calendar"></i-feather>
+            <input matInput [matDatepicker]="insertDatePicker" formControlName="insertDate" (click)="insertDatePicker.open()">
+            <mat-datepicker-toggle matSuffix [for]="insertDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #insertDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-sm-6">
+          <label class="label d-block fw-medium mb-10">Consegna prevista</label>
+          <mat-form-field class="w-100">
+            <i-feather name="calendar"></i-feather>
+            <input matInput [matDatepicker]="deliveryDatePicker" formControlName="expectedDelivery" (click)="deliveryDatePicker.open()">
+            <mat-datepicker-toggle matSuffix [for]="deliveryDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #deliveryDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
         <div class="col-sm-12">
           <label class="label d-block fw-medium mb-10">Settore</label>
           <mat-form-field class="w-100">
