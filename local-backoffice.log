@@ -1,0 +1,737 @@
+
+> triscele-frontend@0.0.0 start
+> ng serve --host 127.0.0.1
+
+Component HMR has been enabled.
+If you encounter application reload issues, you can manually reload the page to bypass HMR and/or disable this feature with the `--no-hmr` command line option.
+Please consider reporting any issues you encounter here: https://github.com/angular/angular-cli/issues
+
+> Building...
+√ Building...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.78 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.34 MB
+
+Application bundle generation complete. [8.941 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://127.0.0.1:4200/
+  ➜  press h + enter to show help
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.79 MB | 
+
+Application bundle generation complete. [2.860 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.79 MB | 
+
+Application bundle generation complete. [0.433 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.79 MB | 
+
+Application bundle generation complete. [1.189 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.79 MB | 
+
+Application bundle generation complete. [1.053 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.79 MB | 
+
+Application bundle generation complete. [1.160 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.79 MB | 
+
+Application bundle generation complete. [0.833 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.80 MB | 
+
+Application bundle generation complete. [0.520 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.80 MB | 
+
+Application bundle generation complete. [1.244 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.80 MB | 
+
+Application bundle generation complete. [0.687 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.80 MB | 
+
+Application bundle generation complete. [0.661 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.80 MB | 
+
+Application bundle generation complete. [1.159 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [0.739 seconds]
+
+X [ERROR] Could not resolve "../api"
+
+    src/app/services/PaymentMethod.service.ts:2:24:
+      2 │ import { API_URL } from '../api';
+        ╵                         ~~~~~~~~
+
+
+X [ERROR] TS2307: Cannot find module '../api' or its corresponding type declarations. [plugin angular-compiler]
+
+    src/app/services/PaymentMethod.service.ts:4:24:
+      4 │ import { API_URL } from '../api';
+        ╵                         ~~~~~~~~
+
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.80 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.36 MB
+
+Application bundle generation complete. [0.703 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [0.938 seconds]
+
+X [ERROR] TS2729: Property 'fb' is used before its initialization. [plugin angular-compiler]
+
+    src/app/pages/payment-methods/payment-methods.component.ts:23:23:
+      23 │   readonly form = this.fb.group({ name: ['', Validators.required],...
+         ╵                        ~~
+
+  'fb' is declared here.
+
+    src/app/pages/payment-methods/payment-methods.component.ts:25:14:
+      25 │   constructor(private readonly fb: FormBuilder, private readonly p...
+         ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.82 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.38 MB
+
+Application bundle generation complete. [0.751 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.82 MB | 
+
+Application bundle generation complete. [0.892 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [1.158 seconds]
+
+X [ERROR] TS2729: Property 'data' is used before its initialization. [plugin angular-compiler]
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:19:33:
+      19 │   readonly isEdit = Boolean(this.data?._id);
+         ╵                                  ~~~~
+
+  'data' is declared here.
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:29:4:
+      29 │     @Inject(MAT_DIALOG_DATA) public readonly data: PaymentMethodOp...
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2729: Property 'fb' is used before its initialization. [plugin angular-compiler]
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:20:23:
+      20 │   readonly form = this.fb.group({
+         ╵                        ~~
+
+  'fb' is declared here.
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:27:4:
+      27 │     private readonly fb: FormBuilder,
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2729: Property 'data' is used before its initialization. [plugin angular-compiler]
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:21:16:
+      21 │     name: [this.data?.name ?? '', Validators.required],
+         ╵                 ~~~~
+
+  'data' is declared here.
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:29:4:
+      29 │     @Inject(MAT_DIALOG_DATA) public readonly data: PaymentMethodOp...
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2729: Property 'data' is used before its initialization. [plugin angular-compiler]
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:22:20:
+      22 │     position: [this.data?.position ?? 0, [Validators.required, Val...
+         ╵                     ~~~~
+
+  'data' is declared here.
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:29:4:
+      29 │     @Inject(MAT_DIALOG_DATA) public readonly data: PaymentMethodOp...
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] TS2729: Property 'data' is used before its initialization. [plugin angular-compiler]
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:23:19:
+      23 │     enabled: [this.data?.enabled ?? true]
+         ╵                    ~~~~
+
+  'data' is declared here.
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:29:4:
+      29 │     @Inject(MAT_DIALOG_DATA) public readonly data: PaymentMethodOp...
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [0.847 seconds]
+
+X [ERROR] TS2729: Property 'data' is used before its initialization. [plugin angular-compiler]
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:19:33:
+      19 │   readonly isEdit = Boolean(this.data?._id);
+         ╵                                  ~~~~
+
+  'data' is declared here.
+
+    src/app/add-update-payment-method-dialog/add-update-payment-method-dialog.component.ts:25:4:
+      25 │     @Inject(MAT_DIALOG_DATA) public readonly data: PaymentMethodOp...
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.83 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.39 MB
+
+Application bundle generation complete. [0.356 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.83 MB | 
+
+Application bundle generation complete. [1.197 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.83 MB | 
+
+Application bundle generation complete. [0.645 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.83 MB | 
+
+Application bundle generation complete. [0.572 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.84 MB | 
+
+Application bundle generation complete. [0.653 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.84 MB | 
+
+Application bundle generation complete. [1.213 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.942 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.793 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.326 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+
+No output file changes.
+
+Application bundle generation complete. [0.506 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.304 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.85 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.41 MB
+
+Application bundle generation complete. [0.347 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.85 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.41 MB
+
+Application bundle generation complete. [0.289 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.314 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.280 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.324 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.311 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [0.265 seconds]
+
+X [ERROR] NG1: Property 'close' does not exist on type 'AddUpdateSectorDialogComponent'. Did you mean 'onClose'? [plugin angular-compiler]
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.html:27:44:
+      27 │ ...utton type="button" (click)="close()" class="btn back">Chiudi</...
+         ╵                                 ~~~~~
+
+  Error occurs in the template of component AddUpdateSectorDialogComponent.
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.ts:15:15:
+      15 │   templateUrl: './add-update-sector-dialog.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'save' does not exist on type 'AddUpdateSectorDialogComponent'. [plugin angular-compiler]
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.html:28:49:
+      28 │ ...button type="button" (click)="save()" class="btn" [disabled]="f...
+         ╵                                  ~~~~
+
+  Error occurs in the template of component AddUpdateSectorDialogComponent.
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.ts:15:15:
+      15 │   templateUrl: './add-update-sector-dialog.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'form' does not exist on type 'AddUpdateSectorDialogComponent'. [plugin angular-compiler]
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.html:28:81:
+      28 │ ...ick)="save()" class="btn" [disabled]="form.invalid">Salva</button>
+         ╵                                          ~~~~
+
+  Error occurs in the template of component AddUpdateSectorDialogComponent.
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.ts:15:15:
+      15 │   templateUrl: './add-update-sector-dialog.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [0.261 seconds]
+
+X [ERROR] NG1: Property 'close' does not exist on type 'AddUpdateSectorDialogComponent'. Did you mean 'onClose'? [plugin angular-compiler]
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.html:27:44:
+      27 │ ...utton type="button" (click)="close()" class="btn back">Chiudi</...
+         ╵                                 ~~~~~
+
+  Error occurs in the template of component AddUpdateSectorDialogComponent.
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.ts:15:15:
+      15 │   templateUrl: './add-update-sector-dialog.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'save' does not exist on type 'AddUpdateSectorDialogComponent'. [plugin angular-compiler]
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.html:28:49:
+      28 │ ...button type="button" (click)="save()" class="btn" [disabled]="f...
+         ╵                                  ~~~~
+
+  Error occurs in the template of component AddUpdateSectorDialogComponent.
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.ts:15:15:
+      15 │   templateUrl: './add-update-sector-dialog.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+X [ERROR] NG9: Property 'form' does not exist on type 'AddUpdateSectorDialogComponent'. [plugin angular-compiler]
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.html:28:81:
+      28 │ ...ick)="save()" class="btn" [disabled]="form.invalid">Salva</button>
+         ╵                                          ~~~~
+
+  Error occurs in the template of component AddUpdateSectorDialogComponent.
+
+    src/app/add-update-sector-dialog/add-update-sector-dialog.component.ts:15:15:
+      15 │   templateUrl: './add-update-sector-dialog.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.85 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.41 MB
+
+Application bundle generation complete. [0.251 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.589 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.85 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.41 MB
+
+Application bundle generation complete. [0.347 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [1.395 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [1.147 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.748 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.911 seconds]
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.654 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.85 MB | 
+
+Application bundle generation complete. [0.343 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [0.943 seconds]
+
+X [ERROR] TS2300: Duplicate identifier 'of'. [plugin angular-compiler]
+
+    src/app/pages/orders/orders.component.ts:34:50:
+      34 │ ...me, finalize, map, Observable, of, shareReplay, switchMap, tap ...
+         ╵                                   ~~
+
+
+X [ERROR] TS2300: Duplicate identifier 'of'. [plugin angular-compiler]
+
+    src/app/pages/orders/orders.component.ts:36:31:
+      36 │ import { catchError, forkJoin, of } from 'rxjs';
+         ╵                                ~~
+
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names         |  Raw size
+scripts.js          | scripts       |   3.05 MB | 
+main.js             | main          |   1.86 MB | 
+styles.css          | styles        | 421.44 kB | 
+polyfills.js        | polyfills     |  90.20 kB | 
+
+                    | Initial total |   5.42 MB
+
+Application bundle generation complete. [0.513 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [0.923 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [0.907 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [0.934 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [0.569 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [1.061 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [1.030 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [0.506 seconds]
+
+▲ [WARNING] TS-998113: MatSelect is not used within the template of QuotationsComponent [plugin angular-compiler]
+
+    src/app/pages/orders/quotations/quotations.component.ts:64:4:
+      64 │     MatSelect,
+         ╵     ~~~~~~~~~
+
+
+Component update sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.86 MB | 
+
+Application bundle generation complete. [1.143 seconds]
+
+Page reload sent to client(s).
