@@ -100,7 +100,10 @@ export class CustomersComponent implements OnInit, AfterViewInit {
       province: []
      });
 
-     const savedState = this.getSavedState();
+     const savedState = this.shouldRestoreState() ? this.getSavedState() : null;
+     if (!savedState) {
+       sessionStorage.removeItem(CUSTOMERS_STATE_KEY);
+     }
      if (savedState) {
        this.form.patchValue(savedState.filters);
        this.restoredPageIndex = savedState.pageIndex;
@@ -119,7 +122,7 @@ export class CustomersComponent implements OnInit, AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.paginator.pageSize = this.restoredPageSize;
     this.paginator.pageIndex = this.restoredPageIndex;
-    this.paginator.page.subscribe(() => this.saveState());
+    this.paginator.page.subscribe(() => undefined);
   }
 
   getCustomers(name?: string, province?: string){
@@ -154,7 +157,6 @@ export class CustomersComponent implements OnInit, AfterViewInit {
     if (this.paginator) {
       this.paginator.pageIndex = 0;
     }
-    this.saveState();
     this.getCustomers(name, province);
   }
 
@@ -256,6 +258,7 @@ export class CustomersComponent implements OnInit, AfterViewInit {
 
   UpdateItem(item: Customers){
     this.saveState();
+    history.replaceState({ ...history.state, restoreListState: true }, '');
     this.router.navigate(["/customer/add/" + item._id]);
   }
 
@@ -301,6 +304,10 @@ export class CustomersComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private shouldRestoreState(): boolean {
+    return history.state?.restoreListState === true;
+  }
+
   private restorePaginatorPosition(): void {
     queueMicrotask(() => {
       if (!this.paginator) {
@@ -312,7 +319,6 @@ export class CustomersComponent implements OnInit, AfterViewInit {
       this.paginator.pageSize = pageSize;
       this.paginator.pageIndex = Math.min(this.restoredPageIndex, lastPageIndex);
       this.dataSource.paginator = this.paginator;
-      this.saveState();
     });
   }
 

@@ -158,7 +158,10 @@ export class ProductsComponent {
 
   ngOnInit(): void {
 
-    const cached = sessionStorage.getItem(PRODUCTS_STATE_KEY);
+    const cached = this.shouldRestoreState() ? sessionStorage.getItem(PRODUCTS_STATE_KEY) : null;
+    if (!cached) {
+      sessionStorage.removeItem(PRODUCTS_STATE_KEY);
+    }
 
      if (cached) {
         const state: ProductsState = JSON.parse(cached);
@@ -205,7 +208,6 @@ export class ProductsComponent {
     this.paginator.page.subscribe(() => {
       this.pageIndex = this.paginator.pageIndex;
       this.pageSize = this.paginator.pageSize;
-      this.saveState();
       this.getProducts();
     });
 
@@ -214,14 +216,12 @@ export class ProductsComponent {
       this.currentSortDirection = sort.direction || 'desc';
       this.pageIndex = 0;
       this.paginator.firstPage();
-      this.saveState();
       this.getProducts();
     });
   }
 
   showCloseFilter(){
     this.show = !this.show;
-    this.saveState();
     this.updateColumns();
   }
 
@@ -236,7 +236,6 @@ export class ProductsComponent {
   onSubmit(){
     this.pageIndex = 0;
     this.paginator.firstPage();
-    this.saveState();
     this.getProducts();
   }
 
@@ -324,6 +323,7 @@ export class ProductsComponent {
         this.productService.delete(item!.id!)
           .subscribe((data: boolean) => {
             if (data) {
+              this.saveState();
               this.getProducts();
               this.findLowStock();
             }
@@ -376,7 +376,13 @@ export class ProductsComponent {
   }
 
   UpdateItem(item: ProductViewModel) {
+    this.saveState();
+    history.replaceState({ ...history.state, restoreListState: true }, '');
     this.router.navigate(["/product/add/" + item.id]);
+  }
+
+  private shouldRestoreState(): boolean {
+    return history.state?.restoreListState === true;
   }
 
   getEnabledStatus(enabled: boolean): string {

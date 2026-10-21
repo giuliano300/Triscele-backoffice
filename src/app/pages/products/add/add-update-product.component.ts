@@ -285,7 +285,7 @@ export class AddProductComponent {
   }
 
   returnBack() {
-    this.router.navigate(["/products"]);
+    this.returnToList();
   }
 
   onSubmit() {
@@ -306,7 +306,7 @@ export class AddProductComponent {
         this.productService.updateProduct(formData)
           .subscribe((data: boolean) => {
             if (data)
-              this.router.navigate(["/products"]);
+              this.returnToList();
             else
               console.log("Errore durante aggiornamento");
           });
@@ -322,6 +322,12 @@ export class AddProductComponent {
     } else {
       console.warn('Form non valido');
     }
+  }
+
+  private returnToList(): void {
+    this.router.navigate(["/products"], {
+      state: { restoreListState: Boolean(this.id) }
+    });
   }
 
 

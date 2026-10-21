@@ -104,6 +104,7 @@ export class AddGeneralMovementComponent {
       supplierId: this.product?.supplierId,
       supplierName: this.product?.supplierName
     });
+    console.log('Selected product:', this.product);
     this.stockError = '';
   }
   

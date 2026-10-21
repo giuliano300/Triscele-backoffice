@@ -609,7 +609,7 @@ export class AddOrderComponent {
     if(this.state)
       navigation = "/quotations";
 
-    this.router.navigate([navigation]);
+    this.returnToList(navigation);
   }
 
   removeThis(index: number) {
@@ -725,7 +725,7 @@ export class AddOrderComponent {
         this.orderService.updateOrder(formData, formData.operatorId?.toString())
           .subscribe((data: Order) => {
             if (data)
-              this.router.navigate([navigation]);
+              this.returnToList(navigation);
             else
               console.log("Errore durante aggiornamento");
           });
@@ -741,6 +741,12 @@ export class AddOrderComponent {
     } else {
       console.warn('Form non valido');
     }
+  }
+
+  private returnToList(navigation: string): void {
+    this.router.navigate([navigation], {
+      state: { restoreListState: Boolean(this.id) }
+    });
   }
 
   openConfigurator(lineId: string) {

@@ -155,7 +155,7 @@ export class AddCustomerComponent {
   }
 
   returnBack(){
-    this.router.navigate(["/customers"]);
+    this.returnToList();
   }
 
   
@@ -175,7 +175,7 @@ export class AddCustomerComponent {
         this.customerService.updateCustomer(w)
         .subscribe((data: boolean) => {
           if(data)
-            this.router.navigate(["/customers"]);
+            this.returnToList();
           else
             console.log("errore");
         })
@@ -195,5 +195,11 @@ export class AddCustomerComponent {
     {
       console.warn('Form non valido');
     }
+  }
+
+  private returnToList(): void {
+    this.router.navigate(["/customers"], {
+      state: { restoreListState: Boolean(this.id) }
+    });
   }
 }

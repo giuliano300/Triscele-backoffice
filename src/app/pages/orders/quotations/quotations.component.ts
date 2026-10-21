@@ -35,6 +35,14 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 declare const pdfMake: any;
 
+const QUOTATIONS_STATE_KEY = 'triscele:backoffice:quotations:list-state:v1';
+
+interface QuotationsListState {
+  filters: Record<string, unknown>;
+  pageIndex: number;
+  pageSize: number;
+}
+
 registerLocaleData(localeIt);
 
 export const MY_DATE_FORMATS = {
@@ -165,6 +173,15 @@ export class QuotationsComponent {
     }
 
   ngOnInit(): void {
+    const savedState = this.shouldRestoreState() ? this.getSavedState() : null;
+    if (savedState) {
+      this.form.patchValue(savedState.filters);
+      this.pageIndex = savedState.pageIndex;
+      this.pageSize = savedState.pageSize;
+    } else {
+      sessionStorage.removeItem(QUOTATIONS_STATE_KEY);
+    }
+
     this.filteredCustomers = this.customerCtrl.valueChanges.pipe(
       debounceTime(300),
       switchMap(value => {
@@ -188,6 +205,8 @@ export class QuotationsComponent {
     this.customerService.getCustomers('')
       .subscribe((data: Customers[]) => {
         this.customers = data;
+        const selectedCustomer = this.customers.find(customer => customer._id === this.form.value.customerId);
+        if (selectedCustomer) this.customerCtrl.setValue(selectedCustomer, { emitEvent: false });
     });
 
     this.operatorService.getOperators()
@@ -206,37 +225,15 @@ export class QuotationsComponent {
 
 
   ngAfterViewInit() {
-    // Chiamata iniziale
-    this.getOrders('');
+    this.paginator.pageIndex = this.pageIndex;
+    this.paginator.pageSize = this.pageSize;
+    this.loadCurrentPage();
 
     // Evento cambio pagina
     this.paginator.page.subscribe(() => {
-      const dateRange = this.form.value.dateRange;
-
-      const { start, end } = dateRange || {};
-
-      let s = '';
-      let e = '';
-
-      if (start) {
-        const startFixed = new Date(start);
-        startFixed.setHours(12, 0, 0, 0);
-        s = startFixed.toISOString();
-      }
-
-      if (end) {
-        const endFixed = new Date(end);
-        endFixed.setHours(12, 0, 0, 0);
-        e = endFixed.toISOString();
-      }
-    
-      this.getOrders(
-        this.form.value.customerId,
-        s,
-        e,
-        this.paginator.pageIndex,
-        this.paginator.pageSize
-      );
+      this.pageIndex = this.paginator.pageIndex;
+      this.pageSize = this.paginator.pageSize;
+      this.loadCurrentPage();
     });
   }
 
@@ -282,29 +279,13 @@ export class QuotationsComponent {
   }
 
   onSubmit(){
-    const { customerId, operatorId, status, dateRange } = this.form.value;
-    const { start, end } = dateRange || {};
-
-    let s = '';
-    let e = '';
-
-    if (start) {
-      const startFixed = new Date(start);
-      startFixed.setHours(12, 0, 0, 0);
-      s = startFixed.toISOString();
-    }
-
-    if (end) {
-      const endFixed = new Date(end);
-      endFixed.setHours(12, 0, 0, 0);
-      e = endFixed.toISOString();
-    }
-    
-    this.getOrders(customerId, s, e);
+    this.pageIndex = 0;
+    if (this.paginator) this.paginator.pageIndex = 0;
+    this.loadCurrentPage();
   }
 
   remove(){
-    this.getOrders();
+    sessionStorage.removeItem(QUOTATIONS_STATE_KEY);
     this.form.patchValue({
       customerId: [],
       operatorId: [],
@@ -314,6 +295,9 @@ export class QuotationsComponent {
         end: null
       }
     });
+    this.pageIndex = 0;
+    if (this.paginator) this.paginator.pageIndex = 0;
+    this.loadCurrentPage();
   }
 
   getTableNote(note:string){
@@ -536,7 +520,8 @@ export class QuotationsComponent {
         this.orderService.delete(item!._id!)
           .subscribe((data: boolean) => {
             if (data) {
-              this.getOrders();
+              this.saveState();
+              this.loadCurrentPage();
             }
           });
       } else {
@@ -565,13 +550,8 @@ export class QuotationsComponent {
         this.orderService.delete(quote._id!).pipe(catchError(() => of(false)))
       )).subscribe(() => {
         this.selection.clear();
-        this.getOrders(
-          this.form.value.customerId,
-          this.toIsoDate(this.form.value.dateRange?.start),
-          this.toIsoDate(this.form.value.dateRange?.end),
-          this.paginator?.pageIndex ?? 0,
-          this.paginator?.pageSize ?? this.pageSize
-        );
+        this.saveState();
+        this.loadCurrentPage();
       });
     });
   }
@@ -616,7 +596,8 @@ export class QuotationsComponent {
           expectedDelivery: result.expectedDelivery
         };
         this.orderService.convertToOrder(c).subscribe((result: any) => {
-          this.getOrders();
+          this.saveState();
+          this.loadCurrentPage();
         })
       }
       else
@@ -625,10 +606,46 @@ export class QuotationsComponent {
   }
 
   UpdateItem(item: Order) {
+    this.saveState();
+    history.replaceState({ ...history.state, restoreListState: true }, '');
     this.router.navigate(
       ["/order/add", item._id],
       { queryParams: { state: 11 } }
     );
+  }
+
+  private loadCurrentPage(): void {
+    const { customerId, dateRange } = this.form.value;
+    this.getOrders(
+      customerId,
+      this.toIsoDate(dateRange?.start),
+      this.toIsoDate(dateRange?.end),
+      this.pageIndex,
+      this.pageSize
+    );
+  }
+
+  private saveState(): void {
+    const state: QuotationsListState = {
+      filters: this.form.value,
+      pageIndex: this.paginator?.pageIndex ?? this.pageIndex,
+      pageSize: this.paginator?.pageSize ?? this.pageSize
+    };
+    sessionStorage.setItem(QUOTATIONS_STATE_KEY, JSON.stringify(state));
+  }
+
+  private getSavedState(): QuotationsListState | null {
+    try {
+      const value = sessionStorage.getItem(QUOTATIONS_STATE_KEY);
+      return value ? JSON.parse(value) as QuotationsListState : null;
+    } catch {
+      sessionStorage.removeItem(QUOTATIONS_STATE_KEY);
+      return null;
+    }
+  }
+
+  private shouldRestoreState(): boolean {
+    return history.state?.restoreListState === true;
   }
 
 }

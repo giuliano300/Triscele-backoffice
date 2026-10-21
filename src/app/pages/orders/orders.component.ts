@@ -40,7 +40,15 @@ import { catchError, forkJoin } from 'rxjs';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 declare const pdfMake: any;
-const ORDERS_PAGE_SIZE_KEY = 'triscele:backoffice:orders:page-size';
+const ORDERS_STATE_KEY = 'triscele:backoffice:orders:list-state:v1';
+
+interface OrdersListState {
+  filters: Record<string, unknown>;
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortDirection: string;
+}
 
 registerLocaleData(localeIt);
 
@@ -122,7 +130,7 @@ export class OrdersComponent {
   firstLoading: boolean = false;
 
   totalItems = 0;
-  pageSize = Number(sessionStorage.getItem(ORDERS_PAGE_SIZE_KEY)) || 20;
+  pageSize = 20;
   pageIndex = 0;
   sortField = '';
   sortDirection = '';
@@ -175,6 +183,17 @@ export class OrdersComponent {
     }
 
   ngOnInit(): void {
+    const savedState = this.shouldRestoreState() ? this.getSavedState() : null;
+    if (savedState) {
+      this.form.patchValue(savedState.filters);
+      this.pageIndex = savedState.pageIndex;
+      this.pageSize = savedState.pageSize;
+      this.sortField = savedState.sortField;
+      this.sortDirection = savedState.sortDirection;
+    } else {
+      sessionStorage.removeItem(ORDERS_STATE_KEY);
+    }
+
     this.filteredCustomers = this.customerCtrl.valueChanges.pipe(
       debounceTime(300),
       switchMap(value => {
@@ -194,6 +213,8 @@ export class OrdersComponent {
     this.customerService.getCustomers('')
       .subscribe((data: Customers[]) => {
         this.customers = data;
+        const selectedCustomer = this.customers.find(customer => customer._id === this.form.value.customerId);
+        if (selectedCustomer) this.customerCtrl.setValue(selectedCustomer, { emitEvent: false });
     }); 
 
     this.operatorService.getOperators()
@@ -222,43 +243,15 @@ export class OrdersComponent {
 
 
   ngAfterViewInit() {
-    // Chiamata iniziale
-    this.getOrders('');
+    this.paginator.pageIndex = this.pageIndex;
+    this.paginator.pageSize = this.pageSize;
+    this.loadCurrentPage();
 
     // Evento cambio pagina
     this.paginator.page.subscribe(() => {
-      sessionStorage.setItem(ORDERS_PAGE_SIZE_KEY, String(this.paginator.pageSize));
-      const dateRange = this.form.value.dateRange;
-
-      const { start, end } = dateRange || {};
-
-      let s = '';
-      let e = '';
-
-      if (start) {
-        const startFixed = new Date(start);
-        startFixed.setHours(12, 0, 0, 0);
-        s = startFixed.toISOString();
-      }
-
-      if (end) {
-        const endFixed = new Date(end);
-        endFixed.setHours(12, 0, 0, 0);
-        e = endFixed.toISOString();
-      }
-    
-      this.getOrders(
-        this.form.value.customerId,
-        this.form.value.operatorId,
-        this.form.value.sectorId,
-        this.form.value.province,
-        this.form.value.status,
-        s,
-        e,
-        this.form.value.expectedDelivery ? this.toIsoDate(this.form.value.expectedDelivery) : '',
-        this.paginator.pageIndex,
-        this.paginator.pageSize
-      );
+      this.pageIndex = this.paginator.pageIndex;
+      this.pageSize = this.paginator.pageSize;
+      this.loadCurrentPage();
     });
 
     this.sort.sortChange.subscribe(sort => {
@@ -330,29 +323,13 @@ export class OrdersComponent {
   }
 
   onSubmit(){
-    const { customerId, operatorId, sectorId, province, status, dateRange } = this.form.value;
-    const { start, end } = dateRange || {};
-
-    let s = '';
-    let e = '';
-
-    if (start) {
-      const startFixed = new Date(start);
-      startFixed.setHours(12, 0, 0, 0);
-      s = startFixed.toISOString();
-    }
-
-    if (end) {
-      const endFixed = new Date(end);
-      endFixed.setHours(12, 0, 0, 0);
-      e = endFixed.toISOString();
-    }
-    
-    this.getOrders(customerId, operatorId, sectorId, province, status, s, e, this.toIsoDate(this.form.value.expectedDelivery));
+    this.pageIndex = 0;
+    if (this.paginator) this.paginator.pageIndex = 0;
+    this.loadCurrentPage();
   }
 
   remove(){
-    this.getOrders();
+    sessionStorage.removeItem(ORDERS_STATE_KEY);
     this.form.patchValue({
       customerId: [],
       operatorId: [],
@@ -365,6 +342,9 @@ export class OrdersComponent {
       },
       expectedDelivery: null
     });
+    this.pageIndex = 0;
+    if (this.paginator) this.paginator.pageIndex = 0;
+    this.loadCurrentPage();
   }
 
   deleteSelected(): void {
@@ -384,7 +364,8 @@ export class OrdersComponent {
       forkJoin(selectedOrders.map(order => this.orderService.delete(order._id!).pipe(catchError(() => of(false)))))
         .subscribe(() => {
           this.selection.clear();
-          this.onSubmit();
+          this.saveState();
+          this.loadCurrentPage();
         });
     });
   }
@@ -818,7 +799,8 @@ export class OrdersComponent {
         this.orderService.delete(item!._id!)
           .subscribe((data: boolean) => {
             if (data) {
-              this.getOrders();
+              this.saveState();
+              this.loadCurrentPage();
             }
           });
       } else {
@@ -828,7 +810,50 @@ export class OrdersComponent {
   }
 
   UpdateItem(item: Order) {
+    this.saveState();
+    history.replaceState({ ...history.state, restoreListState: true }, '');
     this.router.navigate(["/order/add/" + item._id]);
+  }
+
+  private loadCurrentPage(): void {
+    const { customerId, operatorId, sectorId, province, status, dateRange, expectedDelivery } = this.form.value;
+    this.getOrders(
+      customerId,
+      operatorId,
+      sectorId,
+      province,
+      status,
+      this.toIsoDate(dateRange?.start),
+      this.toIsoDate(dateRange?.end),
+      this.toIsoDate(expectedDelivery),
+      this.pageIndex,
+      this.pageSize
+    );
+  }
+
+  private saveState(): void {
+    const state: OrdersListState = {
+      filters: this.form.value,
+      pageIndex: this.paginator?.pageIndex ?? this.pageIndex,
+      pageSize: this.paginator?.pageSize ?? this.pageSize,
+      sortField: this.sortField,
+      sortDirection: this.sortDirection
+    };
+    sessionStorage.setItem(ORDERS_STATE_KEY, JSON.stringify(state));
+  }
+
+  private getSavedState(): OrdersListState | null {
+    try {
+      const value = sessionStorage.getItem(ORDERS_STATE_KEY);
+      return value ? JSON.parse(value) as OrdersListState : null;
+    } catch {
+      sessionStorage.removeItem(ORDERS_STATE_KEY);
+      return null;
+    }
+  }
+
+  private shouldRestoreState(): boolean {
+    return history.state?.restoreListState === true;
   }
 
   generateXML(item: Order){
